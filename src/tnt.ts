@@ -18,7 +18,9 @@ type Array2D = ArrayLike<ArrayLike<number>>
 type Array1D = ArrayLike<number>
 
 /**
- * Find the coefficients (x) for `Ax=b`, where `x` and `b` are vectors.
+ * Find the coefficients `x` for `Ax=b`; `A` is the data, `b` the known output.
+ * 
+ * Only one right hand side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
  *
  * tnt [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
  *
