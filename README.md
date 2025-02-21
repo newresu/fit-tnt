@@ -6,6 +6,8 @@
 [![npm download][download-image]][download-url]
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402)
 
+Custom implementation of [the TNT paper.](https://ieeexplore.ieee.org/abstract/document/8425520). In many cases, this method converges at the first iteration.
+
 ## Install and Use
 
 ```bash
@@ -13,11 +15,14 @@ npm i fit-tnt
 ```
 
 ```ts
-import {tnt} from "fit-tnt";
+import { tnt } from "fit-tnt";
 
-const A = [[1,2,3],[4,5,6]] // 2 x 3 matrix
-const b = [6,7] // you can also use [[6],[7]]
-const result = tnt(A,b)
+const A = [
+  [1, 2, 3],
+  [4, 5, 6],
+]; // 2 x 3 matrix
+const b = [6, 7]; // you can also use [[6],[7]]
+const { solution } = tnt(A, b); //other info is returned optionally
 ```
 
 ## [API Documentation](https://newresu.github.io/fit-tnt/)
@@ -73,11 +78,6 @@ Algorithm Description
 
 </details>
 
-## Credits
-
-The implementation is my own, based off [the paper.](https://ieeexplore.ieee.org/abstract/document/8425520).
-
-
 ## License
 
 [MIT](./LICENSE)
@@ -90,4 +90,3 @@ The implementation is my own, based off [the paper.](https://ieeexplore.ieee.org
 [codecov-url]: https://codecov.io/gh/newresu/fit-tnt
 [download-image]: https://img.shields.io/npm/dm/fit-tnt.svg
 [download-url]: https://www.npmjs.com/package/fit-tnt
-```
