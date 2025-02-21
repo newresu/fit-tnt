@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: "Typescript/Javascript library for iterative Least-Squares."
+repository-artifact: https://newseru.github.io/fit-tnt/
+repository-code: https://github.com/newseru/fit-tnt
+authors:
+  - family-names: "Miranda"
+    given-names: "Santiago"
+    affiliation: "None"
+    orcid: "https://orcid.org/0009-0002-2276-0265"
+license: MIT
+keywords:
+  - TNT
+  - Least Squares
+  - Unconstrained least squares
+doi: [DOI_HERE]/zenodo.8189402
+
