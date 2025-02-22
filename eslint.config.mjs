@@ -2,32 +2,14 @@
 import globals from 'globals';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import jsdoc from 'eslint-plugin-jsdoc';
-import markdown from '@eslint/markdown';
-import json from '@eslint/json';
 
 export default tseslint.config([
-  eslint.configs.recommended,
-  tseslint.configs.recommended,
+  { ignores: ['docs'] },
   {
-    files: ['src/**/*.ts', 'src/**/*.js'],
+    files: ['**/*.ts'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
-    plugins: {
-      jsdoc,
-    },
+    rules: eslint.configs.recommended.rules,
   },
-  {
-    files: ['*.md'],
-    plugins: {
-      markdown,
-    },
-    processor: 'markdown/markdown',
-  },
-  {
-    files: ['*.json'],
-    language: 'json/json',
-    plugins: {
-      json,
-    },
-  },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
 ]);

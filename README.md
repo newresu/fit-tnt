@@ -22,8 +22,21 @@ const A = [
   [4, 5, 6],
 ]; // 2 x 3 matrix
 const b = [6, 7]; // you can also use [[6],[7]]
+
+// throws an error if any calculation blows up.
 const { solution } = tnt(A, b); //other info is returned optionally
 ```
+
+## When does it fail?
+
+Testing on several million random matrices, it seems that sometimes the matrix is positive definite but the cholesky decomposition will return matrices with some element being very small.
+
+This triggers a very large number in the back-substitution. The inverse ends up with very large values and the code won't complete correctly.
+
+The obvious question is: can those numbers be somewhat reduced?
+At the time of writing, I'm unsure.
+
+One could enable `{useSVD:true}` and it will solve it in the cases where TNT fails or where it is slow, if this is desired it could be added.
 
 ## [API Documentation](https://newresu.github.io/fit-tnt/)
 

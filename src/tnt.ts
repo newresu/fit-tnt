@@ -3,14 +3,11 @@
  * i.e A x = b, uses those symbols.
  */
 
-import { Matrix, MatrixTransposeView } from 'ml-matrix';
+import { Matrix, pseudoInverse, solve } from 'ml-matrix';
 
 import { choleskyPrecondition } from './choPrecondition';
 import { initSafetyChecks } from './initSafetyChecks';
-import {
-  upperTriangularSubstitution,
-  lowerTriangularSubstitution,
-} from './triangularSubstitution';
+import { invertLLt } from './triangularSubstitution';
 
 type Array2D = ArrayLike<ArrayLike<number>>;
 type Array1D = ArrayLike<number>;
@@ -25,6 +22,11 @@ export interface TNTOpts {
    * @default 10E-20
    */
   tolerance: number;
+  /**
+   * If the software errors (normally very ill-conditioned matrix) it fallbacks to the slower pseudo-inverse.
+   * @default false
+   */
+  pseudoInverse_fallback: boolean;
 }
 export interface TNTResults {
   iterations: number;
@@ -57,6 +59,7 @@ export function tnt(
   const A = Matrix.isMatrix(data) ? data : new Matrix(data);
   const b = Matrix.isMatrix(output) ? output : Matrix.columnVector(output);
   const x = Matrix.zeros(A.columns, 1); // column of coefficients.
+  let x_best = x.clone(); // column of coefficients.
 
   const At = A.transpose(); // copy is ok. it's used a few times.
   const AtA = At.mmul(A); //square m. will be mutated.
@@ -65,14 +68,9 @@ export function tnt(
 
   // svd-pseudo_inverse for small matrices?
   // mutates AtA until RtR is positive definite.
-  const LLt = choleskyPrecondition(AtA);
-  const L = LLt.lowerTriangularMatrix;
-  const Lt = new MatrixTransposeView(L);
-  const AtA_inv = upperTriangularSubstitution(
-    Lt,
-    lowerTriangularSubstitution(L, Matrix.eye(AtA.rows)),
-  );
-
+  const choleskyDC = choleskyPrecondition(AtA);
+  const L = choleskyDC.lowerTriangularMatrix;
+  const AtA_inv = invertLLt(L);
   const residual = Matrix.sub(b, A.mmul(x)); // r = b - Ax_0
   let gradient = At.mmul(residual); // r_hat = At * r
   // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
@@ -81,25 +79,47 @@ export function tnt(
 
   // `x_error`,  `residual` updated as it iterates
   const { maxIterations = A.columns * 3, tolerance = 10e-26 } = opts;
-  const mse: number[] = [];
+  let last_mse = meanSquaredError(A, x, b);
+  let lowest_mse = Infinity;
+  const mse: number[] = [last_mse];
 
   let sqe, alpha, beta_denom, beta;
   let it = 0;
-  while (it < maxIterations && worthContinuing(mse, tolerance)) {
-    sqe = residual.dot(residual); //.to1DArray, multiply and add.
-    alpha = x_error.dot(gradient) / sqe;
-    x.add(Matrix.mul(p, alpha));
-    residual.sub(residual.clone().mul(alpha)); // update residual
-    beta_denom = x_error.dot(gradient); // using old values
-    gradient = At.mmul(residual); //new g
-    x_error = AtA_inv.mmul(gradient); // new x_error
-    beta = x_error.dot(gradient) / beta_denom; // new/old ratio
-    p = p.multiply(beta).add(x_error); // with new x_error
-    mse.push(meanSquaredError(A, x, b));
-    it++;
+  try {
+    while (it < maxIterations && worthContinuing(mse, tolerance)) {
+      sqe = residual.dot(residual); //.to1DArray, multiply and add.
+      alpha = x_error.dot(gradient) / sqe;
+      x.add(Matrix.mul(p, alpha));
+      if (isNaN(x.get(0, 0)) || !Number.isFinite(x.get(0, 0))) {
+        throw new Error(
+          'Infinite or NaN coefficients were found. This may be due to a very ill-conditioned matrix. You can try `{use_SVD:true}` and it will fallback to solve using pseudoinverse.',
+        );
+      }
+      residual.sub(residual.clone().mul(alpha)); // update residual
+      beta_denom = x_error.dot(gradient); // using old values
+      gradient = At.mmul(residual); //new g
+      x_error = AtA_inv.mmul(gradient); // new x_error
+      beta = x_error.dot(gradient) / beta_denom; // new/old ratio
+      p = p.multiply(beta).add(x_error); // with new x_error
+      last_mse = meanSquaredError(A, x, b);
+      if (last_mse < lowest_mse) {
+        lowest_mse = last_mse;
+        x_best = x.clone();
+      }
+      mse.push(last_mse);
+      it++;
+    }
+  } catch (e) {
+    if (opts.pseudoInverse_fallback) {
+      const svd_sol = pseudoInverse(A).mmul(b);
+      mse.push(meanSquaredError(A, svd_sol, b));
+      return { solution: svd_sol.to1DArray(), iterations: it, mse };
+    } else {
+      throw new Error(e);
+    }
   }
 
-  return { solution: x.to1DArray(), iterations: it, mse };
+  return { solution: x_best.to1DArray(), iterations: it, mse };
 }
 
 function meanSquaredError(A: Matrix, x: Matrix, b: Matrix) {

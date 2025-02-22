@@ -9,14 +9,21 @@ export function choleskyPrecondition(AtA: Matrix) {
    * @param AtA - Symmetric matrix from the normal equation.
    * @returns Cholesky Decomposition of AtA
    */
-  let epsilon = Number.EPSILON * AtA.max() * AtA.columns;
-  let RtR = new CholeskyDecomposition(AtA);
-  while (!RtR.isPositiveDefinite()) {
-    epsilon *= 10;
-    for (let i = 0; i < AtA.columns; i++) {
+  const epsilon = Number.EPSILON * AtA.max() * AtA.rows; // order of magnitude max column
+
+  let choleskyDC = new CholeskyDecomposition(AtA);
+  let it = 0;
+  while (!choleskyDC.isPositiveDefinite()) {
+    if (Number.isNaN(epsilon) || !Number.isFinite(epsilon) || it == 4) {
+      throw new Error(
+        'Preconditioning AtA failed. This may be due to ill-conditioning. Please, raise an issue with the matrix that errors.',
+      );
+    }
+    for (let i = 0; i < AtA.rows; i++) {
       AtA.set(i, i, AtA.get(i, i) + epsilon);
     }
-    RtR = new CholeskyDecomposition(AtA); //again
+    choleskyDC = new CholeskyDecomposition(AtA); //again
+    it++;
   }
-  return RtR;
+  return choleskyDC;
 }
