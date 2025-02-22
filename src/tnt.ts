@@ -1,10 +1,50 @@
-import { MatrixTransposeView, Matrix } from 'ml-matrix';
+import { pseudoInverse, MatrixTransposeView, Matrix } from 'ml-matrix';
 
 import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './triangularSubstitution';
 import { choleskyPrecondition } from './choPrecondition';
+
+import { TNTOpts, Array1D, Array2D, TNTResults } from './types';
 import { meanSquaredError } from './meanSquaredError';
-import { TNTOpts } from './types';
+
+/**
+ * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
+ *
+ * Only one right-hand-side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
+ *
+ * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
+ * @param data - the input or data matrix (2D Array)
+ * @param output - the known-output vector (1D Array)
+ * @param opts
+ * @returns @see {@link TNTResults}
+ */
+export function tnt(
+  data: Array2D | Matrix,
+  output: Array1D | Matrix,
+  opts: Partial<TNTOpts> = {},
+): TNTResults {
+  const A = Matrix.isMatrix(data) ? data : new Matrix(data);
+  const b = Matrix.isMatrix(output) ? output : Matrix.columnVector(output);
+
+  const { pseudoinverseFallback = false } = opts;
+
+  const mse: number[] = [];
+  try {
+    return {
+      solution: _tnt(A, b, mse, opts).to1DArray(),
+      mse,
+      iterations: mse.length,
+    };
+  } catch (e) {
+    if (pseudoinverseFallback) {
+      const svd_sol = pseudoInverse(A).mmul(b);
+      mse.push(meanSquaredError(A, svd_sol, b));
+      return { solution: svd_sol.to1DArray(), iterations: mse.length, mse };
+    } else {
+      throw new Error((e as Error).message);
+    }
+  }
+}
 
 function worthContinuing(mse: number[], tolerance: number) {
   /**
@@ -21,15 +61,24 @@ function worthContinuing(mse: number[], tolerance: number) {
   return true;
 }
 
+/**
+ * Private function (main method)
+ * @param A
+ * @param b
+ * @param mse this will be mutated; this allows user to get all MSEs. 
+ * @param options
+ * @returns best-found coefficients
+ */
 export function _tnt(
   A: Matrix,
   b: Matrix,
   mse: number[],
-  options: Partial<TNTOpts>={},
+  options: Partial<TNTOpts> = {},
 ) {
   const { maxIterations = A.columns * 3, tolerance = 10e-26 } = options;
-
   const x = Matrix.zeros(A.columns, 1); // column of coefficients.
+
+  mse.push(meanSquaredError(A, x, b));
   const At = new MatrixTransposeView(A); // copy is ok. it's used a few times.
   const AtA = At.mmul(A); //square m. will be mutated.
   initSafetyChecks(AtA, A, b); //throws custom errors on issues.
