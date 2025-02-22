@@ -15,7 +15,7 @@ npm i fit-tnt
 ```
 
 ```ts
-import { tnt } from 'fit-tnt';
+import { tnt} from 'fit-tnt';
 
 const A = [
   [1, 2, 3],
