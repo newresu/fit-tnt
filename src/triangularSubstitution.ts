@@ -1,4 +1,5 @@
-import { Matrix, MatrixTransposeView } from "ml-matrix";
+import type { MatrixTransposeView } from 'ml-matrix';
+import { Matrix } from 'ml-matrix';
 
 // back substitution for A X = B
 // where X and B can be vectors or matrices
@@ -17,7 +18,10 @@ function lowerTriangularSubstitution(lowerTriangular: Matrix, rhs: Matrix) {
   return V;
 }
 
-function upperTriangularSubstitution(upperTriangular: Matrix|MatrixTransposeView, rhs: Matrix) {
+function upperTriangularSubstitution(
+  upperTriangular: Matrix | MatrixTransposeView,
+  rhs: Matrix,
+) {
   const V = new Matrix(rhs.rows, rhs.columns);
   for (let i = upperTriangular.rows - 1; i >= 0; i--) {
     for (let k = 0; k < rhs.columns; k++) {
@@ -31,4 +35,4 @@ function upperTriangularSubstitution(upperTriangular: Matrix|MatrixTransposeView
   return V;
 }
 
-export {upperTriangularSubstitution, lowerTriangularSubstitution}
+export { upperTriangularSubstitution, lowerTriangularSubstitution };

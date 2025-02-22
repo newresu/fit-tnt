@@ -3,14 +3,14 @@
  * i.e A x = b, uses those symbols.
  */
 
-import { Matrix, MatrixTransposeView } from "ml-matrix";
+import { Matrix, MatrixTransposeView } from 'ml-matrix';
 
+import { choleskyPrecondition } from './choPrecondition';
+import { initSafetyChecks } from './initSafetyChecks';
 import {
   upperTriangularSubstitution,
   lowerTriangularSubstitution,
-} from "./triangularSubstitution";
-import { choleskyPrecondition } from "./choPrecondition";
-import { initSafetyChecks } from "./initSafetyChecks";
+} from './triangularSubstitution';
 
 type Array2D = ArrayLike<ArrayLike<number>>;
 type Array1D = ArrayLike<number>;
@@ -39,23 +39,23 @@ export interface TNTResults {
   solution: Array1D;
 }
 /**
- * Find the coefficients `x` for `Ax=b`; `A` is the data, `b` the known output.
+ * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
  *
- * Only one right hand side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
+ * Only one right-hand-side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
  *
- * tnt [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
- *
- * @param data the input or data matrix (2D Array)
- * @param result the output vector (1D Array)
+ * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
+ * @param data - the input or data matrix (2D Array)
+ * @param output - the known-output vector (1D Array)
+ * @param opts
  * @returns @see {@link TNTResults}
  */
 export function tnt(
   data: Array2D | Matrix,
-  result: Array1D | Matrix,
-  opts: Partial<TNTOpts> = {}
+  output: Array1D | Matrix,
+  opts: Partial<TNTOpts> = {},
 ): TNTResults {
   const A = Matrix.isMatrix(data) ? data : new Matrix(data);
-  const b = Matrix.isMatrix(result) ? result : Matrix.columnVector(result);
+  const b = Matrix.isMatrix(output) ? output : Matrix.columnVector(output);
   const x = Matrix.zeros(A.columns, 1); // column of coefficients.
 
   const At = A.transpose(); // copy is ok. it's used a few times.
@@ -70,7 +70,7 @@ export function tnt(
   const Lt = new MatrixTransposeView(L);
   const AtA_inv = upperTriangularSubstitution(
     Lt,
-    lowerTriangularSubstitution(L, Matrix.eye(AtA.rows))
+    lowerTriangularSubstitution(L, Matrix.eye(AtA.rows)),
   );
 
   const residual = Matrix.sub(b, A.mmul(x)); // r = b - Ax_0
@@ -96,10 +96,10 @@ export function tnt(
     beta = x_error.dot(gradient) / beta_denom; // new/old ratio
     p = p.multiply(beta).add(x_error); // with new x_error
     mse.push(meanSquaredError(A, x, b));
-    it++
+    it++;
   }
 
-  return { solution: x.to1DArray(), iterations: it, mse: mse };
+  return { solution: x.to1DArray(), iterations: it, mse };
 }
 
 function meanSquaredError(A: Matrix, x: Matrix, b: Matrix) {
@@ -117,6 +117,6 @@ function worthContinuing(mse: number[], tolerance: number) {
   } else if (mse.length > 1 && last >= mse[mse.length - 2]) {
     // worse than previous (otherwise use smaller tolerance)
     return false;
-  }   
+  }
   return true;
 }

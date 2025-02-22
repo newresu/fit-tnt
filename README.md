@@ -6,7 +6,7 @@
 [![npm download][download-image]][download-url]
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402)
 
-Custom implementation of [the TNT paper.](https://ieeexplore.ieee.org/abstract/document/8425520). In many cases, this method converges at the first iteration.
+Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al. In many cases, this method converges at the first iteration.
 
 ## Install and Use
 
@@ -15,7 +15,7 @@ npm i fit-tnt
 ```
 
 ```ts
-import { tnt } from "fit-tnt";
+import { tnt } from 'fit-tnt';
 
 const A = [
   [1, 2, 3],
@@ -36,13 +36,13 @@ The linear problem appears in all science:
 
 $$A\,x = b$$
 
-and methods to make it fast abound. In practice, this equation almost never has an exact solution $A^{-1}$, so the Least-Squares approach is used to minimize the error in the predictions:
+and methods to solve it fast abound. In practice, this equation almost never the straightforward solution $A^{-1}$, so the Least-Squares approach is used to minimize the squared error in the predictions:
 
-$$ f(x) = \mathrm{min}\_x \left|\left| A\,x -b \right|\right|\_2^2$$
+$$ E(x) = \mathrm{min}\_x \left|\left| A\,x -b \right|\right|\_2^2$$
 
 i.e to minimize the $L_2$ (or $L_2^2$ which is equivalent.); this is the Least-Squares problem.
 
-The solution, where the error gradient is zero i.e $\nabla_x E(x)=0$ is $$A^T\,A x = A^T b$$
+The solution, where the error-gradient is zero i.e $\nabla_x E(x)=0$ is $$A^T\,A x = A^T b$$
 
 When computed directly (as done here), $A^T\,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. This affects the precision of the solutions; especially when $\kappa (A) > 10^8$.
 

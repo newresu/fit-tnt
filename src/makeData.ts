@@ -1,4 +1,4 @@
-import { Matrix } from "ml-matrix";
+import { Matrix } from 'ml-matrix';
 
 interface MakeDataOpts {
   useBias: boolean;
@@ -7,7 +7,7 @@ interface MakeDataOpts {
 export function makeData(
   samples: number,
   coefficients: number, // do not include bias here.
-  opts: Partial<MakeDataOpts> = {}
+  opts: Partial<MakeDataOpts> = {},
 ) {
   /**
    * Make some random samples with a number of "coefficients".

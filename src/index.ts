@@ -1,1 +1,1 @@
-export {tnt} from "./tnt";
+export { tnt } from './tnt';
