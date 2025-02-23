@@ -1,7 +1,6 @@
 import { test, expect } from 'vitest';
 
 import { choleskyPrecondition } from '../choPrecondition';
-import { invertLLt } from '../triangularSubstitution';
 import { Matrix } from 'ml-matrix';
 
 test('Cholesky Precondition of Odd Matrix', () => {

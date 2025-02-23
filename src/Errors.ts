@@ -15,4 +15,3 @@ export class NaNOrNonFiniteError extends Error {
     this.name = 'NaNOrNonFiniteError'; // (2)
   }
 }
-throw new Error();

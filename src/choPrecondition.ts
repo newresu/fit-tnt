@@ -10,13 +10,17 @@ export function choleskyPrecondition(AtA: Matrix) {
    * @param AtA - Symmetric matrix from the normal equation.
    * @returns Cholesky Decomposition of AtA
    */
-  const max_avg = Math.max(...AtA.mean('column'));
-  let epsilon = Number.EPSILON * max_avg; // order of magnitude max column
+  const max_avg = Math.abs(Math.max(...AtA.mean('column')));
+  let epsilon = Number.EPSILON * 100; // order of magnitude max column
+  if (max_avg > 1) {
+    epsilon *= max_avg;
+  }
 
   let choleskyDC = new CholeskyDecomposition(AtA);
   let it = 0;
   while (!choleskyDC.isPositiveDefinite()) {
-    if (!Number.isFinite(epsilon) || it == 4) {//includes isNaN
+    if (!Number.isFinite(epsilon) || it == 4) {
+      //includes isNaN
       throw new PreconditionError();
     }
     for (let i = 0; i < AtA.rows; i++) {

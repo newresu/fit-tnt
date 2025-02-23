@@ -121,13 +121,15 @@ export class TNT {
     for (let it = 0; it < this.maxIterations; it++) {
       alpha = xError.dot(gradient) / sqe;
       x.add(Matrix.mul(p, alpha)); //update x
-
+      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
+        throw new NaNOrNonFiniteError();
+      }
       this._update(A, b, x); //updates: mse and counter and xBest
       if (this._noImprovementCounter > this.earlyStopping.patience) {
         break;
       }
-      if (!Number.isFinite(x.get(0, 0))) {
-        throw new NaNOrNonFiniteError();
+      if (this.mseMin < this.earlyStopping.minError) {
+        break;
       }
       betaDenom = xError.dot(gradient); // old CG (maybe)
       residual.sub(residual.clone().mul(alpha)); // update residual
