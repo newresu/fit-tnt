@@ -1,2 +1,2 @@
-export { TNTOpts, TNTResults } from './types';
-export { tnt } from './tnt';
+export { TNTOpts } from './types';
+export { TNT } from './tnt';

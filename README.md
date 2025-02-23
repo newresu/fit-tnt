@@ -15,17 +15,21 @@ npm i fit-tnt
 ```
 
 ```ts
-import { tnt} from 'fit-tnt';
+import { TNT } from 'fit-tnt';
 
 const A = [
   [1, 2, 3],
   [4, 5, 6],
-]; // 2 x 3 matrix
-const b = [6, 7]; // you can also use [[6],[7]]
+]; // 2x3
+const b = [6, 7]; // or [[6],[7]]
 
-// throws an error if any calculation blows up.
-const { solution } = tnt(A, b); //other info is returned optionally
+const tnt = new TNT(A, b);
+// solve may raise error (use within try/catch)
+const solution = tnt.solve();
+const solutionVector = solution.to1DArray(); // turn to 1D array if you prefer
 ```
+
+After `solve` the `tnt` instance has `iterations` and `mse` populated.
 
 ## When does it fail?
 

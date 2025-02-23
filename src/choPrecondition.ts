@@ -9,7 +9,7 @@ export function choleskyPrecondition(AtA: Matrix) {
    * @param AtA - Symmetric matrix from the normal equation.
    * @returns Cholesky Decomposition of AtA
    */
-  const epsilon = Number.EPSILON * AtA.max() * AtA.rows; // order of magnitude max column
+  let epsilon = Number.EPSILON * AtA.max() * AtA.rows; // order of magnitude max column
 
   let choleskyDC = new CholeskyDecomposition(AtA);
   let it = 0;
@@ -22,6 +22,7 @@ export function choleskyPrecondition(AtA: Matrix) {
     for (let i = 0; i < AtA.rows; i++) {
       AtA.set(i, i, AtA.get(i, i) + epsilon);
     }
+    epsilon *= 10;
     choleskyDC = new CholeskyDecomposition(AtA); //again
     it++;
   }
