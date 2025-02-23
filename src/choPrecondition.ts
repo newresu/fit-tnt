@@ -1,5 +1,6 @@
 import type { Matrix } from 'ml-matrix';
 import { CholeskyDecomposition } from 'ml-matrix';
+import { PreconditionError } from './Errors';
 
 export function choleskyPrecondition(AtA: Matrix) {
   /**
@@ -9,15 +10,14 @@ export function choleskyPrecondition(AtA: Matrix) {
    * @param AtA - Symmetric matrix from the normal equation.
    * @returns Cholesky Decomposition of AtA
    */
-  let epsilon = Number.EPSILON * AtA.max() * AtA.rows; // order of magnitude max column
+  const max_avg = Math.max(...AtA.mean('column'));
+  let epsilon = Number.EPSILON * max_avg; // order of magnitude max column
 
   let choleskyDC = new CholeskyDecomposition(AtA);
   let it = 0;
   while (!choleskyDC.isPositiveDefinite()) {
-    if (Number.isNaN(epsilon) || !Number.isFinite(epsilon) || it == 4) {
-      throw new Error(
-        'Preconditioning AtA failed. This may be due to ill-conditioning. Please, raise an issue with the matrix that errors.',
-      );
+    if (!Number.isFinite(epsilon) || it == 4) {//includes isNaN
+      throw new PreconditionError();
     }
     for (let i = 0; i < AtA.rows; i++) {
       AtA.set(i, i, AtA.get(i, i) + epsilon);

@@ -8,14 +8,10 @@ test('Many runs without error', () => {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;
     const { inputs: A, outputs: b } = makeData(m, n);
-    // console.log(pseudoInverse(A).mmul(b));
     const tnt = new TNT(A, b, {
       maxIterations: 4,
       earlyStopping: { patience: 3, minError: 1e-8 },
     });
-    const result = tnt.solve();
-    // console.log(solution, mse);
-    expect(Number.isFinite(result.get(0, 0))).toBeTruthy();
-    // console.log(mse);
+    expect(Number.isFinite(tnt.xBest.get(0, 0))).toBeTruthy();
   }
 });

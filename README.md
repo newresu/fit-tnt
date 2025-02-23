@@ -23,10 +23,13 @@ const A = [
 ]; // 2x3
 const b = [6, 7]; // or [[6],[7]]
 
-const tnt = new TNT(A, b);
-// solve may raise error (use within try/catch)
-const solution = tnt.solve();
-const solutionVector = solution.to1DArray(); // turn to 1D array if you prefer
+try {
+  const tnt = new TNT(A, b);
+  console.log(tnt.xBest, tnt.mse, tnt.iterations);
+  // use xBest.to1DArray unless you want it as Matrix instance.
+} catch (e) {
+  console.log(e); // just as example
+}
 ```
 
 After `solve` the `tnt` instance has `iterations` and `mse` populated.

@@ -1,5 +1,9 @@
 export type Array2D = ArrayLike<ArrayLike<number>>;
 export type Array1D = ArrayLike<number>;
+
+/**
+ * @export
+ */
 export interface EarlyStopping {
   /**
    * If it gets below this error, it stops
@@ -15,6 +19,9 @@ export interface EarlyStopping {
    */
   patience: number;
 }
+/**
+ * @export
+ */
 export interface TNTOpts {
   /**
    * @default `A.columns * 3`
