@@ -1,13 +1,11 @@
-import type { Matrix } from 'ml-matrix';
-
-import { AsymmetricError } from './Errors';
+import { AnyMatrix } from './types';
 
 /**
- * 
+ *
  * @param A input data matrix
  * @param y ouput data vector
  */
-export function initSafetyChecks(A: Matrix, y: Matrix) {
+export function initSafetyChecks(A: AnyMatrix, y: AnyMatrix) {
   if (A.rows !== y.rows) {
     throw new RangeError(
       `Rows of A and y must match. Found dim(A)=(${A.rows}, ${A.columns}) and dim(y)=(${y.rows}, ${y.columns})`,

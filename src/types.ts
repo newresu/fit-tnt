@@ -1,3 +1,5 @@
+import { Matrix, AbstractMatrix } from 'ml-matrix';
+
 export type Array2D = ArrayLike<ArrayLike<number>>;
 export type Array1D = ArrayLike<number>;
 
@@ -13,9 +15,9 @@ export interface EarlyStopping {
    */
   minError: number;
   /**
-   * As in Keras, number of iterations to wait without improvement
-   * 3 is normally enough
-   * @default 3
+   * Number of iterations to allow with no improvement
+   * The method either keeps improving or it stagnates.
+   * @default 2
    */
   patience: number;
 }
@@ -23,6 +25,12 @@ export interface EarlyStopping {
  * @export
  */
 export interface TNTOpts {
+  /**
+   * If minError after optimization is greater than this error,
+   * it throws an error (or passes to pseudoInverse if that is `true`.)
+   * @default 1E-2
+   */
+  unacceptableError: number;
   /**
    * @default `A.columns * 3`
    */
@@ -37,3 +45,5 @@ export interface TNTOpts {
    */;
   pseudoInverseFallback: boolean;
 }
+
+export type AnyMatrix = Matrix | AbstractMatrix;

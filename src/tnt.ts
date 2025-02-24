@@ -4,7 +4,7 @@ import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './triangularSubstitution';
 import { choleskyPrecondition } from './choPrecondition';
 
-import { TNTOpts, Array1D, Array2D, EarlyStopping } from './types';
+import { TNTOpts, Array1D, Array2D, EarlyStopping, AnyMatrix } from './types';
 import { meanSquaredError } from './meanSquaredError';
 import { NaNOrNonFiniteError } from './Errors';
 
@@ -20,20 +20,53 @@ import { NaNOrNonFiniteError } from './Errors';
  * @returns @see {@link TNTResults}
  */
 export class TNT {
-  xBest: Matrix;
+  xBest: AnyMatrix;
 
+  /**
+   * @see {@link TNTOpts["unacceptableError"]}
+   */
+  unacceptableError: number;
+  /**
+   * @see {@link TNTOpts["pseudoInverseFallback"]}
+   */
   pseudoInverseFallback: boolean;
+  /**
+   * @see {@link TNTOpts["maxIterations"]}
+   */
   maxIterations: number;
+  /**
+   * @see {@link TNTOpts["earlyStopping"]}
+   */
   earlyStopping: EarlyStopping;
 
+  /**
+   * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
+   */
+  /**
+   * method
+   * @default TNT
+   */
+  method: 'TNT' | 'pseudoInverse';
   mse: number[];
+
+  /**
+   * Minimum Mean Squared Error in all the iterations.
+   * @default $||b||_2^2$ since x_0 = zero-vector initially.
+   */
   mseMin: number;
+  /**
+   * Last MSE of all iterations.
+   * @default $||b||_2^2$ since x_0 = zero-vector initially.
+   */
   mseLast: number;
+  /**
+   * Keeps track of the patience at each iteration.
+   */
   _noImprovementCounter: number;
 
   constructor(
-    data: Array2D | Matrix,
-    output: Array1D | Matrix,
+    data: Array2D | AnyMatrix,
+    output: Array1D | AnyMatrix,
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.isMatrix(data) ? data : new Matrix(data);
@@ -44,31 +77,43 @@ export class TNT {
     const {
       pseudoInverseFallback = false,
       maxIterations = 3 * A.columns,
-      earlyStopping: { minError = 10e-20, patience = 3 } = {},
+      unacceptableError = 1e-2,
+      earlyStopping: { minError = 10e-20, patience = 2 } = {},
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
     this.maxIterations = maxIterations;
     this.earlyStopping = { minError, patience };
+    this.unacceptableError = unacceptableError;
+    this.method = 'TNT';
 
-    this.mse = [];
-    this.mseMin = Infinity;
-    this.mseLast = Infinity;
+    this.mse = [b.dot(b) / b.columns];
+    this.mseLast = this.mseMin = this.mse[0];
+
     this._noImprovementCounter = 0;
-    this._solve(A, b);
+    if (this.mseLast !== 0) {
+      this._solve(A, b);
+    }
   }
 
   get iterations() {
-    return this.mse.length;
+    return this.mse.length - 1;
   }
 
-  _solve(A: Matrix, b: Matrix) {
+  _solve(A: AnyMatrix, b: AnyMatrix) {
     try {
       this._tnt(A, b);
+      if (this.mseMin > this.unacceptableError) {
+        // pass calculation to the catch block.
+        throw new Error();
+      }
     } catch (e) {
       if (this.pseudoInverseFallback) {
         const x = pseudoInverse(A).mmul(b);
         this._update(A, b, x, false); //false==no cloning of X
+        if (this.mseMin === this.mseLast) {
+          this.method = 'pseudoInverse';
+        }
         return;
       }
       throw new Error((e as Error).message);
@@ -78,8 +123,9 @@ export class TNT {
   /**
    * Updates mse[], mse values, counter and xBest
    * @param x current coefficients
+   * @return 1 means stop, 0 means success.
    */
-  _update(A: Matrix, b: Matrix, x: Matrix, cloneX: boolean = true) {
+  _update(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX: boolean = true) {
     this.mseLast = meanSquaredError(A, x, b);
     this.mse.push(this.mseLast);
     if (this.mseLast < this.mseMin) {
@@ -88,6 +134,12 @@ export class TNT {
       this.xBest = cloneX ? x.clone() : x;
     } else {
       this._noImprovementCounter += 1;
+    }
+    if (this._noImprovementCounter > this.earlyStopping.patience) {
+      return 1;
+    }
+    if (this.mseMin < this.earlyStopping.minError) {
+      return 1;
     }
   }
   /**
@@ -98,7 +150,7 @@ export class TNT {
    * @param options
    * @returns best-found coefficients
    */
-  _tnt(A: Matrix, b: Matrix) {
+  _tnt(A: AnyMatrix, b: AnyMatrix) {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
     const At = new MatrixTransposeView(A); // copy is ok. it's used a few times.
     const AtA = At.mmul(A); //square m. will be mutated.
@@ -113,32 +165,26 @@ export class TNT {
     let xError = AtA_inv.mmul(gradient);
     const p = xError.clone(); // z_0 clone
 
-    let sqe = b.dot(b);
-    this.mse.push(sqe / b.columns);
-    this.mseLast = this.mseMin = this.mse[0];
-
-    let alpha, betaDenom, beta; // column of coefficients.
+    let sqe, alpha, betaDenom, beta, stop; // column of coefficients.
     for (let it = 0; it < this.maxIterations; it++) {
+      sqe = residual.dot(residual); //.to1DArray, multiply and add.
       alpha = xError.dot(gradient) / sqe;
       x.add(Matrix.mul(p, alpha)); //update x
       if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
         throw new NaNOrNonFiniteError();
       }
-      this._update(A, b, x); //updates: mse and counter and xBest
-      if (this._noImprovementCounter > this.earlyStopping.patience) {
+      stop = this._update(A, b, x); //updates: mse and counter and xBest
+      if (stop == 1) {
         break;
       }
-      if (this.mseMin < this.earlyStopping.minError) {
-        break;
-      }
+
       betaDenom = xError.dot(gradient); // old CG (maybe)
       residual.sub(residual.clone().mul(alpha)); // update residual
+
       gradient = At.mmul(residual); // new g
       xError = AtA_inv.mmul(gradient); // new x_error
       beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
       p.multiply(beta).add(xError); // update p
-
-      sqe = residual.dot(residual); //.to1DArray, multiply and add.
     }
   }
 }
