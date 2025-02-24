@@ -6,11 +6,19 @@ on:
       - main
 
 jobs:
-  release:
-    # Documentation: https://github.com/zakodium/workflows#release
-    uses: zakodium/workflows/.github/workflows/release.yml@release-v1
-    with:
-      npm: true
+  prerelease:
+    # Documentation: https://github.com/zakodium/workflows#npm-prerelease
+    uses: zakodium/workflows/.github/workflows/npm-prerelease.yml@npm-prerelease-v1
     secrets:
       github-token: ${{ secrets.GITHUB_TOKEN }}
-      npm-token: ${{ secrets.NPM_BOT_TOKEN }}
+      npm-token: ${{ secrets.NPM_TOKEN }}
+    with:
+      npm: true
+  # release:
+  #   # Documentation: https://github.com/zakodium/workflows#release
+  #   uses: zakodium/workflows/.github/workflows/release.yml@release-v1
+  #   with:
+  #     npm: true
+  #   secrets:
+  #     github-token: ${{ secrets.GITHUB_TOKEN }}
+  #     npm-token: ${{ secrets.NPM_BOT_TOKEN }}

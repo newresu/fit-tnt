@@ -1,11 +1,11 @@
 # TNT
 
-<!-- [![NPM version][npm-image]][npm-url] -->
-
+[![NPM version][npm-image]][npm-url]
 [![build status][ci-image]][ci-url]
 [![Test coverage][codecov-image]][codecov-url]
+[![npm download][download-image]][download-url]
 
-<!-- [![npm download][download-image]][download-url]
+<!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
 Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
