@@ -36,14 +36,16 @@ After `solve` the `tnt` instance has `iterations` and `mse` populated.
 
 ## When does it fail?
 
-Testing on several million random matrices, it seems that sometimes the matrix is positive definite but the cholesky decomposition will return matrices with some element being very small.
+If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal.
 
-This triggers a very large number in the back-substitution. The inverse ends up with very large values and the code won't complete correctly.
+This triggers a very large number in the back-substitution.
 
 The obvious question is: can those numbers be somewhat reduced?
 At the time of writing, I'm unsure.
 
-One could enable `{useSVD:true}` and it will solve it in the cases where TNT fails or where it is slow, if this is desired it could be added.
+Enabling `{pseudoInverseFallback:true}` and it will solve it in the cases where TNT fails.
+
+In any case, TNT is substantially faster than the current pseudo-inverse method used (about 4X faster when TNT finishes successfully).
 
 ## [API Documentation](https://newresu.github.io/fit-tnt/)
 

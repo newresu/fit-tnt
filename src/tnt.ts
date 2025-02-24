@@ -1,4 +1,4 @@
-import { pseudoInverse, MatrixTransposeView, Matrix } from 'ml-matrix';
+import { pseudoInverse, Matrix } from 'ml-matrix';
 
 import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './triangularSubstitution';
@@ -7,6 +7,7 @@ import { choleskyPrecondition } from './choPrecondition';
 import { TNTOpts, Array1D, Array2D, EarlyStopping, AnyMatrix } from './types';
 import { meanSquaredError } from './meanSquaredError';
 import { NaNOrNonFiniteError } from './Errors';
+import { fastAtA } from './fastAtA';
 
 /**
  * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
@@ -30,6 +31,10 @@ export class TNT {
    * @see {@link TNTOpts["pseudoInverseFallback"]}
    */
   pseudoInverseFallback: boolean;
+  /**
+   * @see {@link TNTOpts["criticalRatio"]}
+   */
+  criticalRatio: number;
   /**
    * @see {@link TNTOpts["maxIterations"]}
    */
@@ -78,6 +83,7 @@ export class TNT {
       pseudoInverseFallback = false,
       maxIterations = 3 * A.columns,
       unacceptableError = 1e-2,
+      criticalRatio = 1e-2,
       earlyStopping: { minError = 10e-20, patience = 2 } = {},
     } = opts;
 
@@ -85,13 +91,22 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minError, patience };
     this.unacceptableError = unacceptableError;
+    this.criticalRatio = criticalRatio;
     this.method = 'TNT';
 
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
 
     this._noImprovementCounter = 0;
-    if (this.mseLast !== 0) {
+    if (A.rows / A.columns < this.criticalRatio && this.pseudoInverseFallback) {
+      try {
+        this._pseudoInverse(A, b);
+      } catch (y) {
+        if (y instanceof Error) {
+          throw new Error(`${y.message}`);
+        }
+      }
+    } else if (this.mseLast !== 0) {
       this._solve(A, b);
     }
   }
@@ -103,20 +118,24 @@ export class TNT {
   _solve(A: AnyMatrix, b: AnyMatrix) {
     try {
       this._tnt(A, b);
-      if (this.mseMin > this.unacceptableError) {
-        // pass calculation to the catch block.
-        throw new Error();
-      }
     } catch (e) {
+      // tnt fails
       if (this.pseudoInverseFallback) {
-        const x = pseudoInverse(A).mmul(b);
-        this._update(A, b, x, false); //false==no cloning of X
-        if (this.mseMin === this.mseLast) {
-          this.method = 'pseudoInverse';
+        // fallback
+        try {
+          this._pseudoInverse(A, b);
+        } catch (y) {
+          // fallback fails
+          if (e instanceof Error && y instanceof Error) {
+            throw new Error(`${e.message},\n ${y.message}`);
+          }
         }
-        return;
+      } else {
+        // no fallback try
+        if (e instanceof Error) {
+          throw new Error(e.message);
+        }
       }
-      throw new Error((e as Error).message);
     }
   }
 
@@ -143,6 +162,20 @@ export class TNT {
     }
   }
   /**
+   * Updates best result if reacher.
+   * @param A
+   * @param b
+   */
+  _pseudoInverse(A: AnyMatrix, b: AnyMatrix) {
+    const x = pseudoInverse(A).mmul(b);
+    this._update(A, b, x, false); //false==no cloning of X
+    if (this.mseMin === this.mseLast) {
+      this.method = 'pseudoInverse';
+    }
+    return;
+  }
+
+  /**
    * Private function (main method)
    * @param A
    * @param b
@@ -152,8 +185,9 @@ export class TNT {
    */
   _tnt(A: AnyMatrix, b: AnyMatrix) {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
-    const At = new MatrixTransposeView(A); // copy is ok. it's used a few times.
-    const AtA = At.mmul(A); //square m. will be mutated.
+    const At = A.transpose(); // copy is ok. it's used a few times.
+    // const AtA = At.mmul(A); //square m. will be mutated.
+    const AtA = fastAtA(At);
     initSafetyChecks(A, b); //throws custom errors on issues.
     const choleskyDC = choleskyPrecondition(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
@@ -185,6 +219,11 @@ export class TNT {
       xError = AtA_inv.mmul(gradient); // new x_error
       beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
       p.multiply(beta).add(xError); // update p
+    }
+    if (this.mseMin > this.unacceptableError) {
+      throw new Error(
+        `TNT could not converge (its mseMin=${this.mseMin} is unacceptable)`,
+      );
     }
   }
 }

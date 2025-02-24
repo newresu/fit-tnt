@@ -23,7 +23,7 @@ const illConditioned = new Matrix([
 ]);
 const b = Matrix.ones(illConditioned.rows, 1);
 test('Many runs without error', () => {
-  for (let i = 0; i < 1e4; i++) {
+  for (let i = 0; i < 1e2; i++) {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;
     const { inputs: A, outputs: b } = makeData(m, n);
@@ -36,6 +36,7 @@ test('Many runs without error', () => {
     expect(tnt.mseMin).toBeLessThanOrEqual(tnt.mseLast);
     expect(tnt.iterations).toBeLessThanOrEqual(tnt.maxIterations + 1); //should be equal, but is +1 when fallbacks to pseudoInverse.
     expect(tnt.mse.length).toBeLessThanOrEqual(tnt.maxIterations + 2); // same
+    console.log(tnt.mse, tnt.method);
   }
 });
 

@@ -44,6 +44,15 @@ export interface TNTOpts {
    * @default false
    */;
   pseudoInverseFallback: boolean;
+  /**
+   * If you have a matrix of 2 x 1000
+   * the AtA is 1000 x 1000.
+   * In this case TNT will be slower than pseudoInverse (`pI`),
+   * As a rule of thumb when ratio is < 1/100 one should use `pI`
+   * This setting only has meaning if `pseudoInverse==true`
+   * @default 0.01
+   */
+  criticalRatio: number;
 }
 
 export type AnyMatrix = Matrix | AbstractMatrix;
