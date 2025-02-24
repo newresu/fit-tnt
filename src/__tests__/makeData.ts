@@ -12,7 +12,7 @@ export function makeData(
   /**
    * Make some random samples with a number of "coefficients".
    */
-  const { useBias = false, outputColumns = 1} = opts;
+  const { useBias = false, outputColumns = 1 } = opts;
   // design matrix / input data
   const A = Matrix.random(samples, coefficients, {
     random: myRandom,
