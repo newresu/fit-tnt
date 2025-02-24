@@ -71,11 +71,15 @@ export class TNT {
 
   constructor(
     data: Array2D | AnyMatrix,
-    output: Array1D | AnyMatrix,
+    output: Array2D | Array1D | AnyMatrix,
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.isMatrix(data) ? data : new Matrix(data);
-    const b = Matrix.isMatrix(output) ? output : Matrix.columnVector(output);
+    const b = Matrix.isMatrix(output)
+      ? output
+      : Array.isArray(output[0])
+        ? new Matrix(output as number[][])
+        : Matrix.columnVector(output as number[]);
     this.xBest = new Matrix(A.columns, 1);
 
     // unpack options
@@ -84,7 +88,7 @@ export class TNT {
       maxIterations = 3 * A.columns,
       unacceptableError = 1e-2,
       criticalRatio = 1e-2,
-      earlyStopping: { minError = 10e-20, patience = 2 } = {},
+      earlyStopping: { minError = 1e-20, patience = 2 } = {},
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
@@ -98,12 +102,15 @@ export class TNT {
     this.mseLast = this.mseMin = this.mse[0];
 
     this._noImprovementCounter = 0;
-    if (A.rows / A.columns < this.criticalRatio && this.pseudoInverseFallback) {
+    if (
+      A.rows / A.columns <= this.criticalRatio &&
+      this.pseudoInverseFallback
+    ) {
       try {
         this._pseudoInverse(A, b);
       } catch (y) {
         if (y instanceof Error) {
-          throw new Error(`${y.message}`);
+          throw new Error(y.message);
         }
       }
     } else if (this.mseLast !== 0) {

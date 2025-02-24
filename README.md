@@ -6,7 +6,11 @@
 [![npm download][download-image]][download-url]
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402)
 
-Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al. In many cases, this method converges at the first iteration.
+Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+
+- In many cases, this method converges at the first iteration. It's also normally faster than the pseudoInverse method used (by $\approx$ 4 X).
+
+- An exception is when the matrix is very under-determined. That's why it's recommended to use options object as below.
 
 ## Install and Use
 
@@ -24,28 +28,27 @@ const A = [
 const b = [6, 7]; // or [[6],[7]]
 
 try {
-  const tnt = new TNT(A, b);
-  console.log(tnt.xBest, tnt.mse, tnt.iterations);
+  const tnt = new TNT(A, b, { pseudoInverseFallback: true, maxIterations: 5 });
+  console.log(tnt.xBest, tnt.mse, tnt.iterations, tnt, method);
   // use xBest.to1DArray unless you want it as Matrix instance.
 } catch (e) {
-  console.log(e); // just as example
+  console.error(e); // just as example
 }
 ```
 
-After `solve` the `tnt` instance has `iterations` and `mse` populated.
-
 ## When does it fail?
 
-If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal.
+If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal. This triggers a very large number in the back-substitution.
 
-This triggers a very large number in the back-substitution.
+The root cause seems to be very-ill-conditioned matrices.
 
-The obvious question is: can those numbers be somewhat reduced?
-At the time of writing, I'm unsure.
+The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)
 
 Enabling `{pseudoInverseFallback:true}` and it will solve it in the cases where TNT fails.
 
-In any case, TNT is substantially faster than the current pseudo-inverse method used (about 4X faster when TNT finishes successfully).
+## Speed
+
+As stated earlier, TNT is substantially faster than the current pseudo-inverse method, and should be faster than QR in many cases (see paper.)
 
 ## [API Documentation](https://newresu.github.io/fit-tnt/)
 

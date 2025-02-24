@@ -2,6 +2,7 @@ import { makeData } from './makeData';
 import { TNT } from '../tnt';
 import { expect, test } from 'vitest';
 import { Matrix } from 'ml-matrix';
+import { TNTOpts } from '../types';
 
 const illConditioned = new Matrix([
   [
@@ -40,8 +41,44 @@ test('Many runs without error', () => {
   }
 });
 
+test('example in the readme', () => {
+  const A = new Matrix([
+    [1, 2, 3],
+    [4.01, 7.8, 12.2],
+  ]); // 2x3
+
+  const b = Matrix.columnVector([6, 24]); // or [[6],[7]]
+  // const b2 = [[8], [3]];
+  const opts: Partial<TNTOpts> = {
+    maxIterations: 4,
+    unacceptableError: 10 * 2,
+    earlyStopping: { patience: 4, minError: 1e-8 },
+    // pseudoInverseFallback: true,
+  };
+  const r = new TNT(A, b, opts);
+  console.log(r);
+  expect(r).toBeDefined();
+  // expect(new TNT(A, b2, opts)).toBeDefined();
+});
+
 test('fails to optimize enough without PseudoInverse', () => {
   expect(() => new TNT(illConditioned, b)).toThrowError();
+});
+
+test('fails to optimize enough without PseudoInverse', () => {
+  expect(
+    () =>
+      new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
+        pseudoInverseFallback: false,
+      }),
+  ).toThrowError();
+});
+
+test('runs fine with pseudoinverse', () => {
+  const r = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
+    pseudoInverseFallback: true,
+  });
+  expect(r.method).toBe('pseudoInverse');
 });
 
 test('optimizes with Pseudo Inverse', () => {
