@@ -8,6 +8,8 @@
 
 Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
+It was done primarily for curiosity; it is not the best method out there. 
+
 ## Install and Use
 
 ```bash
