@@ -1,14 +1,16 @@
 # TNT
 
-[![NPM version][npm-image]][npm-url]
+<!-- [![NPM version][npm-image]][npm-url] -->
+
 [![build status][ci-image]][ci-url]
 [![Test coverage][codecov-image]][codecov-url]
-[![npm download][download-image]][download-url]
-[![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402)
+
+<!-- [![npm download][download-image]][download-url]
+[![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
 Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
-It was done primarily for curiosity; it is not the best method out there. 
+It was done primarily for curiosity; it is not the best method out there.
 
 ## Install and Use
 
@@ -23,7 +25,7 @@ const A = [
   [1, 2, 3],
   [4, 5, 6],
 ]; // 2x3
-const b = [6, 7]; // or [[6],[7]]
+const b = [6, 12]; // or [[6],[12]]
 
 try {
   const tnt = new TNT(A, b, { pseudoInverseFallback: true, maxIterations: 5 });

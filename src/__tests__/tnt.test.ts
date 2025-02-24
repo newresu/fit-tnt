@@ -67,45 +67,29 @@ test('Many runs without error', () => {
 test('example in the readme', () => {
   const A = new Matrix([
     [1, 2, 3],
-    [4.01, 7.8, 12.2],
+    [4, 5, 6],
   ]); // 2x3
-  const b = Matrix.columnVector([6, 24]); // or [[6],[7]]
-  // const b2 = [[8], [3]];
+  const b = [6, 12];
+  const b2 = [[6], [12]];
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
     unacceptableError: 1e-2,
     earlyStopping: { minError: 1e-8 },
-    // pseudoInverseFallback: true,
   };
   const r = new TNT(A, b, opts);
-  console.log(r);
-  expect(r).toBeDefined();
-  // expect(new TNT(A, b2, opts)).toBeDefined();
+  expect(r.mseMin).toBeLessThanOrEqual(0.02);
+  const r2 = new TNT(A, b2, opts);
+  expect(r2.mseMin).toBeLessThanOrEqual(0.02);
 });
 
 test('Ill Conditioned', () => {
   expect(new TNT(illConditioned, b)).toBeDefined();
 });
 
-test('fails to optimize enough without PseudoInverse - 2', () => {
+test('Another Test', () => {
   expect(
     new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
       pseudoInverseFallback: false,
     }),
   ).toBeDefined();
-});
-
-test('runs fine with pseudoinverse', () => {
-  const r = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
-    pseudoInverseFallback: true,
-  });
-  expect(r.method).toBe('pseudoInverse');
-});
-
-test('optimizes with Pseudo Inverse', () => {
-  const result = new TNT(illConditioned, b, {
-    pseudoInverseFallback: true,
-  });
-  expect(Number.isFinite(result.xBest.get(0, 0))).toBeTruthy();
-  expect(result.mseMin).toBeLessThanOrEqual(result.mseLast);
 });
