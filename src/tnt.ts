@@ -6,7 +6,6 @@ import { choleskyPrecondition } from './choPrecondition';
 
 import { TNTOpts, Array1D, Array2D, EarlyStopping, AnyMatrix } from './types';
 import { meanSquaredError } from './meanSquaredError';
-import { NaNOrNonFiniteError } from './Errors';
 import { fastAtA } from './fastAtA';
 
 /**
@@ -22,11 +21,6 @@ import { fastAtA } from './fastAtA';
  */
 export class TNT {
   xBest: AnyMatrix;
-
-  /**
-   * @see {@link TNTOpts["unacceptableError"]}
-   */
-  unacceptableError: number;
   /**
    * @see {@link TNTOpts["pseudoInverseFallback"]}
    */
@@ -45,29 +39,22 @@ export class TNT {
   earlyStopping: EarlyStopping;
 
   /**
-   * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
-   */
-  /**
    * method
    * @default TNT
    */
   method: 'TNT' | 'pseudoInverse';
+  /**
+   * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
+   */
   mse: number[];
-
   /**
    * Minimum Mean Squared Error in all the iterations.
-   * @default $||b||_2^2$ since x_0 = zero-vector initially.
    */
   mseMin: number;
   /**
    * Last MSE of all iterations.
-   * @default $||b||_2^2$ since x_0 = zero-vector initially.
    */
   mseLast: number;
-  /**
-   * Keeps track of the patience at each iteration.
-   */
-  _noImprovementCounter: number;
 
   constructor(
     data: Array2D | AnyMatrix,
@@ -86,100 +73,72 @@ export class TNT {
     const {
       pseudoInverseFallback = false,
       maxIterations = 3 * A.columns,
-      unacceptableError = 1e-2,
       criticalRatio = 1e-2,
-      earlyStopping: { minError = 1e-20, patience = 2 } = {},
+      earlyStopping: { minError = 1e-20 } = {},
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
     this.maxIterations = maxIterations;
-    this.earlyStopping = { minError, patience };
-    this.unacceptableError = unacceptableError;
+    this.earlyStopping = { minError };
     this.criticalRatio = criticalRatio;
     this.method = 'TNT';
 
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
 
-    this._noImprovementCounter = 0;
-    if (
-      A.rows / A.columns <= this.criticalRatio &&
-      this.pseudoInverseFallback
-    ) {
-      try {
-        this._pseudoInverse(A, b);
-      } catch (y) {
-        if (y instanceof Error) {
-          throw new Error(y.message);
-        }
+    try {
+      if (this.mseLast === 0) return;
+      if (
+        A.rows / A.columns <= this.criticalRatio &&
+        this.pseudoInverseFallback
+      ) {
+        this.pseudoInverse(A, b);
+      } else {
+        this.tnt(A, b);
       }
-    } else if (this.mseLast !== 0) {
-      this._solve(A, b);
+    } catch (e) {
+      if (e instanceof Error) {
+        this.pseudoInverse(A, b, e);
+      }
     }
   }
 
+  pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
+    try {
+      const x = pseudoInverse(A).mmul(b);
+      this._updateMSEAndX(A, b, x, false);
+      if (this.mseLast === this.mseMin) {
+        this.method = 'pseudoInverse';
+      }
+    } catch (y) {
+      if (y instanceof Error) {
+        throw new Error(y.message + '\n' + e?.message);
+      }
+    }
+  }
   get iterations() {
     return this.mse.length - 1;
   }
 
-  _solve(A: AnyMatrix, b: AnyMatrix) {
-    try {
-      this._tnt(A, b);
-    } catch (e) {
-      // tnt fails
-      if (this.pseudoInverseFallback) {
-        // fallback
-        try {
-          this._pseudoInverse(A, b);
-        } catch (y) {
-          // fallback fails
-          if (e instanceof Error && y instanceof Error) {
-            throw new Error(`${e.message},\n ${y.message}`);
-          }
-        }
-      } else {
-        // no fallback try
-        if (e instanceof Error) {
-          throw new Error(e.message);
-        }
-      }
-    }
-  }
-
   /**
-   * Updates mse[], mse values, counter and xBest
+   * Updates mse[] and mse values
+   * @param A input data matrix
+   * @param b known output vector
    * @param x current coefficients
-   * @return 1 means stop, 0 means success.
+   * @return void
    */
-  _update(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX: boolean = true) {
+  _updateMSEAndX(
+    A: AnyMatrix,
+    b: AnyMatrix,
+    x: AnyMatrix,
+    cloneX: boolean = true,
+  ) {
     this.mseLast = meanSquaredError(A, x, b);
     this.mse.push(this.mseLast);
     if (this.mseLast < this.mseMin) {
       this.mseMin = this.mseLast;
-      this._noImprovementCounter = 0;
       this.xBest = cloneX ? x.clone() : x;
-    } else {
-      this._noImprovementCounter += 1;
     }
-    if (this._noImprovementCounter > this.earlyStopping.patience) {
-      return 1;
-    }
-    if (this.mseMin < this.earlyStopping.minError) {
-      return 1;
-    }
-  }
-  /**
-   * Updates best result if reacher.
-   * @param A
-   * @param b
-   */
-  _pseudoInverse(A: AnyMatrix, b: AnyMatrix) {
-    const x = pseudoInverse(A).mmul(b);
-    this._update(A, b, x, false); //false==no cloning of X
-    if (this.mseMin === this.mseLast) {
-      this.method = 'pseudoInverse';
-    }
-    return;
   }
 
   /**
@@ -190,7 +149,7 @@ export class TNT {
    * @param options
    * @returns best-found coefficients
    */
-  _tnt(A: AnyMatrix, b: AnyMatrix) {
+  tnt(A: AnyMatrix, b: AnyMatrix) {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
     const At = A.transpose(); // copy is ok. it's used a few times.
     // const AtA = At.mmul(A); //square m. will be mutated.
@@ -206,16 +165,18 @@ export class TNT {
     let xError = AtA_inv.mmul(gradient);
     const p = xError.clone(); // z_0 clone
 
-    let sqe, alpha, betaDenom, beta, stop; // column of coefficients.
+    let w, alpha, betaDenom, beta; // column of coefficients.
     for (let it = 0; it < this.maxIterations; it++) {
-      sqe = residual.dot(residual); //.to1DArray, multiply and add.
-      alpha = xError.dot(gradient) / sqe;
+      w = A.mmul(p);
+      alpha = xError.dot(gradient) / w.dot(w);
       x.add(Matrix.mul(p, alpha)); //update x
-      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
-        throw new NaNOrNonFiniteError();
+
+      this._updateMSEAndX(A, b, x); //updates: mse and counter and xBest
+
+      if (this.mseLast !== this.mseMin) {
+        break;
       }
-      stop = this._update(A, b, x); //updates: mse and counter and xBest
-      if (stop == 1) {
+      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
         break;
       }
 
@@ -226,11 +187,6 @@ export class TNT {
       xError = AtA_inv.mmul(gradient); // new x_error
       beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
       p.multiply(beta).add(xError); // update p
-    }
-    if (this.mseMin > this.unacceptableError) {
-      throw new Error(
-        `TNT could not converge (its mseMin=${this.mseMin} is unacceptable)`,
-      );
     }
   }
 }

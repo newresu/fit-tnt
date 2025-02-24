@@ -12,9 +12,11 @@ export function makeData(
   /**
    * Make some random samples with a number of "coefficients".
    */
-  const { useBias = false, outputColumns = 1 } = opts;
+  const { useBias = false, outputColumns = 1} = opts;
   // design matrix / input data
-  const A = Matrix.random(samples, coefficients);
+  const A = Matrix.random(samples, coefficients, {
+    random: myRandom,
+  });
   // coefficients matrix
   const X = Matrix.random(coefficients, outputColumns);
   // output matrix
@@ -29,4 +31,7 @@ export function makeData(
   return { inputs: A, outputs: B, coefficients: X };
 }
 
-// console.log(makeData(5, 2, { outputColumns: 1 }));
+function myRandom() {
+  const randomSign = Math.random() > 0.5 ? -1 : 1;
+  return Math.random() * randomSign;
+}

@@ -14,20 +14,14 @@ export interface EarlyStopping {
    * because afterNRounds was reached
    */
   minError: number;
-  /**
-   * Number of iterations to allow with no improvement
-   * The method either keeps improving or it stagnates.
-   * @default 2
-   */
-  patience: number;
 }
 /**
  * @export
  */
 export interface TNTOpts {
   /**
-   * If minError after optimization is greater than this error,
-   * it throws an error (or passes to pseudoInverse if that is `true`.)
+   * We are not interested in errors above this number.
+   * It throws an error or passes to pseudoInverse if that is `true`.
    * @default 1E-2
    */
   unacceptableError: number;
@@ -36,7 +30,7 @@ export interface TNTOpts {
    */
   maxIterations: number;
   /**
-   * Combinations are additive: one is sufficient to stop.
+   * Stops the optimization on conditions.
    */
   earlyStopping: EarlyStopping /**
    * If the software errors (normally very ill-conditioned matrix) it fallbacks to the slower pseudo-inverse.

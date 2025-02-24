@@ -8,10 +8,6 @@
 
 Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
-- In many cases, this method converges at the first iteration. It's also normally faster than the pseudoInverse method used (by $\approx$ 4 X).
-
-- An exception is when the matrix is very under-determined. That's why it's recommended to use options object as below.
-
 ## Install and Use
 
 ```bash
@@ -35,6 +31,13 @@ try {
   console.error(e); // just as example
 }
 ```
+
+## Important Considerations
+
+- In many cases it gets to a low error fast. Faster than the pseudoInverse method used (by $\approx$ 4 X).
+- In some cases it won't get to a low error (normalizing improves performance.)
+- If it errors, it falls-back to a more reliable but slower method (pseudo-inverse)
+- Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
 
 ## When does it fail?
 
