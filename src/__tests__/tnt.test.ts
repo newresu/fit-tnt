@@ -37,7 +37,6 @@ test('Many random matrices between 0 and 1', () => {
     expect(tnt.mseMin).not.toBeNaN();
     expect(tnt.iterations).toBeLessThanOrEqual(tnt.maxIterations); //should be equal, but is +1 when fallbacks to pseudoInverse.
     expect(tnt.mse.length).toBeLessThanOrEqual(tnt.maxIterations + 1); // same
-    console.log(tnt.mse, tnt.method);
   }
 });
 
@@ -50,7 +49,6 @@ test('Many runs without error', () => {
     const randomColumnVector = Matrix.random(m, 1).multiply(35);
     const bigA = A.mulRowVector(randomRowVector);
     const bigB = b.mulColumnVector(randomColumnVector);
-    // console.log(bigA,bigB)
     const tnt = new TNT(bigA, bigB, {
       pseudoInverseFallback: true,
       maxIterations: 4,
@@ -60,7 +58,6 @@ test('Many runs without error', () => {
     expect(tnt.mseMin).not.toBeNaN();
     expect(tnt.iterations).toBeLessThanOrEqual(tnt.maxIterations + 1); //should be equal, but is +1 when fallbacks to pseudoInverse.
     expect(tnt.mse.length).toBeLessThanOrEqual(tnt.maxIterations + 2); // same
-    console.log(tnt.mse, tnt.method);
   }
 });
 

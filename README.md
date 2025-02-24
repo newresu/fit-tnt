@@ -1,11 +1,11 @@
 # TNT
 
-<!-- [![NPM version][npm-image]][npm-url] -->
-
+[![NPM version][npm-image]][npm-url]
 [![build status][ci-image]][ci-url]
 [![Test coverage][codecov-image]][codecov-url]
+[![npm download][download-image]][download-url]
 
-<!-- [![npm download][download-image]][download-url]
+<!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
 Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
@@ -116,8 +116,8 @@ Algorithm Description
 
 [npm-image]: https://img.shields.io/npm/v/fit-tnt.svg
 [npm-url]: https://www.npmjs.com/package/fit-tnt
-[ci-image]: https://github.com/newresu/fit-tnt/workflows/Node.js%20CI/badge.svg?branch=main
-[ci-url]: https://github.com/newresu/fit-tnt/actions?query=workflow%3A%22Node.js+CI%22
+[ci-image]: https://github.com/newresu/fit-tnt/actions/workflows/nodejs.yml/badge.svg
+[ci-url]: https://github.com/newresu/fit-tnt/actions/workflows/nodejs.yml
 [codecov-image]: https://img.shields.io/codecov/c/github/newresu/fit-tnt.svg
 [codecov-url]: https://codecov.io/gh/newresu/fit-tnt
 [download-image]: https://img.shields.io/npm/dm/fit-tnt.svg

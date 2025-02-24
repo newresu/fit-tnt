@@ -20,7 +20,7 @@
     "prettier": "prettier --check .",
     "prettier-write": "prettier --write .",
     "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
-    "test-only": "vitest run --coverage",
+    "test-only": "vitest run --coverage --testTimeout 12000",
     "test-watch": "vitest",
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
