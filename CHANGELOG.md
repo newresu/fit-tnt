@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/newresu/fit-tnt/compare/v1.0.0...v2.0.0) (2025-02-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* update default value
+
+### Features
+
+* improve accuracy  ([#4](https://github.com/newresu/fit-tnt/issues/4)) ([f714b29](https://github.com/newresu/fit-tnt/commit/f714b29502cef944560d407020bbd12c0422d1d6))
+
+
+### Bug Fixes
+
+* update default value ([2edf280](https://github.com/newresu/fit-tnt/commit/2edf2806954147e22e73c73d12c20414cfad6e1b))
+
 ## 1.0.0 (2025-02-24)
 
 
