@@ -10,7 +10,11 @@
 
 Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
-It was done primarily for curiosity; it is not the best method out there.
+It was done primarily for curiosity.
+
+In v2.0. I added a custom precondition (not in the paper) that seems to work well in many (all) examples, it is faster and accurate.
+
+Version 2.0 uses the "preconditionTrick" by default, it is an option to the class instance.
 
 ## Install and Use
 
@@ -36,24 +40,33 @@ try {
 }
 ```
 
-## Important Considerations
+**Considerations**
 
 - In many cases it gets to a low error fast. Faster than the pseudoInverse method used (by $\approx$ 4 X).
-- In some cases it won't get to a low error (normalizing improves performance.)
+
+The following was drastically reduced in v2.
+
+- In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
 - If it errors, it falls-back to a more reliable but slower method (pseudo-inverse)
 - Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
 
-## When does it fail?
+<details>
+
+<summary>When does it fail?</summary>
 
 If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal. This triggers a very large number in the back-substitution.
 
-The root cause seems to be very-ill-conditioned matrices.
+The root cause seems to be very-ill-conditioned matrices. [Related post.](https://math.stackexchange.com/questions/730421/is-aat-a-positive-definite-symmetric-matrix)
 
 The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)
 
 Enabling `{pseudoInverseFallback:true}` and it will solve it in the cases where TNT fails.
 
-## Speed
+I suspect that one could add the value in the diagonal in a smarter way, so that no value in $L$ is very near $0$, but it's hard to know what this implies for the accuracy.
+
+</details>
+
+**Speed**
 
 As stated earlier, TNT is substantially faster than the current pseudo-inverse method, and should be faster than QR in many cases (see paper.)
 
@@ -86,7 +99,24 @@ The Conjugate Gradient for Normal Residual (CGNR) is a popular method for solvin
 
 The reason for "Large" is that systems with $m \lt\lt n$ can be solved faster and more accurately using the Pseudo-Inverse. Even though the QR decomposition-method can be more accurate, TNT tends to be faster in overdetermined problems where $m \approx n$ or $m \gt n$.
 
-TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T\,A$ so that it's positive definite and converges faster.
+TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T\,A$ so that $A$ becomes positive definite which means it has full column rank.
+
+To be clear, positive definite means:
+$$x^T M x \gt 0$$
+
+In our case:
+
+$$x^T \,(A^T A)\, x \gt 0$$
+
+This means:
+
+$$(A\,x)^T (A x) \gt 0$$
+
+Which means that each $(\ldots)$ must be non-zero. This happens only when the columns are linearly independent. If the columns of $A$ are linearly independent then it's invertible/non-singular, and $A^T A$ is invertible.
+
+So we want to pre-condition $A^T A$ so that it is invertible.
+
+However, this can happen while also returning $L = \mathrm{Cho}(A^T\,A)$ that has some near-zero value in the diagonal, blowing up the method.
 
 </details>
 

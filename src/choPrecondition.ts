@@ -10,14 +10,14 @@ export function choleskyPrecondition(AtA: Matrix) {
    * @param AtA - Symmetric matrix from the normal equation.
    * @returns Cholesky Decomposition of AtA
    */
-  const max_avg = Math.abs(Math.max(...AtA.mean('column'))) / 100;
+  const max_avg = Math.max(...AtA.abs().mean('column')) / 100;
   let epsilon = Number.EPSILON * 100; // order of magnitude max column
   if (max_avg > 1) {
     epsilon *= max_avg;
   }
 
   let choleskyDC = new CholeskyDecomposition(AtA);
-  let it = 2; //max 2 iterations
+  let it = 5; //max 2 iterations
   while (!choleskyDC.isPositiveDefinite()) {
     if (!Number.isFinite(epsilon) || !it) {
       //includes isNaN
@@ -31,4 +31,58 @@ export function choleskyPrecondition(AtA: Matrix) {
     it--;
   }
   return choleskyDC;
+}
+
+/**
+ * Use diagonal of L and PD to improve the matrix.
+ * @param AtA
+ * @returns
+ */
+export function choleskyPreconditionTrick(AtA: Matrix) {
+  let choleskyDC = new CholeskyDecomposition(AtA);
+
+  let diag = choleskyDC.lowerTriangularMatrix.diagonal();
+  positiveArray(diag);
+  let [min, avg] = newMinAvg(diag, 0, 0);
+
+  let ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
+  let epsilon = min + Number.EPSILON;
+  let it = 2000; //max 2 iterations
+  while (ratio < 1e-5 || !choleskyDC.isPositiveDefinite()) {
+    if (!Number.isFinite(epsilon) || !it) {
+      //includes isNaN
+      throw new PreconditionError();
+    }
+    for (let i = 0; i < AtA.rows; i++) {
+      AtA.set(i, i, AtA.get(i, i) + epsilon);
+    }
+    epsilon *= 10;
+    choleskyDC = new CholeskyDecomposition(AtA); //again
+    diag = choleskyDC.lowerTriangularMatrix.diagonal();
+    positiveArray(diag);
+    [min, avg] = newMinAvg(diag, min, avg);
+    ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
+
+    it--;
+  }
+  return choleskyDC;
+}
+
+function positiveArray(arr: number[]) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] < 0) {
+      arr[i] = -arr[i];
+    }
+  }
+}
+function newMinAvg(diag: number[], min: number, avg: number) {
+  min = diag[0];
+  avg = 0;
+  for (let i = 0; i < diag.length; i++) {
+    avg += diag[i];
+    if (diag[i] < min) {
+      min = diag[i];
+    }
+  }
+  return [min, avg / diag.length];
 }

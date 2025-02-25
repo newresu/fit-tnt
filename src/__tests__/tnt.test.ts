@@ -1,8 +1,9 @@
 import { makeData } from './makeData';
 import { TNT } from '../tnt';
 import { expect, test } from 'vitest';
-import { Matrix } from 'ml-matrix';
+import { pseudoInverse, Matrix } from 'ml-matrix';
 import { TNTOpts } from '../types';
+import { meanSquaredError } from '../meanSquaredError';
 
 const illConditioned = new Matrix([
   [
@@ -31,7 +32,7 @@ test('Many random matrices between 0 and 1', () => {
     const tnt = new TNT(A, b, {
       pseudoInverseFallback: true,
       maxIterations: 4,
-      earlyStopping: { minError: 1e-8 },
+      earlyStopping: { minError: 1e-15 },
     });
     expect(Number.isFinite(tnt.xBest.get(0, 0))).toBeTruthy();
     expect(tnt.mseMin).not.toBeNaN();
@@ -50,14 +51,18 @@ test('Many runs without error', () => {
     const bigA = A.mulRowVector(randomRowVector);
     const bigB = b.mulColumnVector(randomColumnVector);
     const tnt = new TNT(bigA, bigB, {
-      pseudoInverseFallback: true,
-      maxIterations: 4,
-      earlyStopping: { minError: 1e-8 },
+      // pseudoInverseFallback: true,
+      maxIterations: 8,
+      earlyStopping: { minError: 1e-6 },
     });
     expect(Number.isFinite(tnt.xBest.get(0, 0))).toBeTruthy();
     expect(tnt.mseMin).not.toBeNaN();
     expect(tnt.iterations).toBeLessThanOrEqual(tnt.maxIterations + 1); //should be equal, but is +1 when fallbacks to pseudoInverse.
     expect(tnt.mse.length).toBeLessThanOrEqual(tnt.maxIterations + 2); // same
+
+    // console.log(`${tnt.method} :`, tnt.mseMin);
+    // const result = pseudoInverse(A).mmul(b);
+    // console.log('pseudo inverse: ', meanSquaredError(A, result, b));
   }
 });
 
