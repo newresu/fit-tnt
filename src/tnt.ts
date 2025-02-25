@@ -2,7 +2,10 @@ import { pseudoInverse, Matrix } from 'ml-matrix';
 
 import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './triangularSubstitution';
-import { choleskyPrecondition } from './choPrecondition';
+import {
+  choleskyPrecondition,
+  choleskyPreconditionTrick,
+} from './choPrecondition';
 
 import { TNTOpts, Array1D, Array2D, EarlyStopping, AnyMatrix } from './types';
 import { meanSquaredError } from './meanSquaredError';
@@ -25,6 +28,11 @@ export class TNT {
    * @see {@link TNTOpts["pseudoInverseFallback"]}
    */
   pseudoInverseFallback: boolean;
+
+  /**
+   * @see {@link TNTOpts["usePreconditionTrick"]}
+   */
+  usePreconditionTrick: boolean;
   /**
    * @see {@link TNTOpts["criticalRatio"]}
    */
@@ -75,12 +83,14 @@ export class TNT {
       maxIterations = 3 * A.columns,
       criticalRatio = 1e-2,
       earlyStopping: { minError = 1e-20 } = {},
+      usePreconditionTrick = true,
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
     this.maxIterations = maxIterations;
     this.earlyStopping = { minError };
     this.criticalRatio = criticalRatio;
+    this.usePreconditionTrick = usePreconditionTrick;
     this.method = 'TNT';
 
     this.mse = [b.dot(b) / b.columns];
@@ -155,7 +165,9 @@ export class TNT {
     // const AtA = At.mmul(A); //square m. will be mutated.
     const AtA = fastAtA(At);
     initSafetyChecks(A, b); //throws custom errors on issues.
-    const choleskyDC = choleskyPrecondition(AtA);
+    const choleskyDC = this.usePreconditionTrick
+      ? choleskyPreconditionTrick(AtA)
+      : choleskyPrecondition(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
     const AtA_inv = invertLLt(L);
 

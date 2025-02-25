@@ -30,6 +30,13 @@ export interface TNTOpts {
    */
   maxIterations: number;
   /**
+   * This uses a custom precondition that has empirically been
+   * shown to work in our tests.
+   *
+   * @default true
+   */
+  usePreconditionTrick: boolean;
+  /**
    * Stops the optimization on conditions.
    */
   earlyStopping: EarlyStopping /**
