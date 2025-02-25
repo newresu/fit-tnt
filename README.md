@@ -8,13 +8,12 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+Implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
 It was done primarily for curiosity.
 
-In v2.0. I added a custom precondition (not in the paper) that seems to work well in many (all) examples, it is faster and accurate.
 
-Version 2.0 uses the "preconditionTrick" by default, it is an option to the class instance.
+Use `preconditionTrick: false` to disable this (fallbacks to the one in the paper.)
 
 ## Install and Use
 
@@ -31,44 +30,57 @@ const A = [
 ]; // 2x3
 const b = [6, 12]; // or [[6],[12]]
 
+// configuration
+const opts = {
+  pseudoInverseFallback: true,
+  maxIterations: 5,
+  preconditionTrick: true,
+};
+// run it.
 try {
-  const tnt = new TNT(A, b, { pseudoInverseFallback: true, maxIterations: 5 });
-  console.log(tnt.xBest, tnt.mse, tnt.iterations, tnt, method);
-  // use xBest.to1DArray unless you want it as Matrix instance.
+  const tnt = new TNT(A, b);
+  console.log(tnt.xBest, tnt.mse, tnt.method); // ...
+  //xBest.to1DArray() if you want as array.
 } catch (e) {
-  console.error(e); // just as example
+  console.error(e);
 }
 ```
-
-**Considerations**
-
-- In many cases it gets to a low error fast. Faster than the pseudoInverse method used (by $\approx$ 4 X).
-
-The following was drastically reduced in v2.
-
-- In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
-- If it errors, it falls-back to a more reliable but slower method (pseudo-inverse)
-- Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
-
 <details>
 
-<summary>When does it fail?</summary>
+<summary>TNT vs Pseudo-Inverse (click to open)</summary>
 
-If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal. This triggers a very large number in the back-substitution.
+The smaller the **rows/columns** ratio, the more one should use the
+pseudo inverse method (currently this `criticalRatio` is set to 1/10)
 
-The root cause seems to be very-ill-conditioned matrices. [Related post.](https://math.stackexchange.com/questions/730421/is-aat-a-positive-definite-symmetric-matrix)
+```
+DIMENSIONS:  500 200
 
-The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)
+// first comes error at each exec
+TNT 0 error:  0.056767708654328744
+PI 0 error:  0.05676770865432878
+TNT 1 error:  0.044906499328197645
+PI 1 error:  0.04490649932819768
+TNT 2 error:  0.04818591644803032
+PI 2 error:  0.04818591644803034
+// ...
+TNT 9 error:  0.05553764914456371
+PI 9 error:  0.05553764914456364
 
-Enabling `{pseudoInverseFallback:true}` and it will solve it in the cases where TNT fails.
+// the avg time
+TNT AVG EX TIME:  0.09274175899999997
+PI AVG EXEC TIME:  0.4914849491999999
 
-I suspect that one could add the value in the diagonal in a smarter way, so that no value in $L$ is very near $0$, but it's hard to know what this implies for the accuracy.
+// and the avg time ratio
+RATIO (tnt/pi) AVG TIME:  0.18869704789731123 (about 5x faster.)
+```
 
 </details>
 
-**Speed**
+**Considerations**
 
-As stated earlier, TNT is substantially faster than the current pseudo-inverse method, and should be faster than QR in many cases (see paper.)
+- In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
+- If it errors, it fallbacks to the pseudo-inverse method.
+- Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
 
 ## [API Documentation](https://newresu.github.io/fit-tnt/)
 
@@ -120,6 +132,21 @@ However, this can happen while also returning $L = \mathrm{Cho}(A^T\,A)$ that ha
 
 </details>
 
+<details>
+
+<summary>When does it fail?</summary>
+
+If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal. This triggers a very large number in the back-substitution.
+
+The root cause seems to be very-ill-conditioned matrices. [Related post.](https://math.stackexchange.com/questions/730421/is-aat-a-positive-definite-symmetric-matrix)
+
+The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)
+
+Enabling `{pseudoInverseFallback:true}` and it will solve it in the cases where TNT fails.
+
+I suspect that one could add the value in the diagonal in a smarter way, so that no value in $L$ is very near $0$, but it's hard to know what this implies for the accuracy.
+
+</details>
 <details>
 <summary>
 Algorithm Description

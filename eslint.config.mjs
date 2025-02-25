@@ -4,7 +4,7 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config([
-  { ignores: ['docs', 'profile'] },
+  { ignores: ['docs/**', 'benchmark/**'] },
   {
     files: ['**/*.ts'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
