@@ -33,11 +33,11 @@ for (let i = 0; i < cycles; i++) {
   console.log(`PI ${i} error: `, r.dot(r) / A.rows);
 }
 
-const tntavgt = avg(tntp)
-const piavgt = avg(pi)
+const tntavgt = avg(tntp);
+const piavgt = avg(pi);
 console.log('TNT AVG EX TIME: ', tntavgt);
-console.log('PI AVG EXEC TIME: ',piavgt );
-console.log('RATIO (tnt/pi) AVG TIME: ', tntavgt/piavgt);
+console.log('PI AVG EXEC TIME: ', piavgt);
+console.log('RATIO (tnt/pi) AVG TIME: ', tntavgt / piavgt);
 
 function avg(a) {
   let total = 0;
