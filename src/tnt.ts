@@ -90,7 +90,7 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minError };
     this.criticalRatio = criticalRatio;
-    this.usePreconditionTrick = usePreconditionTrick
+    this.usePreconditionTrick = usePreconditionTrick;
     this.method = 'TNT';
 
     this.mse = [b.dot(b) / b.columns];
