@@ -12,7 +12,6 @@ Implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/
 
 It was done primarily for curiosity.
 
-This version uses a modified precondition (not in the paper). It seems to do better empirically.
 
 Use `preconditionTrick: false` to disable this (fallbacks to the one in the paper.)
 
@@ -46,7 +45,6 @@ try {
   console.error(e);
 }
 ```
-
 <details>
 
 <summary>TNT vs Pseudo-Inverse (click to open)</summary>
