@@ -51,7 +51,7 @@ export interface TNTOpts {
    * In this case TNT will be slower than pseudoInverse (`pI`),
    * As a rule of thumb when ratio is < 1/100 one should use `pI`
    * This setting only has meaning if `pseudoInverse==true`
-   * @default 0.01
+   * @default 0.1
    */
   criticalRatio: number;
 }

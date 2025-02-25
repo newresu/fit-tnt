@@ -81,7 +81,7 @@ export class TNT {
     const {
       pseudoInverseFallback = false,
       maxIterations = 3 * A.columns,
-      criticalRatio = 1e-2,
+      criticalRatio = 0.1,
       earlyStopping: { minError = 1e-20 } = {},
       usePreconditionTrick = true,
     } = opts;

@@ -8,13 +8,13 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-Custom implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+Implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
 It was done primarily for curiosity.
 
-In v2.0. I added a custom precondition (not in the paper) that seems to work well in many (all) examples, it is faster and accurate.
+This version tests a new precondition (not in the paper) by default. It seems to do better empirically.
 
-Version 2.0 uses the "preconditionTrick" by default, it is an option to the class instance.
+Use `preconditionTrick: false` to disable it.
 
 ## Install and Use
 
@@ -31,13 +31,43 @@ const A = [
 ]; // 2x3
 const b = [6, 12]; // or [[6],[12]]
 
+// configuration
+const opts = {
+  pseudoInverseFallback: true,
+  maxIterations: 5,
+  preconditionTrick: true,
+};
+// run it.
 try {
-  const tnt = new TNT(A, b, { pseudoInverseFallback: true, maxIterations: 5 });
-  console.log(tnt.xBest, tnt.mse, tnt.iterations, tnt, method);
-  // use xBest.to1DArray unless you want it as Matrix instance.
+  const tnt = new TNT(A, b);
+  console.log(tnt.xBest, tnt.mse, tnt.method); // ...
+  //xBest.to1DArray() if you want as array.
 } catch (e) {
   console.error(e); // just as example
 }
+```
+
+**Comparison with Pseudo Inverse**
+
+Here is a 500 by 200 (rows and columns, respectively) matrix and the error of each, and the average execution time (last row.)
+
+The smaller the **rows/columns** ratio, the more one should use the
+pseudo inverse method (currently this `criticalRatio` is set to 1/10)
+
+```
+DIMENSIONS:  500 200
+TNT 0 error:  0.056767708654328744
+PI 0 error:  0.05676770865432878
+TNT 1 error:  0.044906499328197645
+PI 1 error:  0.04490649932819768
+TNT 2 error:  0.04818591644803032
+PI 2 error:  0.04818591644803034
+// ...
+TNT 9 error:  0.05553764914456371
+PI 9 error:  0.05553764914456364
+TNT AVG EX TIME:  0.09274175899999997
+PI AVG EXEC TIME:  0.4914849491999999
+RATIO (tnt/pi) AVG TIME:  0.18869704789731123 (about 5x faster.)
 ```
 
 **Considerations**
