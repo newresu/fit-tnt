@@ -3,9 +3,6 @@ import { Matrix, AbstractMatrix } from 'ml-matrix';
 export type Array2D = ArrayLike<ArrayLike<number>>;
 export type Array1D = ArrayLike<number>;
 
-/**
- * @export
- */
 export interface EarlyStopping {
   /**
    * If it gets below this error, it stops
@@ -15,9 +12,6 @@ export interface EarlyStopping {
    */
   minError: number;
 }
-/**
- * @export
- */
 export interface TNTOpts {
   /**
    * It throws an error or passes to pseudoInverse if enabled with `pseudoInverseFallback:true`.

@@ -7,7 +7,7 @@ import {
   choleskyPreconditionTrick,
 } from './choPrecondition';
 
-import { TNTOpts, Array1D, Array2D, EarlyStopping, AnyMatrix } from './types';
+import { Array1D, Array2D, AnyMatrix, EarlyStopping, TNTOpts } from './types';
 import { meanSquaredError } from './meanSquaredError';
 import { fastAtA } from './fastAtA';
 
@@ -19,8 +19,8 @@ import { fastAtA } from './fastAtA';
  * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
  * @param data - the input or data matrix (2D Array)
  * @param output - the known-output vector (1D Array)
- * @param opts
- * @returns @see {@link TNTResults}
+ * @param opts - @see {@link TNTOpts}
+ * @returns
  */
 export class TNT {
   xBest: AnyMatrix;

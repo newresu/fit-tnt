@@ -1,7 +1,7 @@
 import { makeData } from './makeData';
 import { TNT } from '../tnt';
-import { expect, test } from 'vitest';
 import { TNTOpts } from '../types';
+import { expect, test } from 'vitest';
 import { Matrix } from 'ml-matrix';
 
 const illConditioned = new Matrix([
