@@ -29,8 +29,8 @@ test('Many random matrices between 0 and 1', () => {
     const n = Math.ceil(Math.random() * 12) + 2;
     const { inputs: A, outputs: b } = makeData(m, n);
     const tnt = new TNT(A, b, {
-      pseudoInverseFallback: true,
       maxIterations: 4,
+      usePreconditionTrick: false,
       earlyStopping: { minError: 1e-15 },
     });
     expect(Number.isFinite(tnt.xBest.get(0, 0))).toBeTruthy();
@@ -40,7 +40,7 @@ test('Many random matrices between 0 and 1', () => {
   }
 });
 
-test('Many runs without error', () => {
+test('Many runs without error, use pseudo inverse', () => {
   for (let i = 0; i < 1e2; i++) {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;
@@ -50,8 +50,7 @@ test('Many runs without error', () => {
     const bigA = A.mulRowVector(randomRowVector);
     const bigB = b.mulColumnVector(randomColumnVector);
     const tnt = new TNT(bigA, bigB, {
-      // pseudoInverseFallback: true,
-      maxIterations: 8,
+      maxIterations: 4,
       earlyStopping: { minError: 1e-6 },
     });
     expect(Number.isFinite(tnt.xBest.get(0, 0))).toBeTruthy();

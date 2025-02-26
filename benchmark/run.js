@@ -16,7 +16,7 @@ let [s, e] = [0, 0];
 const cycles = 10;
 
 for (let i = 0; i < cycles; i++) {
-  const A = Matrix.random(m, n);
+  const A = Matrix.random(m, n).mul(100);
   const b = Matrix.random(m, 1);
   s = performance.now();
   t = new TNT(A, b, { pseudoInverseFallback: true });

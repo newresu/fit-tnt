@@ -47,7 +47,7 @@ export class TNT {
   earlyStopping: EarlyStopping;
 
   /**
-   * method
+   * Method used for the best result.
    * @default TNT
    */
   method: 'TNT' | 'pseudoInverse';
@@ -69,7 +69,7 @@ export class TNT {
     output: Array2D | Array1D | AnyMatrix,
     opts: Partial<TNTOpts> = {},
   ) {
-    const A = Matrix.isMatrix(data) ? data : new Matrix(data);
+    const A = Matrix.checkMatrix(data);
     const b = Matrix.isMatrix(output)
       ? output
       : Array.isArray(output[0])
@@ -79,7 +79,7 @@ export class TNT {
 
     // unpack options
     const {
-      pseudoInverseFallback = false,
+      pseudoInverseFallback = true,
       maxIterations = 3 * A.columns,
       criticalRatio = 0.1,
       earlyStopping: { minError = 1e-20 } = {},
@@ -96,42 +96,35 @@ export class TNT {
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
 
+    const ratio = A.rows / A.columns;
+
+    if (this.mseLast === 0) return;
+
     try {
-      if (this.mseLast === 0) return;
-      if (
-        A.rows / A.columns <= this.criticalRatio &&
-        this.pseudoInverseFallback
-      ) {
-        this.pseudoInverse(A, b);
+      if (ratio <= this.criticalRatio && this.pseudoInverseFallback) {
+        this.#pseudoInverse(A, b);
       } else {
-        this.tnt(A, b);
+        this.#tnt(A, b);
       }
     } catch (e) {
       if (e instanceof Error) {
-        this.pseudoInverse(A, b, e);
+        if (this.pseudoInverseFallback) {
+          this.#pseudoInverse(A, b, e);
+        } else {
+          throw new Error(e.message);
+        }
       }
     }
   }
 
-  pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
-    try {
-      const x = pseudoInverse(A).mmul(b);
-      this._updateMSEAndX(A, b, x, false);
-      if (this.mseLast === this.mseMin) {
-        this.method = 'pseudoInverse';
-      }
-    } catch (y) {
-      if (y instanceof Error) {
-        throw new Error(y.message + '\n' + e?.message);
-      }
-    }
-  }
   get iterations() {
     return this.mse.length - 1;
   }
 
   /**
-   * Updates mse[] and mse values
+   * 1. Calculate `mseLast`
+   * 2. Updates `mse[]`
+   * 3. Sets `mseMin` if improved, and `xBest` in that case.
    * @param A input data matrix
    * @param b known output vector
    * @param x current coefficients
@@ -150,6 +143,26 @@ export class TNT {
       this.xBest = cloneX ? x.clone() : x;
     }
   }
+  /**
+   * Private method
+   * Finds `x` using the pseudo-inverse of `A`.
+   * @param A the data matrix
+   * @param b known output
+   * @param e any previous errors thrown
+   */
+  #pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
+    try {
+      const x = pseudoInverse(A).mmul(b);
+      this._updateMSEAndX(A, b, x, false);
+      if (this.mseLast === this.mseMin) {
+        this.method = 'pseudoInverse';
+      }
+    } catch (y) {
+      if (y instanceof Error) {
+        throw new Error(y.message + '\n' + e?.message);
+      }
+    }
+  }
 
   /**
    * Private function (main method)
@@ -159,7 +172,7 @@ export class TNT {
    * @param options
    * @returns best-found coefficients
    */
-  tnt(A: AnyMatrix, b: AnyMatrix) {
+  #tnt(A: AnyMatrix, b: AnyMatrix) {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
     const At = A.transpose(); // copy is ok. it's used a few times.
     // const AtA = At.mmul(A); //square m. will be mutated.
@@ -183,12 +196,13 @@ export class TNT {
       alpha = xError.dot(gradient) / w.dot(w);
       x.add(Matrix.mul(p, alpha)); //update x
 
+      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
+        break;
+      }
+
       this._updateMSEAndX(A, b, x); //updates: mse and counter and xBest
 
       if (this.mseLast !== this.mseMin) {
-        break;
-      }
-      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
         break;
       }
 
