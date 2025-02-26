@@ -37,6 +37,12 @@ It uses a modified preconditioning algorithm, still based off [Ridge Regression]
 
 Use `preconditionTrick: false` to disable this (fallbacks to a closer implementation of the paper's method.)
 
+## Documentation
+
+- [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules)
+
+## Considerations and Benchmark
+
 <details>
 
 <summary>TNT vs Pseudo-Inverse (click to open)</summary>
@@ -68,13 +74,9 @@ RATIO (tnt/pi) AVG TIME:  0.18869704789731123 (about 5x faster.)
 
 </details>
 
-**Considerations**
-
 - In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
 - If it errors, it fallbacks to the pseudo-inverse method.
 - Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
-
-## [API Documentation](https://newresu.github.io/fit-tnt/)
 
 <details>
 <summary>
