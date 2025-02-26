@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/newresu/fit-tnt/compare/v2.0.0...v3.0.0) (2025-02-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* number of cycles to a normal number, use pseudo inverse fallback.
+
+### Bug Fixes
+
+* number of cycles to a normal number, use pseudo inverse fallback. ([4cd2b31](https://github.com/newresu/fit-tnt/commit/4cd2b3135e9abf01f462a446237b0955a1a4d029))
+
 ## [2.0.0](https://github.com/newresu/fit-tnt/compare/v1.0.0...v2.0.0) (2025-02-25)
 
 
