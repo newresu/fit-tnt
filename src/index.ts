@@ -1,1 +1,2 @@
-export { TNT } from './tnt';
+export * from './tnt';
+export * from './types';

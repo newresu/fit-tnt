@@ -10,10 +10,6 @@
 
 Implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
-It was done primarily for curiosity.
-
-Use `preconditionTrick: false` to disable this (fallbacks to the one in the paper.)
-
 ## Install and Use
 
 ```bash
@@ -29,21 +25,17 @@ const A = [
 ]; // 2x3
 const b = [6, 12]; // or [[6],[12]]
 
-// configuration
-const opts = {
-  pseudoInverseFallback: true,
-  maxIterations: 5,
-  preconditionTrick: true,
-};
-// run it.
 try {
-  const tnt = new TNT(A, b);
-  console.log(tnt.xBest, tnt.mse, tnt.method); // ...
-  //xBest.to1DArray() if you want as array.
+  // fallbacks to pseudo inverse
+  const { xBest, mse, method } = new TNT(A, b);
 } catch (e) {
   console.error(e);
 }
 ```
+
+It uses a modified preconditioning algorithm, still based off [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression), aiming to improve the condition number (and convergence.)
+
+Use `preconditionTrick: false` to disable this (fallbacks to a closer implementation of the paper's method.)
 
 <details>
 
@@ -141,8 +133,6 @@ If the matrix is positive-definite but the Cholesky decomposition returns some v
 The root cause seems to be very-ill-conditioned matrices. [Related post.](https://math.stackexchange.com/questions/730421/is-aat-a-positive-definite-symmetric-matrix)
 
 The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)
-
-Enabling `{pseudoInverseFallback:true}` and it will solve it in the cases where TNT fails.
 
 I suspect that one could add the value in the diagonal in a smarter way, so that no value in $L$ is very near $0$, but it's hard to know what this implies for the accuracy.
 

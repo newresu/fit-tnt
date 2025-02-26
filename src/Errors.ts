@@ -3,6 +3,7 @@ export class PreconditionError extends Error {
     const message =
       'Preconditioning AtA failed. This may be due to ill-conditioning. Please, raise an issue with the matrix that errors.';
     super(message); // (1)
+
     this.name = 'PreconditionError'; // (2)
   }
 }

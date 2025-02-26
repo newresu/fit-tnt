@@ -1,11 +1,16 @@
 import { MatrixTransposeView, Matrix } from 'ml-matrix';
 
+/**
+ * Performs the lower triangular substitution (starts from the top-left.)
+ * @param lowerTriangular
+ * @param rhs supports multiple right hand sides.
+ * @returns solution to the system of equations
+ */
 export function lowerTriangularSubstitution(
   lowerTriangular: Matrix,
   rhs: Matrix,
 ) {
   const V = new Matrix(rhs.rows, rhs.columns);
-  // console.log(lowerTriangular, rhs);
   for (let i = 0; i < lowerTriangular.rows; i++) {
     for (let k = 0; k < rhs.columns; k++) {
       let terms = rhs.get(i, k);
@@ -18,6 +23,12 @@ export function lowerTriangularSubstitution(
   return V;
 }
 
+/**
+ * Performs the upper triangular substitution (starts from the bottom-right.)
+ * @param upperTriangular
+ * @param rhs supports multiple right hand sides.
+ * @returns solution to the system of equations
+ */
 export function upperTriangularSubstitution(
   upperTriangular: Matrix | MatrixTransposeView,
   rhs: Matrix,
@@ -32,10 +43,14 @@ export function upperTriangularSubstitution(
       V.set(i, k, terms / upperTriangular.get(i, i));
     }
   }
-  // console.log('V from Upper: ', V);
   return V;
 }
 
+/**
+ * Invert LLt by using identity i.e `LLt x = I`
+ * @param L lower triangular.
+ * @returns inverse
+ */
 export function invertLLt(L: Matrix) {
   return upperTriangularSubstitution(
     new MatrixTransposeView(L),
