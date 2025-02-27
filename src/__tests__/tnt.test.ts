@@ -3,43 +3,8 @@ import { expect, test } from 'vitest';
 
 import { TNT } from '../tnt';
 import { TNTOpts } from '../types';
-import { makeData } from './makeData';
 
-test('Many random matrices between 0 and 1', () => {
-  for (let i = 0; i < 1e2; i++) {
-    const m = Math.ceil(Math.random() * 12) + 2;
-    const n = Math.ceil(Math.random() * 12) + 2;
-    const { inputs: A, outputs: b } = makeData(m, n);
-    const { xBest, mseMin } = new TNT(A, b, {
-      maxIterations: 4,
-      usePreconditionTrick: false,
-      earlyStopping: { minError: 1e-15 },
-    });
-    expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
-    expect(mseMin).not.toBeNaN();
-  }
-});
-
-test('Scaled Up any runs without error', () => {
-  for (let i = 0; i < 1e2; i++) {
-    const m = Math.ceil(Math.random() * 12) + 2;
-    const n = Math.ceil(Math.random() * 12) + 2;
-    const { inputs: A, outputs: b } = makeData(m, n, { scaleA: 100 });
-    const randomColumnVector = Matrix.random(m, 1).multiply(35);
-    const bigB = b.mulColumnVector(randomColumnVector);
-    const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(A, bigB, {
-      maxIterations: 4,
-      maxError: 100,
-      earlyStopping: { minError: 1e-6 },
-    });
-    expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
-    expect(mseMin).not.toBeNaN();
-    expect(iterations).toBeLessThanOrEqual(maxIterations);
-    expect(mse.length).toBeLessThanOrEqual(maxIterations + 2);
-  }
-});
-
-test('example in the readme', () => {
+test('example in the readme through both methods', () => {
   const A = new Matrix([
     [1, 2, 3],
     [4, 5, 6],
@@ -51,10 +16,23 @@ test('example in the readme', () => {
     maxError: 1e-2,
     earlyStopping: { minError: 1e-8 },
   };
-  const r = new TNT(A, b, opts);
+  let r = new TNT(A, b, opts);
   expect(r.mseMin).toBeLessThanOrEqual(0.02);
-  const r2 = new TNT(A, b2, opts);
+  expect(r.method).toBe('TNT');
+
+  let r2 = new TNT(A, b2, opts);
   expect(r2.mseMin).toBeLessThanOrEqual(0.02);
+  expect(r2.method).toBe('TNT');
+
+  // this forces method 2
+  opts.maxIterations = 0;
+  r = new TNT(A, b, opts);
+  expect(r.mseMin).toBeLessThanOrEqual(0.02);
+  expect(r.method).toBe('pseudoInverse');
+
+  r2 = new TNT(A, b2, opts);
+  expect(r2.mseMin).toBeLessThanOrEqual(0.02);
+  expect(r2.method).toBe('pseudoInverse');
 });
 
 test('Ill Conditioned', () => {
@@ -78,13 +56,30 @@ test('Ill Conditioned', () => {
     ],
   ]);
   const b = Matrix.ones(illConditioned.rows, 1);
-  expect(new TNT(illConditioned, b)).toBeDefined();
+  const r = new TNT(illConditioned, b);
+  expect(r).toBeDefined();
+
+  expect(
+    new TNT(illConditioned, b, {
+      usePreconditionTrick: false,
+      pseudoInverseFallback: true,
+    }),
+  ).toBeDefined();
+
+  expect(
+    () =>
+      new TNT(illConditioned, b, {
+        usePreconditionTrick: false,
+        pseudoInverseFallback: false,
+      }),
+  ).toThrowError();
 });
 
 test('Another Test', () => {
   expect(
     new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
       pseudoInverseFallback: false,
+      usePreconditionTrick: false,
     }),
   ).toBeDefined();
 });

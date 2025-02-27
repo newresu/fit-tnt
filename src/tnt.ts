@@ -68,7 +68,6 @@ export class TNT {
    * Last MSE of all iterations.
    */
   mseLast: number;
-  
 
   constructor(
     data: Array2D | AnyMatrix,
