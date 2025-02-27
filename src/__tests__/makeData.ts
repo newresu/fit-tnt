@@ -3,9 +3,9 @@ import { Matrix } from 'ml-matrix';
 interface MakeDataOpts {
   useBias: boolean; // false
   outputColumns: number; //default 1
-  addNoise: boolean; // true. Add noise to `b` using another random.
-  scaleX: number; // 100 Multiply the X by this number.
-  scaleA: number; // 100 Multiply the A by this number.
+  addNoise: boolean; // true. Add noise to `b` using 1/100 of scaling of X
+  scaleX: number; // Scale the X by this number.
+  scaleA: number; // Scale the A by this number.
 }
 export function makeData(
   samples: number,
@@ -40,13 +40,17 @@ export function makeData(
     useBias ? coefficients + 1 : coefficients,
     outputColumns,
   );
-  if(scaleX !== 1) {
+  if (scaleX !== 1) {
     X.mul(scaleX);
   }
 
   const B = A.mmul(X);
   if (addNoise) {
-    B.add(Matrix.random(samples, outputColumns, { random: myRandom }));
+    B.add(
+      Matrix.random(samples, outputColumns, { random: myRandom }).mul(
+        scaleX / 100,
+      ),
+    );
   }
   return { inputs: A, outputs: B, coefficients: X };
 }
