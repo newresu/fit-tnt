@@ -39,7 +39,7 @@ Use `preconditionTrick: false` to disable this (fallbacks to a closer implementa
 
 ## Documentation
 
-- [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules)
+- [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules.html)
 
 ## Considerations and Benchmark
 
