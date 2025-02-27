@@ -4,7 +4,8 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { // applies to all: https://eslint.org/docs/latest/use/configure/ignore#ignoring-files
+  {
+    // applies to all: https://eslint.org/docs/latest/use/configure/ignore#ignoring-files
     ignores: ['coverage', 'docs', 'benchmark', 'node_modules'],
   },
   {

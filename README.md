@@ -20,16 +20,16 @@ npm i fit-tnt
 import { TNT } from 'fit-tnt';
 
 const A = [
-    [1, 2, 3],
-    [4, 5, 6],
+  [1, 2, 3],
+  [4, 5, 6],
 ]; // 2x3
 const b = [6, 12]; // or [[6],[12]]
 
 try {
-    // fallbacks to pseudo inverse
-    const { xBest, mse, method } = new TNT(A, b);
+  // fallbacks to pseudo inverse
+  const { xBest, mse, method } = new TNT(A, b);
 } catch (e) {
-    console.error(e);
+  console.error(e);
 }
 ```
 
