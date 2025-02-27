@@ -43,6 +43,10 @@ Use `preconditionTrick: false` to disable this (fallbacks to a closer implementa
 
 ## Considerations and Benchmark
 
+- In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
+- If it errors, it fallbacks to the pseudo-inverse method.
+- Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
+
 <details>
 
 <summary>TNT vs Pseudo-Inverse (click to open)</summary>
@@ -74,13 +78,9 @@ RATIO (tnt/pi) AVG TIME:  0.18869704789731123 (about 5x faster.)
 
 </details>
 
-- In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
-- If it errors, it fallbacks to the pseudo-inverse method.
-- Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
-
 <details>
 <summary>
-Concepts (click to open)
+Concepts
 </summary>
 
 The linear problem appears in all science:
