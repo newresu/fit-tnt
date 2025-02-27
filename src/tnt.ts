@@ -16,32 +16,31 @@ import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
  * Only one right-hand-side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
  *
  * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
- * @param data - the input or data matrix (2D Array)
- * @param output - the known-output vector (1D Array)
- * @param opts - @see {@link TNTOpts}
- * @returns
+ * @param data the input or data matrix (2D Array)
+ * @param output the known-output vector (1D Array)
+ * @param opts {@link TNTOpts}
  */
 export class TNT {
     xBest: AnyMatrix;
     /**
-     * @see {@link TNTOpts["pseudoInverseFallback"]}
+     * {@link TNTOpts["pseudoInverseFallback"]}
      */
     pseudoInverseFallback: boolean;
 
     /**
-     * @see {@link TNTOpts["usePreconditionTrick"]}
+     * {@link TNTOpts["usePreconditionTrick"]}
      */
     usePreconditionTrick: boolean;
     /**
-     * @see {@link TNTOpts["criticalRatio"]}
+     * {@link TNTOpts["criticalRatio"]}
      */
     criticalRatio: number;
     /**
-     * @see {@link TNTOpts["maxIterations"]}
+     * {@link TNTOpts["maxIterations"]}
      */
     maxIterations: number;
     /**
-     * @see {@link TNTOpts["earlyStopping"]}
+     * {@link TNTOpts["earlyStopping"]}
      */
     earlyStopping: EarlyStopping;
 
@@ -129,7 +128,7 @@ export class TNT {
      * @param x current coefficients
      * @return void
      */
-    _updateMSEAndX(
+    #updateMSEAndX(
         A: AnyMatrix,
         b: AnyMatrix,
         x: AnyMatrix,
@@ -152,7 +151,7 @@ export class TNT {
     #pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
         try {
             const x = pseudoInverse(A).mmul(b);
-            this._updateMSEAndX(A, b, x, false);
+            this.#updateMSEAndX(A, b, x, false);
             if (this.mseLast === this.mseMin) {
                 this.method = 'pseudoInverse';
             }
@@ -199,7 +198,7 @@ export class TNT {
                 break;
             }
 
-            this._updateMSEAndX(A, b, x); //updates: mse and counter and xBest
+            this.#updateMSEAndX(A, b, x); //updates: mse and counter and xBest
 
             if (this.mseLast !== this.mseMin) {
                 break;
