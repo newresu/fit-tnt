@@ -104,9 +104,9 @@ export class TNT {
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
 
-    const ratio = A.rows / A.columns;
-
     if (this.mseLast === 0) return;
+
+    const ratio = A.rows / A.columns;
 
     // control which method executes.
     try {
@@ -179,7 +179,6 @@ export class TNT {
   #tnt(A: AnyMatrix, b: AnyMatrix) {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
     const At = A.transpose(); // copy is ok. it's used a few times.
-    // const AtA = At.mmul(A); //square m. will be mutated.
     const AtA = fastAtA(At);
     initSafetyChecks(A, b); //throws custom errors on issues.
     const choleskyDC = this.usePreconditionTrick
@@ -194,7 +193,7 @@ export class TNT {
     let xError = AtA_inv.mmul(gradient);
     const p = xError.clone(); // z_0 clone
 
-    let w, alpha, betaDenom, beta; // column of coefficients.
+    let w, alpha, betaDenom, beta;
     for (let it = 0; it < this.maxIterations; it++) {
       w = A.mmul(p);
       alpha = xError.dot(gradient) / w.dot(w);
