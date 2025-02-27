@@ -33,7 +33,6 @@ test('Many random matrices between 0 and 1', () => {
             A,
             b,
             {
-                pseudoInverseFallback: true,
                 maxIterations: 4,
                 usePreconditionTrick: false,
                 earlyStopping: { minError: 1e-15 },
