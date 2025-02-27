@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.0.0](https://github.com/newresu/fit-tnt/compare/v3.0.0...v4.0.0) (2025-02-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* minError parameter instead of unacceptable error.
+
+### Bug Fixes
+
+* make all methods private ([9e8f065](https://github.com/newresu/fit-tnt/commit/9e8f06574755800880cc1d60f701403bd44ade91))
+* pass to pseudo inverse when erroring or above max error ([9e8f065](https://github.com/newresu/fit-tnt/commit/9e8f06574755800880cc1d60f701403bd44ade91))
+
+
+### Code Refactoring
+
+* minError parameter instead of unacceptable error. ([9e8f065](https://github.com/newresu/fit-tnt/commit/9e8f06574755800880cc1d60f701403bd44ade91))
+
 ## [3.0.0](https://github.com/newresu/fit-tnt/compare/v2.0.0...v3.0.0) (2025-02-26)
 
 
