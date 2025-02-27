@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { PreconditionError, NaNOrNonFiniteError } from '../Errors';
+import { describe, expect, it } from 'vitest';
+
+import { NaNOrNonFiniteError, PreconditionError } from '../Errors';
 
 describe('Custom Errors', () => {
   describe('PreconditionError', () => {

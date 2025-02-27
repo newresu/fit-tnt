@@ -1,13 +1,11 @@
-import { describe, it, expect } from 'vitest';
-
 import { Matrix } from 'ml-matrix';
+import { describe, expect, it } from 'vitest';
 
+import { PreconditionError } from '../Errors';
 import {
   choleskyPrecondition,
   choleskyPreconditionTrick,
 } from '../choPrecondition';
-
-import { PreconditionError } from '../Errors';
 
 describe('choleskyPrecondition', () => {
   it('should return a Cholesky Decomposition for a positive definite matrix', () => {

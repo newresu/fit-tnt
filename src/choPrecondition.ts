@@ -1,5 +1,6 @@
 import type { Matrix } from 'ml-matrix';
 import { CholeskyDecomposition } from 'ml-matrix';
+
 import { PreconditionError } from './Errors';
 
 /**
@@ -89,10 +90,10 @@ function positiveArray(arr: number[]) {
 function arrayMeanAndAverage(arr: number[]) {
   let min = arr[0];
   let avg = 0;
-  for (let i = 0; i < arr.length; i++) {
-    avg += arr[i];
-    if (arr[i] < min) {
-      min = arr[i];
+  for (const item of arr) {
+    avg += item;
+    if (item < min) {
+      min = item;
     }
   }
   return [min, avg / arr.length];

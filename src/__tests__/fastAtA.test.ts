@@ -1,5 +1,5 @@
-import { expect, test } from 'vitest';
 import { Matrix } from 'ml-matrix';
+import { expect, test } from 'vitest';
 
 import { fastAtA } from '../fastAtA';
 

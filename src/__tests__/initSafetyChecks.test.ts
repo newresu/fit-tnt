@@ -1,6 +1,7 @@
-import { initSafetyChecks } from '../initSafetyChecks';
 import { Matrix } from 'ml-matrix';
 import { expect, test } from 'vitest';
+
+import { initSafetyChecks } from '../initSafetyChecks';
 
 const A = Matrix.random(3, 4);
 const b = Matrix.random(3, 1);

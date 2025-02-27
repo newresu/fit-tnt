@@ -1,4 +1,5 @@
 import { AnyMatrix } from './types';
+
 /**
  * Performs E = Ax - b and E'E/A.rows
  *

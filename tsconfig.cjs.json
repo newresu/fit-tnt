@@ -3,7 +3,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
-    "declarationMap": true
-  },
-  "exclude": ["./src/**/__tests__"]
+    "declarationMap": true,
+    "outDir": "./lib"
+  }
 }

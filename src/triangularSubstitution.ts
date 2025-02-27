@@ -1,4 +1,4 @@
-import { MatrixTransposeView, Matrix } from 'ml-matrix';
+import { Matrix, MatrixTransposeView } from 'ml-matrix';
 
 /**
  * Performs the lower triangular substitution (starts from the top-left.)

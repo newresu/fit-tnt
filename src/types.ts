@@ -1,4 +1,4 @@
-import { Matrix, AbstractMatrix } from 'ml-matrix';
+import { AbstractMatrix, Matrix } from 'ml-matrix';
 
 export type Array2D = ArrayLike<ArrayLike<number>>;
 export type Array1D = ArrayLike<number>;
@@ -14,10 +14,11 @@ export interface EarlyStopping {
 }
 export interface TNTOpts {
   /**
-   * It throws an error or passes to pseudoInverse if enabled with `pseudoInverseFallback:true`.
+   * Maximum mean squared error allowed.
+   * If the result is above, it throws an error **or** passes to pseudoInverse when `pseudoInverseFallback:true`.
    * @default 1E-2
    */
-  unacceptableError: number;
+  maxAllowedMSE: number;
   /**
    * @default `A.columns * 3`
    */

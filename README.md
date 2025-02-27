@@ -39,40 +39,27 @@ Use `preconditionTrick: false` to disable this (fallbacks to a closer implementa
 
 ## Documentation
 
-- [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules)
+- [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules.html)
 
-## Considerations and Benchmark
-
-<details>
-
-<summary>TNT vs Pseudo-Inverse (click to open)</summary>
+## Comparison: TNT vs Pseudo-Inverse
 
 The smaller the **rows/columns** ratio, the more one should use the
 pseudo inverse method (currently this `criticalRatio` is set to 1/10)
 
+- Matrix Shape: 500 200
+
 ```
-DIMENSIONS:  500 200
-
-// first comes error at each exec
-TNT 0 error:  0.056767708654328744
-PI 0 error:  0.05676770865432878
-TNT 1 error:  0.044906499328197645
-PI 1 error:  0.04490649932819768
-TNT 2 error:  0.04818591644803032
-PI 2 error:  0.04818591644803034
-// ...
-TNT 9 error:  0.05553764914456371
-PI 9 error:  0.05553764914456364
-
-// the avg time
-TNT AVG EX TIME:  0.09274175899999997
-PI AVG EXEC TIME:  0.4914849491999999
-
-// and the avg time ratio
-RATIO (tnt/pi) AVG TIME:  0.18869704789731123 (about 5x faster.)
+┌───────────────┬─────────────────────┬─────────────────────┐
+│ (index)       │       Avg Exec Time │           Avg Error │
+├───────────────┼─────────────────────┼─────────────────────┤
+│ TNT           │ 0.09470919929999999 │ 0.04945702797110891 │
+│ PseudoInverse │ 0.49272041820000007 │ 0.04945702797110894 │
+└───────────────┴─────────────────────┴─────────────────────┘
 ```
 
-</details>
+- Speed Up: 5.202455747083906
+
+## Misc.
 
 - In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
 - If it errors, it fallbacks to the pseudo-inverse method.
@@ -80,7 +67,7 @@ RATIO (tnt/pi) AVG TIME:  0.18869704789731123 (about 5x faster.)
 
 <details>
 <summary>
-Concepts (click to open)
+Concepts
 </summary>
 
 The linear problem appears in all science:

@@ -1,15 +1,14 @@
-import { pseudoInverse, Matrix } from 'ml-matrix';
+import { Matrix, pseudoInverse } from 'ml-matrix';
 
-import { initSafetyChecks } from './initSafetyChecks';
-import { invertLLt } from './triangularSubstitution';
 import {
   choleskyPrecondition,
   choleskyPreconditionTrick,
 } from './choPrecondition';
-
-import { Array1D, Array2D, AnyMatrix, EarlyStopping, TNTOpts } from './types';
-import { meanSquaredError } from './meanSquaredError';
 import { fastAtA } from './fastAtA';
+import { initSafetyChecks } from './initSafetyChecks';
+import { meanSquaredError } from './meanSquaredError';
+import { invertLLt } from './triangularSubstitution';
+import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
 /**
  * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
@@ -17,32 +16,34 @@ import { fastAtA } from './fastAtA';
  * Only one right-hand-side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
  *
  * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
- * @param data - the input or data matrix (2D Array)
- * @param output - the known-output vector (1D Array)
- * @param opts - @see {@link TNTOpts}
- * @returns
+ * @param data the input or data matrix (2D Array)
+ * @param output the known-output vector (1D Array)
+ * @param opts {@link TNTOpts}
  */
 export class TNT {
   xBest: AnyMatrix;
   /**
-   * @see {@link TNTOpts["pseudoInverseFallback"]}
+   * {@link TNTOpts["pseudoInverseFallback"]}
    */
   pseudoInverseFallback: boolean;
-
   /**
-   * @see {@link TNTOpts["usePreconditionTrick"]}
+   * {@link TNTOpts["maxAllowedMSE"]}
+   */
+  maxAllowedMSE: number;
+  /**
+   * {@link TNTOpts["usePreconditionTrick"]}
    */
   usePreconditionTrick: boolean;
   /**
-   * @see {@link TNTOpts["criticalRatio"]}
+   * {@link TNTOpts["criticalRatio"]}
    */
   criticalRatio: number;
   /**
-   * @see {@link TNTOpts["maxIterations"]}
+   * {@link TNTOpts["maxIterations"]}
    */
   maxIterations: number;
   /**
-   * @see {@link TNTOpts["earlyStopping"]}
+   * {@link TNTOpts["earlyStopping"]}
    */
   earlyStopping: EarlyStopping;
 
@@ -51,6 +52,10 @@ export class TNT {
    * @default TNT
    */
   method: 'TNT' | 'pseudoInverse';
+  /**
+   * Whether the pseudo-inverse was executed.
+   */
+  executedPseudoInverse: boolean;
   /**
    * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
    */
@@ -84,14 +89,17 @@ export class TNT {
       criticalRatio = 0.1,
       earlyStopping: { minError = 1e-20 } = {},
       usePreconditionTrick = true,
+      maxAllowedMSE = 1e-2,
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
+    this.executedPseudoInverse = false;
     this.maxIterations = maxIterations;
     this.earlyStopping = { minError };
     this.criticalRatio = criticalRatio;
     this.usePreconditionTrick = usePreconditionTrick;
     this.method = 'TNT';
+    this.maxAllowedMSE = maxAllowedMSE;
 
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
@@ -100,6 +108,7 @@ export class TNT {
 
     if (this.mseLast === 0) return;
 
+    // control which method executes.
     try {
       if (ratio <= this.criticalRatio && this.pseudoInverseFallback) {
         this.#pseudoInverse(A, b);
@@ -118,6 +127,9 @@ export class TNT {
   }
 
   get iterations() {
+    if (this.executedPseudoInverse) {
+      return this.mse.length - 2;
+    }
     return this.mse.length - 1;
   }
 
@@ -130,12 +142,7 @@ export class TNT {
    * @param x current coefficients
    * @return void
    */
-  _updateMSEAndX(
-    A: AnyMatrix,
-    b: AnyMatrix,
-    x: AnyMatrix,
-    cloneX: boolean = true,
-  ) {
+  #updateMSEAndX(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX = true) {
     this.mseLast = meanSquaredError(A, x, b);
     this.mse.push(this.mseLast);
     if (this.mseLast < this.mseMin) {
@@ -151,11 +158,16 @@ export class TNT {
    * @param e any previous errors thrown
    */
   #pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
+    this.executedPseudoInverse = true;
     try {
       const x = pseudoInverse(A).mmul(b);
-      this._updateMSEAndX(A, b, x, false);
+      this.#updateMSEAndX(A, b, x, false);
       if (this.mseLast === this.mseMin) {
         this.method = 'pseudoInverse';
+      } else if (this.mseMin > this.maxAllowedMSE) {
+        throw new Error('Min Error is above Max Error');
+      } else {
+        throw new Error('Unknown error.');
       }
     } catch (y) {
       if (y instanceof Error) {
@@ -200,7 +212,7 @@ export class TNT {
         break;
       }
 
-      this._updateMSEAndX(A, b, x); //updates: mse and counter and xBest
+      this.#updateMSEAndX(A, b, x); //updates: mse and counter and xBest
 
       if (this.mseLast !== this.mseMin) {
         break;
@@ -213,6 +225,9 @@ export class TNT {
       xError = AtA_inv.mmul(gradient); // new x_error
       beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
       p.multiply(beta).add(xError); // update p
+    }
+    if (this.mseMin > this.maxAllowedMSE) {
+      throw new Error('Unacceptable error');
     }
   }
 }
