@@ -25,7 +25,7 @@ test('Scaled Up A', () => {
     const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 100 });
     const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(bigA, b, {
       maxIterations: 4,
-      maxError: 100,
+      maxAllowedMSE: 100,
       earlyStopping: { minError: 1e-3 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
@@ -44,7 +44,7 @@ test('Scaled Up X runs without error', () => {
     });
     const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(A, bigB, {
       maxIterations: 4,
-      maxError: 100,
+      maxAllowedMSE: 100,
       earlyStopping: { minError: 1e-3 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();

@@ -13,7 +13,7 @@ test('example in the readme through both methods', () => {
   const b2 = [[6], [12]];
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
-    maxError: 1e-2,
+    maxAllowedMSE: 1e-2,
     earlyStopping: { minError: 1e-8 },
   };
   let r = new TNT(A, b, opts);

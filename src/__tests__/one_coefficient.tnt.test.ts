@@ -67,7 +67,7 @@ test('Simple Linear Fit to noisy data', () => {
     maxIterations: 4,
     usePreconditionTrick: true,
     earlyStopping: { minError: 1e-15 },
-    maxError: 0.00001,
+    maxAllowedMSE: 0.00001,
   };
   const { xBest, mseMin, mse, iterations, maxIterations, method } = new TNT(
     A,
@@ -81,11 +81,11 @@ test('Simple Linear Fit to noisy data', () => {
   expect(xBest.get(0, 0)).toBeCloseTo(x, 2);
   expect(method).toBe('TNT');
 
-  opts.maxError = 0.000000000000001;
+  opts.maxAllowedMSE = 0.000000000000001;
   expect(() => new TNT(A, b, opts)).toThrowError('Min Error');
 
   opts.maxIterations = 0;
-  opts.maxError = 0.0001;
+  opts.maxAllowedMSE = 0.0001;
   const resultInverse = new TNT(A, b, opts);
   expect(resultInverse.method).toBe('pseudoInverse');
   expect(resultInverse.xBest.get(0, 0)).toBeCloseTo(x, 2);
