@@ -1,62 +1,63 @@
 {
-  "name": "fit-tnt",
-  "version": "3.0.0",
-  "description": "TNT - A Least Squares iterative solver.",
-  "main": "./lib/index.js",
-  "module": "./lib-esm/index.js",
-  "types": "./lib/index.d.ts",
-  "sideEffects": false,
-  "files": [
-    "src",
-    "lib",
-    "lib-esm"
-  ],
-  "scripts": {
-    "check-types": "tsc --noEmit",
-    "clean": "rimraf lib lib-esm",
-    "eslint": "eslint src",
-    "eslint-fix": "npm run eslint -- --fix",
-    "prepack": "npm run tsc",
-    "prettier": "prettier --check .",
-    "prettier-write": "prettier --write .",
-    "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
-    "test-only": "vitest --run --coverage --testTimeout 12000",
-    "test-watch": "vitest",
-    "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
-    "tsc-cjs": "tsc --project tsconfig.cjs.json",
-    "tsc-esm": "tsc --project tsconfig.esm.json"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/newseru/fit-tnt.git"
-  },
-  "keywords": [
-    "least-squares",
-    "unconstrained least squares",
-    "least squares"
-  ],
-  "author": "Santiago Miranda",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/newseru/fit-tnt/issues"
-  },
-  "homepage": "https://github.com/newseru/fit-tnt#readme",
-  "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@eslint/json": "^0.10.0",
-    "@eslint/markdown": "^6.2.2",
-    "@types/eslint-config-prettier": "^6.11.3",
-    "@vitest/coverage-v8": "^3.0.7",
-    "eslint": "^9.21.0",
-    "eslint-plugin-jsdoc": "^50.6.3",
-    "globals": "^16.0.0",
-    "prettier": "^3.5.2",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.7.3",
-    "typescript-eslint": "^8.25.0",
-    "vitest": "^3.0.7"
-  },
-  "dependencies": {
-    "ml-matrix": "^6.12.0"
-  }
+    "name": "fit-tnt",
+    "version": "3.0.0",
+    "description": "TNT - A Least Squares iterative solver.",
+    "main": "./lib/index.js",
+    "module": "./lib-esm/index.js",
+    "types": "./lib/index.d.ts",
+    "sideEffects": false,
+    "files": [
+        "src",
+        "lib",
+        "lib-esm"
+    ],
+    "scripts": {
+        "check-types": "tsc --noEmit",
+        "clean": "rimraf lib lib-esm",
+        "eslint": "eslint src",
+        "eslint-fix": "npm run eslint -- --fix",
+        "prepack": "npm run tsc",
+        "prettier": "prettier --check .",
+        "prettier-write": "prettier --write .",
+        "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
+        "test-only": "vitest --run --coverage",
+        "test-watch": "vitest",
+        "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
+        "tsc-cjs": "tsc --project tsconfig.cjs.json",
+        "tsc-esm": "tsc --project tsconfig.esm.json"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/newseru/fit-tnt.git"
+    },
+    "keywords": [
+        "least-squares",
+        "unconstrained least squares",
+        "least squares"
+    ],
+    "author": "Santiago Miranda",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/newseru/fit-tnt/issues"
+    },
+    "homepage": "https://github.com/newseru/fit-tnt#readme",
+    "devDependencies": {
+        "@eslint/js": "^9.21.0",
+        "@eslint/json": "^0.10.0",
+        "@eslint/markdown": "^6.2.2",
+        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+        "@types/eslint-config-prettier": "^6.11.3",
+        "@vitest/coverage-v8": "^3.0.7",
+        "eslint": "^9.21.0",
+        "eslint-plugin-jsdoc": "^50.6.3",
+        "globals": "^16.0.0",
+        "prettier": "^3.5.2",
+        "rimraf": "^6.0.1",
+        "typescript": "^5.7.3",
+        "typescript-eslint": "^8.25.0",
+        "vitest": "^3.0.7"
+    },
+    "dependencies": {
+        "ml-matrix": "^6.12.0"
+    }
 }

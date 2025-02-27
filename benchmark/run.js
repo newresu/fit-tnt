@@ -1,5 +1,6 @@
-import { performance } from 'perf_hooks';
 import { Matrix, pseudoInverse } from 'ml-matrix';
+import { performance } from 'perf_hooks';
+
 import { TNT } from '../lib/index.js';
 
 const m = 500; // use 100 to see TNT using pseudo inverse by default
@@ -16,21 +17,21 @@ let [s, e] = [0, 0];
 const cycles = 10;
 
 for (let i = 0; i < cycles; i++) {
-  const A = Matrix.random(m, n).mul(100);
-  const b = Matrix.random(m, 1);
-  s = performance.now();
-  t = new TNT(A, b, { pseudoInverseFallback: true });
-  e = performance.now();
-  tntp.push((e - s) / 1000);
-  console.log(`${t.method} ${i} error: `, t.mseMin);
+    const A = Matrix.random(m, n).mul(100);
+    const b = Matrix.random(m, 1);
+    s = performance.now();
+    t = new TNT(A, b, { pseudoInverseFallback: true });
+    e = performance.now();
+    tntp.push((e - s) / 1000);
+    console.log(`${t.method} ${i} error: `, t.mseMin);
 
-  /*pseudo inverse*/
-  s = performance.now();
-  r = pseudoInverse(A).mmul(b);
-  e = performance.now();
-  pi.push((e - s) / 1000);
-  r = A.mmul(r).sub(b);
-  console.log(`PI ${i} error: `, r.dot(r) / A.rows);
+    /*pseudo inverse*/
+    s = performance.now();
+    r = pseudoInverse(A).mmul(b);
+    e = performance.now();
+    pi.push((e - s) / 1000);
+    r = A.mmul(r).sub(b);
+    console.log(`PI ${i} error: `, r.dot(r) / A.rows);
 }
 
 const tntavgt = avg(tntp);
@@ -40,9 +41,9 @@ console.log('PI AVG EXEC TIME: ', piavgt);
 console.log('RATIO (tnt/pi) AVG TIME: ', tntavgt / piavgt);
 
 function avg(a) {
-  let total = 0;
-  for (let i = 0; i < a.length; i++) {
-    total += a[i];
-  }
-  return total / a.length;
+    let total = 0;
+    for (let i = 0; i < a.length; i++) {
+        total += a[i];
+    }
+    return total / a.length;
 }
