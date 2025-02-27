@@ -128,7 +128,7 @@ export class TNT {
    * @param x current coefficients
    * @return void
    */
-  #updateMSEAndX(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX: true) {
+  #updateMSEAndX(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX = true) {
     this.mseLast = meanSquaredError(A, x, b);
     this.mse.push(this.mseLast);
     if (this.mseLast < this.mseMin) {
