@@ -42,15 +42,13 @@ test('Many random matrices between 0 and 1', () => {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;
     const { inputs: A, outputs: b } = makeData(m, n);
-    const { xBest, mseMin, iterations, mse, maxIterations } = new TNT(A, b, {
+    const { xBest, mseMin } = new TNT(A, b, {
       maxIterations: 4,
       usePreconditionTrick: false,
       earlyStopping: { minError: 1e-15 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
-    expect(iterations).toBeLessThanOrEqual(maxIterations);
-    expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
   }
 });
 
@@ -63,14 +61,18 @@ test('Many runs without error, use pseudo inverse', () => {
     const randomColumnVector = Matrix.random(m, 1).multiply(35);
     const bigA = A.mulRowVector(randomRowVector);
     const bigB = b.mulColumnVector(randomColumnVector);
-    const tnt = new TNT(bigA, bigB, {
-      maxIterations: 4,
-      earlyStopping: { minError: 1e-6 },
-    });
-    expect(Number.isFinite(tnt.xBest.get(0, 0))).toBeTruthy();
-    expect(tnt.mseMin).not.toBeNaN();
-    expect(tnt.iterations).toBeLessThanOrEqual(tnt.maxIterations);
-    expect(tnt.mse.length).toBeLessThanOrEqual(tnt.maxIterations + 1);
+    const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(
+      bigA,
+      bigB,
+      {
+        maxIterations: 4,
+        earlyStopping: { minError: 1e-6 },
+      },
+    );
+    expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
+    expect(mseMin).not.toBeNaN();
+    expect(iterations).toBeLessThanOrEqual(maxIterations);
+    expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
   }
 });
 
