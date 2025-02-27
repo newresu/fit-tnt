@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/newresu/fit-tnt/compare/v4.0.0...v4.0.1) (2025-02-27)
+
+
+### Bug Fixes
+
+* ensures throwing on pseudo inverse doesn't re-execute it. ([6d1569e](https://github.com/newresu/fit-tnt/commit/6d1569ec3fdf5f1433c0f24f06fe2b5a743d97a3))
+
 ## [4.0.0](https://github.com/newresu/fit-tnt/compare/v3.0.0...v4.0.0) (2025-02-27)
 
 
