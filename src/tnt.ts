@@ -27,9 +27,9 @@ export class TNT {
    */
   pseudoInverseFallback: boolean;
   /**
-   * {@link TNTOpts["maxError"]}
+   * {@link TNTOpts["maxAllowedMSE"]}
    */
-  maxError: number;
+  maxAllowedMSE: number;
   /**
    * {@link TNTOpts["usePreconditionTrick"]}
    */
@@ -89,7 +89,7 @@ export class TNT {
       criticalRatio = 0.1,
       earlyStopping: { minError = 1e-20 } = {},
       usePreconditionTrick = true,
-      maxError = 1e-2,
+      maxAllowedMSE = 1e-2,
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
@@ -99,7 +99,7 @@ export class TNT {
     this.criticalRatio = criticalRatio;
     this.usePreconditionTrick = usePreconditionTrick;
     this.method = 'TNT';
-    this.maxError = maxError;
+    this.maxAllowedMSE = maxAllowedMSE;
 
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
@@ -164,7 +164,7 @@ export class TNT {
       this.#updateMSEAndX(A, b, x, false);
       if (this.mseLast === this.mseMin) {
         this.method = 'pseudoInverse';
-      } else if (this.mseMin > this.maxError) {
+      } else if (this.mseMin > this.maxAllowedMSE) {
         throw new Error('Min Error is above Max Error');
       } else {
         throw new Error('Unknown error.');
@@ -226,7 +226,7 @@ export class TNT {
       beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
       p.multiply(beta).add(xError); // update p
     }
-    if (this.mseMin > this.maxError) {
+    if (this.mseMin > this.maxAllowedMSE) {
       throw new Error('Unacceptable error');
     }
   }

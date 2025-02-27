@@ -14,10 +14,11 @@ export interface EarlyStopping {
 }
 export interface TNTOpts {
   /**
-   * It throws an error or passes to pseudoInverse if enabled with `pseudoInverseFallback:true`.
+   * Maximum mean squared error allowed.
+   * If the result is above, it throws an error **or** passes to pseudoInverse when `pseudoInverseFallback:true`.
    * @default 1E-2
    */
-  maxError: number;
+  maxAllowedMSE: number;
   /**
    * @default `A.columns * 3`
    */
