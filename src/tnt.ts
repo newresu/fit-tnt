@@ -114,6 +114,9 @@ export class TNT {
         this.#pseudoInverse(A, b);
       } else {
         this.#tnt(A, b);
+        if (this.mseMin > this.maxAllowedMSE) {
+          throw new Error('Min MSE is above Max Allowed MSE');
+        }
       }
     } catch (e) {
       if (this.pseudoInverseFallback && !this.executedPseudoInverse) {
@@ -161,10 +164,6 @@ export class TNT {
     this.#updateMSEAndX(A, b, x, false);
     if (this.mseLast === this.mseMin) {
       this.method = 'pseudoInverse';
-    } else if (this.mseMin > this.maxAllowedMSE) {
-      throw new Error('Minimum MSE obtained is above Max Allowed MSE ');
-    } else {
-      throw new Error('Unknown error.');
     }
   }
 
@@ -216,9 +215,6 @@ export class TNT {
       xError = AtA_inv.mmul(gradient); // new x_error
       beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
       p.multiply(beta).add(xError); // update p
-    }
-    if (this.mseMin > this.maxAllowedMSE) {
-      throw new Error('Min MSE is above Max Allowed MSE');
     }
   }
 }

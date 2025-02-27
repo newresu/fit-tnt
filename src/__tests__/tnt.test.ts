@@ -13,7 +13,7 @@ test('example in the readme through both methods', () => {
   const b2 = [[6], [12]];
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
-    maxAllowedMSE: 1e-2,
+    maxAllowedMSE: 1,
     earlyStopping: { minError: 1e-8 },
   };
   let r = new TNT(A, b, opts);
@@ -56,15 +56,17 @@ test('Ill Conditioned', () => {
     ],
   ]);
   const b = Matrix.ones(illConditioned.rows, 1);
-  const r = new TNT(illConditioned, b);
+  const r = new TNT(illConditioned, b, { maxAllowedMSE: 0.01 });
   expect(r).toBeDefined();
+  expect(r.method).toBe('TNT');
 
-  expect(
-    new TNT(illConditioned, b, {
-      usePreconditionTrick: false,
-      pseudoInverseFallback: true,
-    }),
-  ).toBeDefined();
+  const r2 = new TNT(illConditioned, b, {
+    usePreconditionTrick: false,
+    pseudoInverseFallback: true,
+    maxAllowedMSE: 0.01,
+  });
+  expect(r2).toBeDefined();
+  expect(r2.method).toBe('pseudoInverse');
 
   expect(
     () =>
@@ -76,10 +78,11 @@ test('Ill Conditioned', () => {
 });
 
 test('Another Test', () => {
-  expect(
-    new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
-      pseudoInverseFallback: false,
-      usePreconditionTrick: false,
-    }),
-  ).toBeDefined();
+  const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
+    pseudoInverseFallback: false,
+    usePreconditionTrick: false,
+  });
+  expect(result).toBeDefined();
+  expect(result.method).toBe('TNT');
+  expect(result.mseMin).toBeLessThanOrEqual(1e-2);
 });

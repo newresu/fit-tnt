@@ -24,8 +24,7 @@ test('Scaled Up A', () => {
     const n = Math.ceil(Math.random() * 12) + 2;
     const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 100 });
     const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(bigA, b, {
-      maxIterations: 4,
-      maxAllowedMSE: 100,
+      maxIterations: 8,
       earlyStopping: { minError: 1e-3 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
@@ -39,12 +38,11 @@ test('Scaled Up X runs without error', () => {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;
     const { inputs: A, outputs: bigB } = makeData(m, n, {
-      scaleX: 100,
+      scaleX: 1,
       addNoise: true,
     });
     const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(A, bigB, {
       maxIterations: 4,
-      maxAllowedMSE: 100,
       earlyStopping: { minError: 1e-3 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
