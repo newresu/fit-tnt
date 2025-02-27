@@ -41,7 +41,25 @@ Use `preconditionTrick: false` to disable this (fallbacks to a closer implementa
 
 - [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules.html)
 
-## Considerations and Benchmark
+## Comparison: TNT vs Pseudo-Inverse
+
+The smaller the **rows/columns** ratio, the more one should use the
+pseudo inverse method (currently this `criticalRatio` is set to 1/10)
+
+- Matrix Shape: 500 200
+
+```
+┌───────────────┬─────────────────────┬─────────────────────┐
+│ (index)       │       Avg Exec Time │           Avg Error │
+├───────────────┼─────────────────────┼─────────────────────┤
+│ TNT           │ 0.09470919929999999 │ 0.04945702797110891 │
+│ PseudoInverse │ 0.49272041820000007 │ 0.04945702797110894 │
+└───────────────┴─────────────────────┴─────────────────────┘
+```
+
+- Speed Up: 5.202455747083906
+
+## Misc.
 
 - In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
 - If it errors, it fallbacks to the pseudo-inverse method.
@@ -127,24 +145,6 @@ Algorithm Description
 12. Get $\beta$ `beta = dot(z_{i+1},g_{i+1})/dot (z_i,g_i)`
 
 </details>
-
-**Comparison: TNT vs Pseudo-Inverse**
-
-The smaller the **rows/columns** ratio, the more one should use the
-pseudo inverse method (currently this `criticalRatio` is set to 1/10)
-
-- Matrix Shape: 500 200
-
-```
-┌───────────────┬─────────────────────┬─────────────────────┐
-│ (index)       │       Avg Exec Time │           Avg Error │
-├───────────────┼─────────────────────┼─────────────────────┤
-│ TNT           │ 0.09470919929999999 │ 0.04945702797110891 │
-│ PseudoInverse │ 0.49272041820000007 │ 0.04945702797110894 │
-└───────────────┴─────────────────────┴─────────────────────┘
-```
-
-- Speed Up: 5.202455747083906
 
 ## License
 
