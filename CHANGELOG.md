@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2](https://github.com/newresu/fit-tnt/compare/v4.0.1...v4.0.2) (2025-02-27)
+
+
+### Bug Fixes
+
+* replace where to throw the error from. ([95efa32](https://github.com/newresu/fit-tnt/commit/95efa328a8febc4e42384a65e091d36d972a7bc2))
+
 ## [4.0.1](https://github.com/newresu/fit-tnt/compare/v4.0.0...v4.0.1) (2025-02-27)
 
 
