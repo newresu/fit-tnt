@@ -17,7 +17,7 @@ export interface TNTOpts {
    * It throws an error or passes to pseudoInverse if enabled with `pseudoInverseFallback:true`.
    * @default 1E-2
    */
-  unacceptableError: number;
+  maxError: number;
   /**
    * @default `A.columns * 3`
    */
