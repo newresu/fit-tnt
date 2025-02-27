@@ -116,12 +116,10 @@ export class TNT {
         this.#tnt(A, b);
       }
     } catch (e) {
-      if (e instanceof Error) {
-        if (this.pseudoInverseFallback) {
-          this.#pseudoInverse(A, b, e);
-        } else {
-          throw new Error(e.message);
-        }
+      if (this.pseudoInverseFallback && !this.executedPseudoInverse) {
+        this.#pseudoInverse(A, b);
+      } else {
+        throw e;
       }
     }
   }
@@ -157,22 +155,16 @@ export class TNT {
    * @param b known output
    * @param e any previous errors thrown
    */
-  #pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
+  #pseudoInverse(A: AnyMatrix, b: AnyMatrix) {
     this.executedPseudoInverse = true;
-    try {
-      const x = pseudoInverse(A).mmul(b);
-      this.#updateMSEAndX(A, b, x, false);
-      if (this.mseLast === this.mseMin) {
-        this.method = 'pseudoInverse';
-      } else if (this.mseMin > this.maxAllowedMSE) {
-        throw new Error('Min Error is above Max Error');
-      } else {
-        throw new Error('Unknown error.');
-      }
-    } catch (y) {
-      if (y instanceof Error) {
-        throw new Error(y.message + '\n' + e?.message);
-      }
+    const x = pseudoInverse(A).mmul(b);
+    this.#updateMSEAndX(A, b, x, false);
+    if (this.mseLast === this.mseMin) {
+      this.method = 'pseudoInverse';
+    } else if (this.mseMin > this.maxAllowedMSE) {
+      throw new Error('Minimum MSE obtained is above Max Allowed MSE ');
+    } else {
+      throw new Error('Unknown error.');
     }
   }
 
@@ -227,7 +219,7 @@ export class TNT {
       p.multiply(beta).add(xError); // update p
     }
     if (this.mseMin > this.maxAllowedMSE) {
-      throw new Error('Unacceptable error');
+      throw new Error('Min MSE is above Max Allowed MSE');
     }
   }
 }

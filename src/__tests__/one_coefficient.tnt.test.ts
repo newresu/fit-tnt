@@ -82,7 +82,7 @@ test('Simple Linear Fit to noisy data', () => {
   expect(method).toBe('TNT');
 
   opts.maxAllowedMSE = 0.000000000000001;
-  expect(() => new TNT(A, b, opts)).toThrowError('Min Error');
+  expect(() => new TNT(A, b, opts)).toThrowError('Minimum MSE');
 
   opts.maxIterations = 0;
   opts.maxAllowedMSE = 0.0001;
