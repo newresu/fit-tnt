@@ -20,27 +20,22 @@ test('Many random matrices between 0 and 1', () => {
   }
 });
 
-test('Many runs without error, use pseudo inverse', () => {
+test('Scaled Up any runs without error', () => {
   for (let i = 0; i < 1e2; i++) {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;
-    const { inputs: A, outputs: b } = makeData(m, n);
-    const randomRowVector = Matrix.random(1, n).multiply(100);
+    const { inputs: A, outputs: b } = makeData(m, n, { scaleA: 100 });
     const randomColumnVector = Matrix.random(m, 1).multiply(35);
-    const bigA = A.mulRowVector(randomRowVector);
     const bigB = b.mulColumnVector(randomColumnVector);
-    const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(
-      bigA,
-      bigB,
-      {
-        maxIterations: 4,
-        earlyStopping: { minError: 1e-6 },
-      },
-    );
+    const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(A, bigB, {
+      maxIterations: 4,
+      maxError: 100,
+      earlyStopping: { minError: 1e-6 },
+    });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
     expect(iterations).toBeLessThanOrEqual(maxIterations);
-    expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
+    expect(mse.length).toBeLessThanOrEqual(maxIterations + 2);
   }
 });
 

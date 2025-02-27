@@ -53,6 +53,10 @@ export class TNT {
    */
   method: 'TNT' | 'pseudoInverse';
   /**
+   * Whether the pseudo-inverse was executed.
+   */
+  executedPseudoInverse: boolean;
+  /**
    * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
    */
   mse: number[];
@@ -64,6 +68,7 @@ export class TNT {
    * Last MSE of all iterations.
    */
   mseLast: number;
+  
 
   constructor(
     data: Array2D | AnyMatrix,
@@ -89,6 +94,7 @@ export class TNT {
     } = opts;
 
     this.pseudoInverseFallback = pseudoInverseFallback;
+    this.executedPseudoInverse = false;
     this.maxIterations = maxIterations;
     this.earlyStopping = { minError };
     this.criticalRatio = criticalRatio;
@@ -103,6 +109,7 @@ export class TNT {
 
     if (this.mseLast === 0) return;
 
+    // control which method executes.
     try {
       if (ratio <= this.criticalRatio && this.pseudoInverseFallback) {
         this.#pseudoInverse(A, b);
@@ -121,6 +128,9 @@ export class TNT {
   }
 
   get iterations() {
+    if (this.executedPseudoInverse) {
+      return this.mse.length - 2;
+    }
     return this.mse.length - 1;
   }
 
@@ -149,6 +159,7 @@ export class TNT {
    * @param e any previous errors thrown
    */
   #pseudoInverse(A: AnyMatrix, b: AnyMatrix, e?: Error) {
+    this.executedPseudoInverse = true;
     try {
       const x = pseudoInverse(A).mmul(b);
       this.#updateMSEAndX(A, b, x, false);
@@ -157,7 +168,7 @@ export class TNT {
       } else if (this.mseMin > this.maxError) {
         throw new Error('Min Error is above Max Error');
       } else {
-        throw new Error('Unknwon error.');
+        throw new Error('Unknown error.');
       }
     } catch (y) {
       if (y instanceof Error) {

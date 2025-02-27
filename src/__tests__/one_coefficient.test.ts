@@ -2,6 +2,7 @@ import { Matrix } from 'ml-matrix';
 import { expect, test } from 'vitest';
 
 import { TNT } from '../tnt';
+import { TNTOpts } from '../types';
 
 test('Simple Linear Fit from non-noisy data', () => {
   const A = new Matrix([
@@ -62,16 +63,16 @@ test('Simple Linear Fit to noisy data', () => {
     0.24359542640624454,
   ];
   const x = 0.4350441345216933;
-
-  const { xBest, mseMin, iterations, mse, maxIterations, method } = new TNT(
+  const opts: Partial<TNTOpts> = {
+    maxIterations: 4,
+    usePreconditionTrick: true,
+    earlyStopping: { minError: 1e-15 },
+    maxError: 0.00001,
+  };
+  const { xBest, mseMin, mse, iterations, maxIterations, method } = new TNT(
     A,
     b,
-    {
-      maxIterations: 4,
-      usePreconditionTrick: true,
-      earlyStopping: { minError: 1e-15 },
-      unacceptableError: 0.000001,
-    },
+    opts,
   );
   expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
   expect(mseMin).not.toBeNaN();
@@ -79,35 +80,13 @@ test('Simple Linear Fit to noisy data', () => {
   expect(mse.length).toBeLessThanOrEqual(iterations + 1);
   expect(xBest.get(0, 0)).toBeCloseTo(x, 2);
   expect(method).toBe('TNT');
-});
 
-test('Simple Linear Fit below the return error', () => {
-  const A = new Matrix([
-    [-0.008284110337955319],
-    [0.5897720744120512],
-    [0.15217826587090927],
-    [0.25978149066548833],
-    [-0.2987909107335514],
-    [-0.5341164458709763],
-    [0.5196655664209802],
-    [-0.9114099314910604],
-    [-0.38975386686619523],
-    [0.5684580385973504],
-  ]);
-  const b = [
-    -0.004230803938062248, 0.2533694661111869, 0.06908929893243614,
-    0.11442237305348127, -0.12912524549758192, -0.23263959668058015,
-    0.22835097473417648, -0.3926549809396137, -0.16958217669996367,
-    0.24359542640624454,
-  ];
+  opts.maxError = 0.000000000000001;
+  expect(() => new TNT(A, b, opts)).toThrowError('Min Error');
 
-  expect(
-    () =>
-      new TNT(A, b, {
-        maxIterations: 4,
-        usePreconditionTrick: true,
-        earlyStopping: { minError: 1e-15 },
-        maxError: 0.000000000000001,
-      }),
-  ).toThrowError('Min Error');
+  opts.maxIterations = 0;
+  opts.maxError = 0.0001;
+  const resultInverse = new TNT(A, b, opts);
+  expect(resultInverse.method).toBe('pseudoInverse');
+  expect(resultInverse.xBest.get(0, 0)).toBeCloseTo(x, 2);
 });
