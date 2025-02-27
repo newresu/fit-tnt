@@ -2,10 +2,16 @@
     "arrowParens": "always",
     "semi": true,
     "singleQuote": true,
-    "tabWidth": 4,
+    "printWidth": 80,
+    "tabWidth": 2,
     "trailingComma": "all",
-    "plugins": ["@trivago/prettier-plugin-sort-imports"],
-    "importOrder": ["<THIRD_PARTY_MODULES>", "^[./]"],
+    "plugins": [
+        "@trivago/prettier-plugin-sort-imports"
+    ],
+    "importOrder": [
+        "<THIRD_PARTY_MODULES>",
+        "^[./]"
+    ],
     "importOrderSeparation": true,
     "importOrderSortSpecifiers": true
 }
