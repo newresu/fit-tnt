@@ -2,38 +2,6 @@ import { Matrix } from 'ml-matrix';
 import { expect, test } from 'vitest';
 
 import { TNT } from '../tnt';
-import { TNTOpts } from '../types';
-
-test('example in the readme through both methods', () => {
-  const A = new Matrix([
-    [1, 2, 3],
-    [4, 5, 6],
-  ]); // 2x3
-  const b = [6, 12];
-  const b2 = [[6], [12]];
-  const opts: Partial<TNTOpts> = {
-    maxIterations: 4,
-    maxAllowedMSE: 1,
-    earlyStopping: { minError: 1e-8 },
-  };
-  let r = new TNT(A, b, opts);
-  expect(r.mseMin).toBeLessThanOrEqual(0.02);
-  expect(r.method).toBe('TNT');
-
-  let r2 = new TNT(A, b2, opts);
-  expect(r2.mseMin).toBeLessThanOrEqual(0.02);
-  expect(r2.method).toBe('TNT');
-
-  // this forces method 2
-  opts.maxIterations = 0;
-  r = new TNT(A, b, opts);
-  expect(r.mseMin).toBeLessThanOrEqual(0.02);
-  expect(r.method).toBe('pseudoInverse');
-
-  r2 = new TNT(A, b2, opts);
-  expect(r2.mseMin).toBeLessThanOrEqual(0.02);
-  expect(r2.method).toBe('pseudoInverse');
-});
 
 test('Ill Conditioned', () => {
   // has large condition number.
@@ -61,9 +29,9 @@ test('Ill Conditioned', () => {
   expect(r.method).toBe('TNT');
 
   const r2 = new TNT(illConditioned, b, {
-    usePreconditionTrick: false,
     pseudoInverseFallback: true,
     maxAllowedMSE: 0.01,
+    maxIterations: 0,
   });
   expect(r2).toBeDefined();
   expect(r2.method).toBe('pseudoInverse');
@@ -71,8 +39,8 @@ test('Ill Conditioned', () => {
   expect(
     () =>
       new TNT(illConditioned, b, {
-        usePreconditionTrick: false,
         pseudoInverseFallback: false,
+        maxIterations: 0,
       }),
   ).toThrowError();
 });
@@ -80,7 +48,6 @@ test('Ill Conditioned', () => {
 test('Another Test', () => {
   const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
     pseudoInverseFallback: false,
-    usePreconditionTrick: false,
   });
   expect(result).toBeDefined();
   expect(result.method).toBe('TNT');

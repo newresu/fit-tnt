@@ -8,7 +8,9 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-Implementation of [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+A fast least squares fitting method for dense matrices.
+
+The implementation based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
 ## Install and Use
 
@@ -26,16 +28,13 @@ const A = [
 const b = [6, 12]; // or [[6],[12]]
 
 try {
-  // fallbacks to pseudo inverse
   const { xBest, mse, method } = new TNT(A, b);
 } catch (e) {
   console.error(e);
 }
 ```
 
-It uses a modified preconditioning algorithm, still based off [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression), aiming to improve the condition number (and convergence.)
-
-Use `preconditionTrick: false` to disable this (fallbacks to a closer implementation of the paper's method.)
+The preconditioning was based off [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression), aiming to improve the condition number (and convergence.) This is a bit different to the paper.
 
 ## Documentation
 
@@ -63,7 +62,7 @@ pseudo inverse method (currently this `criticalRatio` is set to 1/10)
 
 - In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
 - If it errors, it fallbacks to the pseudo-inverse method.
-- Very under-determined are ran by pseudo-inverse, the reason is that in those cases pseudo-inverse is faster.
+- Very under-determined are ran by pseudo-inverse (it's faster in those cases.)
 
 <details>
 <summary>

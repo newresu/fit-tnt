@@ -30,8 +30,7 @@ test('Simple Linear Fit from non-noisy data', () => {
     b,
     {
       maxIterations: 4,
-      usePreconditionTrick: true,
-      earlyStopping: { minError: 1e-15 },
+      earlyStopping: { minMSE: 1e-15 },
     },
   );
   expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
@@ -65,8 +64,7 @@ test('Simple Linear Fit to noisy data', () => {
   const x = 0.4350441345216933;
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
-    usePreconditionTrick: true,
-    earlyStopping: { minError: 1e-15 },
+    earlyStopping: { minMSE: 1e-15 },
     maxAllowedMSE: 0.00001,
   };
   const { xBest, mseMin, mse, iterations, maxIterations, method } = new TNT(
@@ -82,12 +80,12 @@ test('Simple Linear Fit to noisy data', () => {
   expect(method).toBe('TNT');
 
   opts.maxAllowedMSE = 1e-6;
-  const a = new TNT(A, b, opts);
-  console.log(a);
-  // expect(() =>).toThrowError('Min MSE is');
-
   opts.maxIterations = 0;
-  opts.maxAllowedMSE = 1e-2;
+  opts.pseudoInverseFallback = false;
+
+  expect(() => new TNT(A, b, opts)).toThrowError('Min MSE is');
+
+  opts.pseudoInverseFallback = true;
   const resultInverse = new TNT(A, b, opts);
   expect(resultInverse.method).toBe('pseudoInverse');
   expect(resultInverse.xBest.get(0, 0)).toBeCloseTo(x, 2);
