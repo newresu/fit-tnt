@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/newresu/fit-tnt/compare/v4.0.2...v5.0.0) (2025-02-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* Remove Cholesky Precondition Trick option (it's the only option.)  ([#13](https://github.com/newresu/fit-tnt/issues/13))
+
+### Code Refactoring
+
+* Remove Cholesky Precondition Trick option (it's the only option.)  ([#13](https://github.com/newresu/fit-tnt/issues/13)) ([db31e31](https://github.com/newresu/fit-tnt/commit/db31e315cd7f4e0b0a44558004e8f355a59517a4))
+
 ## [4.0.2](https://github.com/newresu/fit-tnt/compare/v4.0.1...v4.0.2) (2025-02-27)
 
 
