@@ -14,7 +14,6 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
-  positiveArray(diag);
   let [min, avg] = arrayMeanAndAverage(diag);
 
   let ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
@@ -31,7 +30,6 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
     epsilon *= 10;
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    positiveArray(diag);
     [min, avg] = arrayMeanAndAverage(diag);
     ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
 
@@ -40,17 +38,6 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   return choleskyDC;
 }
 
-/**
- * Mutate arr so that it's positive.
- * @param arr
- */
-function positiveArray(arr: number[]) {
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] < 0) {
-      arr[i] = -arr[i];
-    }
-  }
-}
 /**
  * Calculate mean and average of an array.
  * @param arr array of numbers
