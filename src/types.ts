@@ -10,7 +10,7 @@ export interface EarlyStopping {
    * Note: In many cases, it will still return a larger error,
    * because afterNRounds was reached
    */
-  minError: number;
+  minMSE: number;
 }
 export interface TNTOpts {
   /**
@@ -23,13 +23,6 @@ export interface TNTOpts {
    * @default `A.columns * 3`
    */
   maxIterations: number;
-  /**
-   * Use a custom precondition that has empirically been
-   * shown to work in our tests.
-   *
-   * @default true
-   */
-  usePreconditionTrick: boolean;
   /**
    * Stops the optimization on conditions.
    */

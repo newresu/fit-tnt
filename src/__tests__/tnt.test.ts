@@ -14,7 +14,7 @@ test('example in the readme through both methods', () => {
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
     maxAllowedMSE: 1,
-    earlyStopping: { minError: 1e-8 },
+    earlyStopping: { minMSE: 1e-8 },
   };
   let r = new TNT(A, b, opts);
   expect(r.mseMin).toBeLessThanOrEqual(0.02);
@@ -61,7 +61,6 @@ test('Ill Conditioned', () => {
   expect(r.method).toBe('TNT');
 
   const r2 = new TNT(illConditioned, b, {
-    usePreconditionTrick: false,
     pseudoInverseFallback: true,
     maxAllowedMSE: 0.01,
   });
@@ -71,7 +70,6 @@ test('Ill Conditioned', () => {
   expect(
     () =>
       new TNT(illConditioned, b, {
-        usePreconditionTrick: false,
         pseudoInverseFallback: false,
       }),
   ).toThrowError();
@@ -80,7 +78,6 @@ test('Ill Conditioned', () => {
 test('Another Test', () => {
   const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
     pseudoInverseFallback: false,
-    usePreconditionTrick: false,
   });
   expect(result).toBeDefined();
   expect(result.method).toBe('TNT');

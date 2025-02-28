@@ -30,8 +30,7 @@ test('Simple Linear Fit from non-noisy data', () => {
     b,
     {
       maxIterations: 4,
-      usePreconditionTrick: true,
-      earlyStopping: { minError: 1e-15 },
+      earlyStopping: { minMSE: 1e-15 },
     },
   );
   expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
@@ -65,8 +64,7 @@ test('Simple Linear Fit to noisy data', () => {
   const x = 0.4350441345216933;
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
-    usePreconditionTrick: true,
-    earlyStopping: { minError: 1e-15 },
+    earlyStopping: { minMSE: 1e-15 },
     maxAllowedMSE: 0.00001,
   };
   const { xBest, mseMin, mse, iterations, maxIterations, method } = new TNT(

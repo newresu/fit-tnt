@@ -11,7 +11,7 @@ test('Many random matrices between 0 and 1', () => {
     const { xBest, mseMin } = new TNT(A, b, {
       maxIterations: 4,
       usePreconditionTrick: false,
-      earlyStopping: { minError: 1e-15 },
+      earlyStopping: { minMSE: 1e-15 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
@@ -25,7 +25,7 @@ test('Scaled Up A', () => {
     const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 100 });
     const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(bigA, b, {
       maxIterations: 8,
-      earlyStopping: { minError: 1e-3 },
+      earlyStopping: { minMSE: 1e-3 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
@@ -43,7 +43,7 @@ test('Scaled Up X runs without error', () => {
     });
     const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(A, bigB, {
       maxIterations: 4,
-      earlyStopping: { minError: 1e-3 },
+      earlyStopping: { minMSE: 1e-3 },
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
