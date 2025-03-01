@@ -69,21 +69,13 @@ pseudo inverse method (currently this `criticalRatio` is set to 1/10)
 Concepts
 </summary>
 
-The linear problem appears in all science:
-
-$$A\,x = b$$
-
-and methods to solve it fast abound. In practice, this equation almost never the straightforward solution $A^{-1}$, so the Least-Squares approach is used to minimize the squared error in the predictions:
+The linear problem appears in all science: $A\,x = b$. Methods to solve it fast abound. But $A^{-1}$ rarely exists in practice; the Least-Squares approach is used to minimize the squared error in the predictions:
 
 $$ E(x) = \mathrm{min}\_x \left|\left| A\,x -b \right|\right|\_2^2$$
 
-i.e to minimize the $L_2$ (or $L_2^2$ which is equivalent.); this is the Least-Squares problem.
+We then look for $\nabla_x E(x)=0$ that is $A^T\,A x = A^T b$
 
-The solution, where the error-gradient is zero i.e $\nabla_x E(x)=0$ is $$A^T\,A x = A^T b$$
-
-When computed directly (as done here), $A^T\,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. This affects the precision of the solutions; especially when $\kappa (A) > 10^8$.
-
-Larger condition number also tends to slow the convergence.
+When computed directly (as done here), $A^T\,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. We try to reduce this problem with preconditioning. Larger condition number also tends to slow the convergence.
 
 **TNT**
 
@@ -91,40 +83,16 @@ The Conjugate Gradient for Normal Residual (CGNR) is a popular method for solvin
 
 The reason for "Large" is that systems with $m \lt\lt n$ can be solved faster and more accurately using the Pseudo-Inverse. Even though the QR decomposition-method can be more accurate, TNT tends to be faster in overdetermined problems where $m \approx n$ or $m \gt n$.
 
-TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T\,A$ so that $A$ becomes positive definite which means it has full column rank.
+TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T\,A$ so that it has an inverse.
 
-To be clear, positive definite means:
-$$x^T M x \gt 0$$
+Positive definite means that $x^T M x \gt 0$. In our case: $x^T \,(A^T A)\, x \gt 0$, and $(A\,x)^T (A x) \gt 0$
 
-In our case:
+The $(\ldots)$ are non-zero when the columns are linearly independent. If the columns of $A$ are linearly independent then it's invertible/non-singular, and $A^T A$ is invertible.
 
-$$x^T \,(A^T A)\, x \gt 0$$
-
-This means:
-
-$$(A\,x)^T (A x) \gt 0$$
-
-Which means that each $(\ldots)$ must be non-zero. This happens only when the columns are linearly independent. If the columns of $A$ are linearly independent then it's invertible/non-singular, and $A^T A$ is invertible.
-
-So we want to pre-condition $A^T A$ so that it is invertible.
-
-However, this can happen while also returning $L = \mathrm{Cho}(A^T\,A)$ that has some near-zero value in the diagonal, blowing up the method.
+So we want to pre-condition $A^T A$ so that it is invertible, we also want to avoid tiny numbers in the diagonal of the decomposition.
 
 </details>
 
-<details>
-
-<summary>When does it fail?</summary>
-
-If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal. This triggers a very large number in the back-substitution.
-
-The root cause seems to be very-ill-conditioned matrices. [Related post.](https://math.stackexchange.com/questions/730421/is-aat-a-positive-definite-symmetric-matrix)
-
-The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)
-
-I suspect that one could add the value in the diagonal in a smarter way, so that no value in $L$ is very near $0$, but it's hard to know what this implies for the accuracy.
-
-</details>
 <details>
 <summary>
 Algorithm Description

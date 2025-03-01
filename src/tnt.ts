@@ -173,7 +173,7 @@ export class TNT {
     initSafetyChecks(A, b); //throws custom errors on issues.
     const choleskyDC = choleskyPreconditionTrick(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
-    const AtA_inv = invertLLt(L);
+    const AtA_inv = invertLLt(L); // because it will be positive definite.
 
     const residual = b.clone(); // r = b - Ax_0 (but Ax_0 is 0)
     let gradient = At.mmul(residual); // r_hat = At * r
