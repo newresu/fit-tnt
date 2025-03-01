@@ -71,7 +71,7 @@ Concepts
 
 The linear problem appears in all science: $A\,x = b$. Methods to solve it fast abound. But $A^{-1}$ rarely exists in practice; the Least-Squares approach is used to minimize the squared error in the predictions:
 
-$$ E(x) = \mathrm{min}\_x \left|\left| A\,x -b \right|\right|\_2^2$$
+$E(x) = \mathrm{min}_x \left|\left| A\,x -b \right|\right|_2^2$
 
 We then look for $\nabla_x E(x)=0$ that is $A^T\,A x = A^T b$
 
