@@ -170,10 +170,10 @@ export class TNT {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
     const At = A.transpose(); // copy is ok. it's used a few times.
     const AtA = fastAtA(At);
-    initSafetyChecks(A, b); //throws custom errors on issues.
+    initSafetyChecks(A, b);
     const choleskyDC = choleskyPreconditionTrick(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
-    const AtA_inv = invertLLt(L); // because it will be positive definite.
+    const AtA_inv = invertLLt(L); // AtA positive definite
 
     const residual = b.clone(); // r = b - Ax_0 (but Ax_0 is 0)
     let gradient = At.mmul(residual); // r_hat = At * r
