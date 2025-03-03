@@ -144,7 +144,7 @@ export class TNT {
   }
   /**
    * Private method
-   * Finds `x` using the pseudo-inverse of `A`.
+   * Finds `X` using the pseudo-inverse of `A`.
    * @param A the data matrix
    * @param B known output
    * @param e any previous errors thrown
