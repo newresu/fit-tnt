@@ -4,7 +4,7 @@ import { choleskyPreconditionTrick } from './choPrecondition';
 import { fastAtA } from './fastAtA';
 import { initSafetyChecks } from './initSafetyChecks';
 import { meanSquaredError } from './meanSquaredError';
-import { invertLLt } from './triangularSubstitution';
+import { invertLLt } from './invertLLt';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
 /**
