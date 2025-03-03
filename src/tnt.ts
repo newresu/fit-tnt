@@ -8,13 +8,13 @@ import { meanSquaredError } from './meanSquaredError';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
 /**
- * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
+ * Find the coefficients `x` for `A X = B`; `A` is the data, `B` the known output.
  *
- * Only one right-hand-side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
+ * `B` can be column vector or a matrix.
  *
  * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
  * @param data the input or data matrix (2D Array)
- * @param output the known-output vector (1D Array)
+ * @param output the known-output
  * @param opts {@link TNTOpts}
  */
 export class TNT {
@@ -68,12 +68,12 @@ export class TNT {
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.checkMatrix(data);
-    const b = Matrix.isMatrix(output)
+    const B = Matrix.isMatrix(output)
       ? output
       : Array.isArray(output[0])
         ? new Matrix(output as number[][])
         : Matrix.columnVector(output as number[]);
-    this.xBest = new Matrix(A.columns, 1);
+    this.xBest = new Matrix(A.columns, B.columns);
 
     // unpack options
     const {
@@ -92,7 +92,7 @@ export class TNT {
     this.method = 'TNT';
     this.maxAllowedMSE = maxAllowedMSE;
 
-    this.mse = [b.dot(b) / b.columns];
+    this.mse = [B.dot(B) / (A.rows * B.columns)];
     this.mseLast = this.mseMin = this.mse[0];
 
     if (this.mseLast === 0) return;
@@ -102,16 +102,16 @@ export class TNT {
     // control which method executes.
     try {
       if (ratio <= this.criticalRatio && this.pseudoInverseFallback) {
-        this.#pseudoInverse(A, b);
+        this.#pseudoInverse(A, B);
       } else {
-        this.#tnt(A, b);
+        this.#tnt(A, B);
         if (this.mseMin > this.maxAllowedMSE) {
           throw new Error('Min MSE is above Max Allowed MSE');
         }
       }
     } catch (e) {
       if (this.pseudoInverseFallback && !this.executedPseudoInverse) {
-        this.#pseudoInverse(A, b);
+        this.#pseudoInverse(A, B);
       } else {
         throw e;
       }
@@ -130,23 +130,23 @@ export class TNT {
    * 2. Updates `mse[]`
    * 3. Sets `mseMin` if improved, and `xBest` in that case.
    * @param A input data matrix
-   * @param b known output vector
-   * @param x current coefficients
+   * @param B known output vector
+   * @param X current coefficients
    * @return void
    */
-  #updateMSEAndX(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX = true) {
-    this.mseLast = meanSquaredError(A, x, b);
+  #updateMSEAndX(A: AnyMatrix, B: AnyMatrix, X: AnyMatrix, cloneX = true) {
+    this.mseLast = meanSquaredError(A, X, B);
     this.mse.push(this.mseLast);
     if (this.mseLast < this.mseMin) {
       this.mseMin = this.mseLast;
-      this.xBest = cloneX ? x.clone() : x;
+      this.xBest = cloneX ? X.clone() : X;
     }
   }
   /**
    * Private method
    * Finds `x` using the pseudo-inverse of `A`.
    * @param A the data matrix
-   * @param b known output
+   * @param B known output
    * @param e any previous errors thrown
    */
   #pseudoInverse(A: AnyMatrix, b: AnyMatrix) {
@@ -161,21 +161,21 @@ export class TNT {
   /**
    * Private function (main method)
    * @param A
-   * @param b
+   * @param B
    * @param mse this will be mutated; this allows user to get all MSEs.
    * @param options
    * @returns best-found coefficients
    */
-  #tnt(A: AnyMatrix, b: AnyMatrix) {
-    const x = Matrix.zeros(A.columns, 1); // column of coefficients.
+  #tnt(A: AnyMatrix, B: AnyMatrix) {
+    const X = Matrix.zeros(A.columns, B.columns); // column of coefficients.
     const At = A.transpose(); // copy is ok. it's used a few times.
     const AtA = fastAtA(At);
-    initSafetyChecks(A, b);
+    initSafetyChecks(A, X, B);
     const choleskyDC = choleskyPreconditionTrick(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
     const AtA_inv = invertLLt(L); // AtA positive definite
 
-    const residual = b.clone(); // r = b - Ax_0 (but Ax_0 is 0)
+    const residual = B.clone(); // r = b - Ax_0 (but Ax_0 is 0)
     let gradient = At.mmul(residual); // r_hat = At * r
     // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
     let xError = AtA_inv.mmul(gradient);
@@ -185,13 +185,11 @@ export class TNT {
     for (let it = 0; it < this.maxIterations; it++) {
       w = A.mmul(p);
       alpha = xError.dot(gradient) / w.dot(w);
-      x.add(Matrix.mul(p, alpha)); //update x
+      X.add(Matrix.mul(p, alpha)); //update x
 
-      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
-        break;
-      }
+      if (!Number.isFinite(alpha)) break;
 
-      this.#updateMSEAndX(A, b, x); //updates: mse and counter and xBest
+      this.#updateMSEAndX(A, B, X); //updates: mse and counter and xBest
 
       if (this.mseLast !== this.mseMin) {
         break;
