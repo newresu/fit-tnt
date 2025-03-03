@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.0](https://github.com/newresu/fit-tnt/compare/v5.0.0...v5.1.0) (2025-03-03)
+
+
+### Features
+
+* experimental support for multiple right hand sides ([#15](https://github.com/newresu/fit-tnt/issues/15)) ([e0c126b](https://github.com/newresu/fit-tnt/commit/e0c126be0c5f474e47a39946e9ef87daae5c4862))
+
 ## [5.0.0](https://github.com/newresu/fit-tnt/compare/v4.0.2...v5.0.0) (2025-02-28)
 
 
