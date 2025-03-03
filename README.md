@@ -12,6 +12,8 @@ A fast least squares fitting method for dense matrices.
 
 The implementation based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
+Support for multiple right-hand-sides was added but it is experimental and not robust enough.
+
 ## Install and Use
 
 ```bash
