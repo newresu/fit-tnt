@@ -3,8 +3,8 @@ import { Matrix, pseudoInverse } from 'ml-matrix';
 import { choleskyPreconditionTrick } from './choPrecondition';
 import { fastAtA } from './fastAtA';
 import { initSafetyChecks } from './initSafetyChecks';
-import { meanSquaredError } from './meanSquaredError';
 import { invertLLt } from './invertLLt';
+import { meanSquaredError } from './meanSquaredError';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
 /**
