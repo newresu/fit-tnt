@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.1](https://github.com/newresu/fit-tnt/compare/v5.1.0...v5.1.1) (2025-03-03)
+
+
+### Bug Fixes
+
+* do not add multiple rhs until fully tested. ([2f114f8](https://github.com/newresu/fit-tnt/commit/2f114f820b514364c3e1f6d1efc330fb907d4666))
+
 ## [5.1.0](https://github.com/newresu/fit-tnt/compare/v5.0.0...v5.1.0) (2025-03-03)
 
 
