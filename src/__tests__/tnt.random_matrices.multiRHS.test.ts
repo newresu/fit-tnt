@@ -44,14 +44,10 @@ test('Scaled Up X runs without error', () => {
       addNoise: true,
       outputColumns: 5,
     });
-    const { mse, mseMin, iterations, maxIterations, xBest, method } = new TNT(
-      A,
-      bigB,
-      {
-        maxIterations: 4,
-        earlyStopping: { minMSE: 1e-3 },
-      },
-    );
+    const { mse, mseMin, iterations, maxIterations, xBest } = new TNT(A, bigB, {
+      maxIterations: 4,
+      earlyStopping: { minMSE: 1e-3 },
+    });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
     expect(iterations).toBeLessThanOrEqual(maxIterations);
