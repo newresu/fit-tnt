@@ -22,7 +22,7 @@ for (let i = 0; i < cycles; i++) {
   s = performance.now();
   t = new TNT(A, b, {
     pseudoInverseFallback: true,
-    maxAllowedMSE: 10,
+    maxError: 10,
     maxIterations: 12,
   });
   e = performance.now();

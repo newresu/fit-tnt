@@ -1,8 +1,8 @@
 import { Matrix } from 'ml-matrix';
 
 /**
- * The moment matrix `At * A` is symmetric,
- * Hence, calculate half of it and add the transpose.
+ * We know that At * A is symmetric,
+ * We calculate half of it and add the transpose.
  * The diagonal is added afterwards.
  *
  * The reason to use the transpose is that selecting rows may be faster

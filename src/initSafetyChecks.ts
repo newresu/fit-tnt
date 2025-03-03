@@ -3,23 +3,15 @@ import { AnyMatrix } from './types';
 /**
  *
  * @param A input data matrix
- * @param X coefficient matrix
- * @param B known output vector
+ * @param y ouput data vector
  */
-export function initSafetyChecks(A: AnyMatrix, X: AnyMatrix, B: AnyMatrix) {
-  if (A.rows !== B.rows) {
+export function initSafetyChecks(A: AnyMatrix, y: AnyMatrix) {
+  if (A.rows !== y.rows) {
     throw new RangeError(
-      `Found A rows = ${A.rows} and B rows = ${B.rows}. They must match.`,
+      `Rows of A and y must match. Found dim(A)=(${A.rows}, ${A.columns}) and dim(y)=(${y.rows}, ${y.columns})`,
     );
   }
-  if (A.columns !== X.rows) {
-    throw new RangeError(
-      `Found A columns = ${A.columns} and X rows = ${X.rows}. They must match.`,
-    );
-  }
-  if (B.columns !== X.columns) {
-    throw new RangeError(
-      `Found B columns = ${B.columns} and X columns = ${X.columns}. They must match.`,
-    );
+  if (!y.isColumnVector()) {
+    throw new Error(`One Right-Hand-Side is supported. Found ${y.columns}`);
   }
 }
