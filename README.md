@@ -51,8 +51,9 @@ The preconditioning was based off [Ridge Regression](https://en.wikipedia.org/wi
 
 ## Comparison: TNT vs Pseudo-Inverse
 
-The smaller the **rows/columns** ratio, the more one should use the
-pseudo inverse method (currently this `criticalRatio` is set to 1/10)
+The larger the **rows/columns** ratio, the more convenient to use TNT.
+
+Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.
 
 - Matrix Shape: 500 200
 
