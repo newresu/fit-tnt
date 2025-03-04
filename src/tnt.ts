@@ -122,7 +122,10 @@ export class TNT {
       alpha = xError.dot(gradient) / w.dot(w);
       x.add(Matrix.mul(p, alpha)); //update x
 
-      if (!Number.isFinite(x.get(0, 0)) || !Number.isFinite(alpha)) {
+      if (
+        !Number.isFinite(alpha) ||
+        x.to1DArray().some((v) => !Number.isFinite(v))
+      ) {
         break;
       }
 
