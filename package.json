@@ -33,7 +33,8 @@
   "keywords": [
     "least-squares",
     "unconstrained least squares",
-    "least squares"
+    "linear regression",
+    "multiple linear regression"
   ],
   "author": "Santiago Miranda",
   "license": "MIT",
