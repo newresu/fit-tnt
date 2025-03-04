@@ -14,8 +14,10 @@ The implementation based off [the TNT paper](https://ieeexplore.ieee.org/abstrac
 
 This method is more likely to succeed and be useful on the following conditions:
 
-- Speed: best on square or tall matrices, less on wide matrices.
-- Accuracy: it's much more likely to converge if the matrices are normalized.
+- **Speed**: best on tall matrices (rows/cols > 10). For wide matrices the PseudoInverse method is best. [See comparison.](#comparison-tnt-vs-pseudo-inverse).
+- **Accuracy**: normalizing the data is likely to reduce error, but in many cases it's not needed.
+
+For numerical issues, please include some example or link to a file.
 
 ## Install and Use
 
@@ -33,7 +35,8 @@ const A = [
 const b = [6, 12]; // or [[6],[12]]
 
 try {
-  const { xBest, mse, method } = new TNT(A, b);
+  // there are other properties as well.
+  const { xBest, mseMin } = new TNT(A, b);
 } catch (e) {
   console.error(e);
 }
@@ -66,8 +69,6 @@ pseudo inverse method (currently this `criticalRatio` is set to 1/10)
 ## Misc.
 
 - In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
-- If it errors, it fallbacks to the pseudo-inverse method.
-- Very under-determined are ran by pseudo-inverse (it's faster in those cases.)
 
 <details>
 <summary>
