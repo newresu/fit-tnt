@@ -21,8 +21,6 @@ for (let i = 0; i < cycles; i++) {
   const b = Matrix.random(m, 1);
   s = performance.now();
   t = new TNT(A, b, {
-    pseudoInverseFallback: true,
-    maxAllowedMSE: 10,
     maxIterations: 12,
   });
   e = performance.now();

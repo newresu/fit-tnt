@@ -1,6 +1,6 @@
 import { Matrix } from 'ml-matrix';
 
-import { symmetricMul } from './symmetricMul';
+import { symmetricMulUpperLower } from './symmetricMul';
 
 /**
  * Performs the lower triangular substitution (starts from the top-left.)
@@ -34,5 +34,5 @@ export function lowerTriangularInverse(lowerTriangular: Matrix) {
  * @returns inverse
  */
 export function invertLLt(L: Matrix) {
-  return symmetricMul(lowerTriangularInverse(L).transpose());
+  return symmetricMulUpperLower(lowerTriangularInverse(L).transpose());
 }
