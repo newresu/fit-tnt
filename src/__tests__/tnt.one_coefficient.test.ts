@@ -25,20 +25,15 @@ test('Simple Linear Fit from non-noisy data', () => {
     -0.16689281098857903, 0.16037842398411126, 0.23349689914484856,
     0.08906348705953603,
   ];
-  const { xBest, mseMin, iterations, method, mse, maxIterations } = new TNT(
-    A,
-    b,
-    {
-      maxIterations: 4,
-      earlyStopping: { minMSE: 1e-15 },
-    },
-  );
+  const { xBest, mseMin, iterations, mse, maxIterations } = new TNT(A, b, {
+    maxIterations: 4,
+    earlyStopping: { minMSE: 1e-15 },
+  });
   expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
   expect(mseMin).not.toBeNaN();
   expect(iterations).toBeLessThanOrEqual(maxIterations);
   expect(mse.length).toBeLessThanOrEqual(iterations + 1);
   expect(mseMin).toBeCloseTo(0, 10);
-  expect(method).toBe('TNT');
   expect(xBest.get(0, 0)).toBeCloseTo(0.257214702964);
 });
 
@@ -65,28 +60,16 @@ test('Simple Linear Fit to noisy data', () => {
   const opts: Partial<TNTOpts> = {
     maxIterations: 4,
     earlyStopping: { minMSE: 1e-15 },
-    maxAllowedMSE: 0.00001,
   };
-  const { xBest, mseMin, mse, iterations, maxIterations, method } = new TNT(
-    A,
-    b,
-    opts,
-  );
+  const { xBest, mseMin, mse, iterations, maxIterations } = new TNT(A, b, opts);
   expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
   expect(mseMin).not.toBeNaN();
   expect(iterations).toBeLessThanOrEqual(maxIterations);
   expect(mse.length).toBeLessThanOrEqual(iterations + 1);
   expect(xBest.get(0, 0)).toBeCloseTo(x, 2);
-  expect(method).toBe('TNT');
 
-  opts.maxAllowedMSE = 1e-6;
   opts.maxIterations = 0;
-  opts.pseudoInverseFallback = false;
 
-  expect(() => new TNT(A, b, opts)).toThrowError('Min MSE is');
-
-  opts.pseudoInverseFallback = true;
-  const resultInverse = new TNT(A, b, opts);
-  expect(resultInverse.method).toBe('pseudoInverse');
-  expect(resultInverse.xBest.get(0, 0)).toBeCloseTo(x, 2);
+  const result = new TNT(A, b, opts);
+  expect(result.mseMin).toBeLessThan(0.45);
 });

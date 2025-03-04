@@ -1,15 +1,15 @@
 import { AnyMatrix } from './types';
 
 /**
- * Performs E = Ax - b and E'E/A.rows
+ * Performs Frobenius Norm or Standard Norm.
  *
  * @export
  * @param A input data
- * @param x current coefficients
- * @param b output data
+ * @param X current coefficients
+ * @param B output data
  * @returns the mean squared error
  */
-export function meanSquaredError(A: AnyMatrix, x: AnyMatrix, b: AnyMatrix) {
-  const e = A.mmul(x).sub(b);
-  return e.dot(e) / e.rows;
+export function meanSquaredError(A: AnyMatrix, X: AnyMatrix, B: AnyMatrix) {
+  const e = A.mmul(X).sub(B);
+  return e.dot(e) / (e.rows * B.columns);
 }

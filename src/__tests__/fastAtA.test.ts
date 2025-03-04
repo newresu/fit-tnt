@@ -1,7 +1,7 @@
 import { Matrix } from 'ml-matrix';
 import { expect, test } from 'vitest';
 
-import { fastAtA } from '../fastAtA';
+import { symmetricMul} from '../symmetricMul';
 
 test('Returns the AtA matrix', () => {
   const At = new Matrix([
@@ -9,7 +9,7 @@ test('Returns the AtA matrix', () => {
     [4, 5, 6, 6],
     [7, 8, 9, 7],
   ]);
-  const AtA = fastAtA(At);
+  const AtA = symmetricMul(At);
   expect(AtA.isSymmetric()).toBe(true);
   expect(AtA.get(0, 0)).toEqual(23);
   expect(AtA.get(0, 1)).toEqual(50);

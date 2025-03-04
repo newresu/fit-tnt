@@ -24,32 +24,17 @@ test('Ill Conditioned', () => {
     ],
   ]);
   const b = Matrix.ones(illConditioned.rows, 1);
-  const r = new TNT(illConditioned, b, { maxAllowedMSE: 0.01 });
+  const r = new TNT(illConditioned, b);
   expect(r).toBeDefined();
-  expect(r.method).toBe('TNT');
 
   const r2 = new TNT(illConditioned, b, {
-    pseudoInverseFallback: true,
-    maxAllowedMSE: 0.01,
     maxIterations: 0,
   });
   expect(r2).toBeDefined();
-  expect(r2.method).toBe('pseudoInverse');
-
-  expect(
-    () =>
-      new TNT(illConditioned, b, {
-        pseudoInverseFallback: false,
-        maxIterations: 0,
-      }),
-  ).toThrowError();
 });
 
 test('Another Test', () => {
-  const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1), {
-    pseudoInverseFallback: false,
-  });
+  const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1));
   expect(result).toBeDefined();
-  expect(result.method).toBe('TNT');
   expect(result.mseMin).toBeLessThanOrEqual(1e-2);
 });

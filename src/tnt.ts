@@ -1,10 +1,10 @@
-import { Matrix, pseudoInverse } from 'ml-matrix';
+import { Matrix } from 'ml-matrix';
 
 import { choleskyPreconditionTrick } from './choPrecondition';
-import { fastAtA } from './fastAtA';
 import { initSafetyChecks } from './initSafetyChecks';
+import { invertLLt } from './invertLLt';
 import { meanSquaredError } from './meanSquaredError';
-import { invertLLt } from './triangularSubstitution';
+import { symmetricMul  } from './symmetricMul';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
 /**
@@ -20,18 +20,6 @@ import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 export class TNT {
   xBest: AnyMatrix;
   /**
-   * {@link TNTOpts["pseudoInverseFallback"]}
-   */
-  pseudoInverseFallback: boolean;
-  /**
-   * {@link TNTOpts["maxAllowedMSE"]}
-   */
-  maxAllowedMSE: number;
-  /**
-   * {@link TNTOpts["criticalRatio"]}
-   */
-  criticalRatio: number;
-  /**
    * {@link TNTOpts["maxIterations"]}
    */
   maxIterations: number;
@@ -40,15 +28,6 @@ export class TNT {
    */
   earlyStopping: EarlyStopping;
 
-  /**
-   * Method used for the best result.
-   * @default TNT
-   */
-  method: 'TNT' | 'pseudoInverse';
-  /**
-   * Whether the pseudo-inverse was executed.
-   */
-  executedPseudoInverse: boolean;
   /**
    * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
    */
@@ -77,51 +56,22 @@ export class TNT {
 
     // unpack options
     const {
-      pseudoInverseFallback = true,
       maxIterations = 3 * A.columns,
-      criticalRatio = 0.1,
       earlyStopping: { minMSE = 1e-20 } = {},
-      maxAllowedMSE = 1e-2,
     } = opts;
 
-    this.pseudoInverseFallback = pseudoInverseFallback;
-    this.executedPseudoInverse = false;
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
-    this.criticalRatio = criticalRatio;
-    this.method = 'TNT';
-    this.maxAllowedMSE = maxAllowedMSE;
 
     this.mse = [b.dot(b) / b.columns];
     this.mseLast = this.mseMin = this.mse[0];
 
     if (this.mseLast === 0) return;
 
-    const ratio = A.rows / A.columns;
-
-    // control which method executes.
-    try {
-      if (ratio <= this.criticalRatio && this.pseudoInverseFallback) {
-        this.#pseudoInverse(A, b);
-      } else {
-        this.#tnt(A, b);
-        if (this.mseMin > this.maxAllowedMSE) {
-          throw new Error('Min MSE is above Max Allowed MSE');
-        }
-      }
-    } catch (e) {
-      if (this.pseudoInverseFallback && !this.executedPseudoInverse) {
-        this.#pseudoInverse(A, b);
-      } else {
-        throw e;
-      }
-    }
+    this.#tnt(A, b);
   }
 
   get iterations() {
-    if (this.executedPseudoInverse) {
-      return this.mse.length - 2;
-    }
     return this.mse.length - 1;
   }
 
@@ -142,21 +92,6 @@ export class TNT {
       this.xBest = cloneX ? x.clone() : x;
     }
   }
-  /**
-   * Private method
-   * Finds `x` using the pseudo-inverse of `A`.
-   * @param A the data matrix
-   * @param b known output
-   * @param e any previous errors thrown
-   */
-  #pseudoInverse(A: AnyMatrix, b: AnyMatrix) {
-    this.executedPseudoInverse = true;
-    const x = pseudoInverse(A).mmul(b);
-    this.#updateMSEAndX(A, b, x, false);
-    if (this.mseLast === this.mseMin) {
-      this.method = 'pseudoInverse';
-    }
-  }
 
   /**
    * Private function (main method)
@@ -169,7 +104,7 @@ export class TNT {
   #tnt(A: AnyMatrix, b: AnyMatrix) {
     const x = Matrix.zeros(A.columns, 1); // column of coefficients.
     const At = A.transpose(); // copy is ok. it's used a few times.
-    const AtA = fastAtA(At);
+    const AtA = symmetricMul(At);
     initSafetyChecks(A, b); //throws custom errors on issues.
     const choleskyDC = choleskyPreconditionTrick(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
