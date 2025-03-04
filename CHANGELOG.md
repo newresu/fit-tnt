@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.0](https://github.com/newresu/fit-tnt/compare/v5.1.1...v6.0.0) (2025-03-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* the pseudo inverse and options are removed since it makes sense to have this a separate program, especially given that it seems to do fine.
+
+### Features
+
+* when doing UL and given U^T = L and given that the result is symmetric, it's possible to save a little bit of time (actually only 1% speed up in large a matrix) ([6d46b4c](https://github.com/newresu/fit-tnt/commit/6d46b4c3aed2c50584ced8960b245be390992888))
+
+
+### Code Refactoring
+
+* the pseudo inverse and options are removed since it makes sense to have this a separate program, especially given that it seems to do fine. ([6d46b4c](https://github.com/newresu/fit-tnt/commit/6d46b4c3aed2c50584ced8960b245be390992888))
+
 ## [5.1.1](https://github.com/newresu/fit-tnt/compare/v5.1.0...v5.1.1) (2025-03-03)
 
 
