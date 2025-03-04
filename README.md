@@ -12,7 +12,10 @@ A fast least squares fitting method for dense matrices.
 
 The implementation based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
-Support for multiple right-hand-sides was added but it is experimental and not robust enough.
+This method is more likely to succeed and be useful on the following conditions:
+
+- Speed: best on square or tall matrices, less on wide matrices.
+- Accuracy: it's much more likely to converge if the matrices are normalized.
 
 ## Install and Use
 

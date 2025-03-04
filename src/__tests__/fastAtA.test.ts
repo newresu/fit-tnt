@@ -1,7 +1,7 @@
 import { Matrix } from 'ml-matrix';
 import { expect, test } from 'vitest';
 
-import { symmetricMul} from '../symmetricMul';
+import { symmetricMul } from '../symmetricMul';
 
 test('Returns the AtA matrix', () => {
   const At = new Matrix([

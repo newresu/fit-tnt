@@ -17,7 +17,7 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let [min, avg] = arrayMinAndAverage(diag);
 
   let ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
-  let epsilon = min + Number.EPSILON;
+  let epsilon = min + Number.EPSILON * 100;
   let it = 10;
   while (ratio < 1e-5 || !choleskyDC.isPositiveDefinite()) {
     if (!Number.isFinite(epsilon) || !it) {

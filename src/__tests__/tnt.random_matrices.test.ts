@@ -12,6 +12,7 @@ test('Many random matrices between 0 and 1', () => {
       maxIterations: 4,
       earlyStopping: { minMSE: 1e-15 },
     });
+    expect(mseMin).toBeLessThan(1e-3);
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
   }
@@ -28,11 +29,12 @@ test('Scaled Up A', () => {
     });
     expect(Number.isFinite(xBest.get(0, 0))).toBeTruthy();
     expect(mseMin).not.toBeNaN();
+    expect(mseMin).toBeLessThan(1e-3);
     expect(iterations).toBeLessThanOrEqual(maxIterations);
-    expect(mse.length).toBeLessThanOrEqual(maxIterations + 2);
+    expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
   }
 });
-test('Scaled Up X runs without error', () => {
+test('Scaled Up X (on AX=>B) to make large B', () => {
   for (let i = 0; i < 1e2; i++) {
     const m = Math.ceil(Math.random() * 12) + 2;
     const n = Math.ceil(Math.random() * 12) + 2;

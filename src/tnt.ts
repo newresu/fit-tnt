@@ -4,7 +4,7 @@ import { choleskyPreconditionTrick } from './choPrecondition';
 import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
 import { meanSquaredError } from './meanSquaredError';
-import { symmetricMul  } from './symmetricMul';
+import { symmetricMul } from './symmetricMul';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
 /**
