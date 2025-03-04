@@ -4,12 +4,19 @@
 <a href="https://www.npmjs.com/package/fit-tnt"><img src="https://img.shields.io/npm/dm/fit-tnt.svg" alt="npm download"></a></p>
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
-<p>A fast least squares fitting method for dense matrices.</p>
-<p>The implementation based off <a href="https://ieeexplore.ieee.org/abstract/document/8425520">the TNT paper</a> by J. M. Myre et al.</p>
+<p>A fast least-squares solver. It is based off <a href="https://ieeexplore.ieee.org/abstract/document/8425520">the TNT paper</a> by J. M. Myre et al.</p>
+<p><strong>Recommendations</strong></p>
+<ul>
+<li>Speed: best on tall matrices i.e $\large\frac{\mathrm{rows}}{\mathrm{cols}} \gt 10$. For wide matrices the PseudoInverse method is best. <a href="#comparison-tnt-vs-pseudo-inverse">See comparison</a>.</li>
+<li>Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.</li>
+<li>Capabilities: currently supports 1 right hand side (i.e a matrix and a vector as inputs.)</li>
+</ul>
+<p>For numerical issues, please include some example or link to a file.</p>
+<p><em>For calculations with non-zero intercept</em>, remember to push a $1$ to each row. The coefficient will be the last item in $xBest$.</p>
 <a id="install-and-use" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Install and Use<a href="#install-and-use" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">i</span><span class="hl-1"> </span><span class="hl-2">fit-tnt</span>
 </code><button type="button">Copy</button></pre>
 
-<pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> { </span><span class="hl-4">TNT</span><span class="hl-1"> } </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;fit-tnt&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">A</span><span class="hl-1"> = [</span><br/><span class="hl-1">  [</span><span class="hl-7">1</span><span class="hl-1">, </span><span class="hl-7">2</span><span class="hl-1">, </span><span class="hl-7">3</span><span class="hl-1">],</span><br/><span class="hl-1">  [</span><span class="hl-7">4</span><span class="hl-1">, </span><span class="hl-7">5</span><span class="hl-1">, </span><span class="hl-7">6</span><span class="hl-1">],</span><br/><span class="hl-1">]; </span><span class="hl-8">// 2x3</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">b</span><span class="hl-1"> = [</span><span class="hl-7">6</span><span class="hl-1">, </span><span class="hl-7">12</span><span class="hl-1">]; </span><span class="hl-8">// or [[6],[12]]</span><br/><br/><span class="hl-3">try</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">xBest</span><span class="hl-1">, </span><span class="hl-6">mse</span><span class="hl-1">, </span><span class="hl-6">method</span><span class="hl-1"> } = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">TNT</span><span class="hl-1">(</span><span class="hl-6">A</span><span class="hl-1">, </span><span class="hl-4">b</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-3">catch</span><span class="hl-1"> (</span><span class="hl-4">e</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-0">error</span><span class="hl-1">(</span><span class="hl-4">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
+<pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> { </span><span class="hl-4">TNT</span><span class="hl-1"> } </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;fit-tnt&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">A</span><span class="hl-1"> = [</span><br/><span class="hl-1">  [</span><span class="hl-7">1</span><span class="hl-1">, </span><span class="hl-7">2</span><span class="hl-1">, </span><span class="hl-7">3</span><span class="hl-1">],</span><br/><span class="hl-1">  [</span><span class="hl-7">4</span><span class="hl-1">, </span><span class="hl-7">5</span><span class="hl-1">, </span><span class="hl-7">6</span><span class="hl-1">],</span><br/><span class="hl-1">]; </span><span class="hl-8">// 2x3</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">b</span><span class="hl-1"> = [</span><span class="hl-7">6</span><span class="hl-1">, </span><span class="hl-7">12</span><span class="hl-1">]; </span><span class="hl-8">// or [[6],[12]]</span><br/><br/><span class="hl-3">try</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-8">// there are other properties as well.</span><br/><span class="hl-1">  </span><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">xBest</span><span class="hl-1">, </span><span class="hl-6">mseMin</span><span class="hl-1"> } = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">TNT</span><span class="hl-1">(</span><span class="hl-6">A</span><span class="hl-1">, </span><span class="hl-4">b</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-3">catch</span><span class="hl-1"> (</span><span class="hl-4">e</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-0">error</span><span class="hl-1">(</span><span class="hl-4">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
 </code><button type="button">Copy</button></pre>
 
 <p>The preconditioning was based off <a href="https://en.wikipedia.org/wiki/Ridge_regression">Ridge Regression</a>, aiming to improve the condition number (and convergence.) This is a bit different to the paper.</p>
@@ -29,41 +36,22 @@ pseudo inverse method (currently this <code>criticalRatio</code> is set to 1/10)
 </ul>
 <a id="misc" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Misc.<a href="#misc" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
 <li>In some cases it won't get to a low error, but <a href="https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr">normalizing improves performance.</a></li>
-<li>If it errors, it fallbacks to the pseudo-inverse method.</li>
-<li>Very under-determined are ran by pseudo-inverse (it's faster in those cases.)</li>
 </ul>
 <details>
 <summary>
 Concepts
 </summary>
-<p>The linear problem appears in all science:</p>
-<p>$$A,x = b$$</p>
-<p>and methods to solve it fast abound. In practice, this equation almost never the straightforward solution $A^{-1}$, so the Least-Squares approach is used to minimize the squared error in the predictions:</p>
-<p>$$ E(x) = \mathrm{min}_x \left|\left| A,x -b \right|\right|_2^2$$</p>
-<p>i.e to minimize the $L_2$ (or $L_2^2$ which is equivalent.); this is the Least-Squares problem.</p>
-<p>The solution, where the error-gradient is zero i.e $\nabla_x E(x)=0$ is $$A^T,A x = A^T b$$</p>
-<p>When computed directly (as done here), $A^T,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. This affects the precision of the solutions; especially when $\kappa (A) &gt; 10^8$.</p>
-<p>Larger condition number also tends to slow the convergence.</p>
+<p>The linear problem appears in all science: $A,x = b$. Methods to solve it fast abound. But $A^{-1}$ rarely exists in practice; the Least-Squares approach is used to minimize the squared error in the predictions:</p>
+<p>$E(x) = \mathrm{min}_x \left|\left| A,x -b \right|\right|_2^2$</p>
+<p>We then look for $\nabla_x E(x)=0$ that is $A^T,A x = A^T b$</p>
+<p>When computed directly (as done here), $A^T,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. We try to reduce this problem with preconditioning. Larger condition number also tends to slow the convergence.</p>
 <p><strong>TNT</strong></p>
 <p>The Conjugate Gradient for Normal Residual (CGNR) is a popular method for solving Sparse Least-Squares problems, where the design matrix has many zeros.</p>
 <p>The reason for &quot;Large&quot; is that systems with $m \lt\lt n$ can be solved faster and more accurately using the Pseudo-Inverse. Even though the QR decomposition-method can be more accurate, TNT tends to be faster in overdetermined problems where $m \approx n$ or $m \gt n$.</p>
-<p>TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T,A$ so that $A$ becomes positive definite which means it has full column rank.</p>
-<p>To be clear, positive definite means:
-$$x^T M x \gt 0$$</p>
-<p>In our case:</p>
-<p>$$x^T ,(A^T A), x \gt 0$$</p>
-<p>This means:</p>
-<p>$$(A,x)^T (A x) \gt 0$$</p>
-<p>Which means that each $(\ldots)$ must be non-zero. This happens only when the columns are linearly independent. If the columns of $A$ are linearly independent then it's invertible/non-singular, and $A^T A$ is invertible.</p>
-<p>So we want to pre-condition $A^T A$ so that it is invertible.</p>
-<p>However, this can happen while also returning $L = \mathrm{Cho}(A^T,A)$ that has some near-zero value in the diagonal, blowing up the method.</p>
-</details>
-<details>
-<summary>When does it fail?</summary>
-<p>If the matrix is positive-definite but the Cholesky decomposition returns some very small number in the diagonal. This triggers a very large number in the back-substitution.</p>
-<p>The root cause seems to be very-ill-conditioned matrices. <a href="https://math.stackexchange.com/questions/730421/is-aat-a-positive-definite-symmetric-matrix">Related post.</a></p>
-<p>The pseudoInverse will do better since the condition number is the square root of the normal equations (used by TNT.)</p>
-<p>I suspect that one could add the value in the diagonal in a smarter way, so that no value in $L$ is very near $0$, but it's hard to know what this implies for the accuracy.</p>
+<p>TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T,A$ so that it has an inverse.</p>
+<p>Positive definite means that $x^T M x \gt 0$. In our case: $x^T ,(A^T A), x \gt 0$, and $(A,x)^T (A x) \gt 0$</p>
+<p>The $(\ldots)$ are non-zero when the columns are linearly independent. If the columns of $A$ are linearly independent then it's invertible/non-singular, and $A^T A$ is invertible.</p>
+<p>So we want to pre-condition $A^T A$ so that it is invertible, we also want to avoid tiny numbers in the diagonal of the decomposition.</p>
 </details>
 <details>
 <summary>
