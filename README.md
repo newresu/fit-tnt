@@ -8,11 +8,15 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-A fast least-squares solver. It is based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+A fast least-squares solver for large, dense matrices. It is based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
 **Recommendations**
 
-- Speed: best on tall matrices i.e $\large\frac{\mathrm{rows}}{\mathrm{cols}} \gt 10$. For wide matrices the PseudoInverse method is best. [See comparison](#comparison-tnt-vs-pseudo-inverse).
+- Speed. Best when these apply:
+
+  - $ \large\frac{\mathrm{rows}}{\mathrm{cols}} \gte 1$.
+  - columns $\gte 10$. [See comparison](#comparison-tnt-vs-pseudo-inverse).
+
 - Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.
 - Capabilities: currently supports 1 right hand side (i.e a matrix and a vector as inputs.)
 

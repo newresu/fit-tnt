@@ -122,12 +122,7 @@ export class TNT {
       alpha = xError.dot(gradient) / w.dot(w);
       x.add(Matrix.mul(p, alpha)); //update x
 
-      if (
-        !Number.isFinite(alpha) ||
-        x.to1DArray().some((v) => !Number.isFinite(v))
-      ) {
-        break;
-      }
+      if (!Number.isFinite(alpha)) break
 
       this.#updateMSEAndX(A, b, x); //updates: mse and counter and xBest
 
