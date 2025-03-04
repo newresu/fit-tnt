@@ -8,16 +8,17 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-A fast least squares fitting method for dense matrices.
+A fast least-squares solver. It is based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
-The implementation based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+**Recommendations**
 
-This method is more likely to succeed and be useful on the following conditions:
-
-- **Speed**: best on tall matrices (rows/cols > 10). For wide matrices the PseudoInverse method is best. [See comparison.](#comparison-tnt-vs-pseudo-inverse).
-- **Accuracy**: normalizing the data is likely to reduce error, but in many cases it's not needed.
+- Speed: best on tall matrices i.e $\large\frac{\mathrm{rows}}{\mathrm{cols}} \gt 10$. For wide matrices the PseudoInverse method is best. [See comparison](#comparison-tnt-vs-pseudo-inverse).
+- Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.
+- Capabilities: currently supports 1 right hand side (i.e a matrix and a vector as inputs.)
 
 For numerical issues, please include some example or link to a file.
+
+_For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in $xBest$.
 
 ## Install and Use
 
