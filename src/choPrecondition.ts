@@ -14,10 +14,10 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
-  let [min, avg] = arrayMeanAndAverage(diag);
+  let [min, avg] = arrayMinAndAverage(diag);
 
   let ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
-  let epsilon = min + Number.EPSILON;
+  let epsilon = min + Number.EPSILON * 100;
   let it = 10;
   while (ratio < 1e-5 || !choleskyDC.isPositiveDefinite()) {
     if (!Number.isFinite(epsilon) || !it) {
@@ -30,7 +30,7 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
     epsilon *= 10;
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    [min, avg] = arrayMeanAndAverage(diag);
+    [min, avg] = arrayMinAndAverage(diag);
     ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
 
     it--;
@@ -39,11 +39,11 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
 }
 
 /**
- * Calculate mean and average of an array.
+ * Calculate min and average of an array.
  * @param arr array of numbers
  * @returns
  */
-function arrayMeanAndAverage(arr: number[]) {
+function arrayMinAndAverage(arr: number[]) {
   let min = arr[0];
   let avg = 0;
   for (const item of arr) {
