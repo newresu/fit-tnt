@@ -11,7 +11,5 @@ import { AnyMatrix } from './types';
  */
 export function meanSquaredError(A: AnyMatrix, X: AnyMatrix, B: AnyMatrix) {
   const e = A.mmul(X).sub(B);
-  return e
-    .pow(2)
-    .mean('column')
+  return e.pow(2).mean('column');
 }

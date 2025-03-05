@@ -36,5 +36,5 @@ test('Ill Conditioned', () => {
 test('Another Test', () => {
   const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1));
   expect(result).toBeDefined();
-  expect(result.mseMin).toBeLessThanOrEqual(1e-2);
+  expect(result.metadata[0].mseMin).toBeLessThanOrEqual(1e-2);
 });

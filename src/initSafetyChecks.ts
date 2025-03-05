@@ -5,7 +5,7 @@ import { AnyMatrix } from './types';
  * @param A input data matrix
  * @param y ouput data vector
  */
-export function initSafetyChecks(A: AnyMatrix, X:AnyMatrix, B: AnyMatrix) {
+export function initSafetyChecks(A: AnyMatrix, X: AnyMatrix, B: AnyMatrix) {
   if (A.rows !== B.rows) {
     throw new RangeError(
       `Rows of A and y must match. Found dim(A)=(${A.rows}, ${A.columns}) and dim(y)=(${B.rows}, ${B.columns})`,
