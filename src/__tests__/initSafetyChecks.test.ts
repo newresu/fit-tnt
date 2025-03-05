@@ -23,6 +23,12 @@ describe('initSafetyChecks', () => {
     const X = Matrix.zeros(n - 1, p);
     expect(() => initSafetyChecks(A, X, B)).toThrow();
   });
+  it('should throw an error fot A, X', () => {
+    const A = Matrix.random(m, n);
+    const B = Matrix.random(m, p - 1);
+    const X = Matrix.zeros(n, p);
+    expect(() => initSafetyChecks(A, X, B)).toThrow();
+  });
 
   it('should throw an error fot A, B', () => {
     const A = Matrix.random(m, n);

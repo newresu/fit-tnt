@@ -1,4 +1,3 @@
-import { pseudoInverse } from 'ml-matrix';
 import { describe, expect, it } from 'vitest';
 
 import { TNT } from '../tnt';
@@ -11,11 +10,11 @@ describe('Multi RHS, random values', () => {
       const n = Math.ceil(Math.random() * 12) + 2;
       const { inputs: A, outputs: b } = makeData(m, n, { outputColumns: n });
       const { XBest, metadata: e } = new TNT(A, b, {
+        maxIterations: 4,
         earlyStopping: { minMSE: 1e-6 },
       });
       expect(e[0].mseMin).toBeLessThan(1e-3);
       expect(XBest.to1DArray().every(Number.isFinite)).toBeTruthy();
-      console.log(XBest, pseudoInverse(A).mmul(b));
     }
   });
 
