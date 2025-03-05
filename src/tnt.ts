@@ -42,11 +42,7 @@ export class TNT {
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.checkMatrix(data);
-    const B = Matrix.isMatrix(output)
-      ? output
-      : Array.isArray(output[0])
-        ? new Matrix(output as number[][])
-        : Matrix.columnVector(output as number[]);
+    const B = ensureMatrix(output);
     this.XBest = new Matrix(A.columns, B.columns);
 
     // unpack options
@@ -58,7 +54,7 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
 
-    this.metadata = Matrix.pow(B,2)
+    this.metadata = Matrix.pow(B, 2)
       .mean('column')
       .map((x) => {
         return {
@@ -90,9 +86,7 @@ export class TNT {
     cols2solve: number[],
   ) {
     const indices = cols2solveToColIndices(cols2solve);
-    const X_sel = new MatrixColumnSelectionView(X, indices);
-    const B_sel = new MatrixColumnSelectionView(B, indices);
-    const mseLast = meanSquaredError(A, X_sel, B_sel);
+    const mseLast = meanSquaredError(A, X, B);
     for (let i = 0; i < indices.length; i++) {
       const column = this.metadata[indices[i]];
       column.mse.push(mseLast[i]);
@@ -117,7 +111,6 @@ export class TNT {
    */
   #tnt(A: AnyMatrix, B: AnyMatrix) {
     const X = Matrix.zeros(A.columns, B.columns);
-
     initSafetyChecks(A, X, B);
 
     // binary array to keep track of which columns to solve
@@ -141,27 +134,43 @@ export class TNT {
     let alpha: number[];
     let betaDenom: number[];
     let beta: number[];
+    let indices: number[];
+    let X_View: Matrix | MatrixColumnSelectionView = X;
+    let B_View: Matrix | MatrixColumnSelectionView = B;
+    const X_ErrorView: Matrix | MatrixColumnSelectionView = XError;
+    let GradientView: Matrix | MatrixColumnSelectionView = Gradient;
+    const P_ErrorView = P;
+    let ResidualView = Residual;
 
     for (let it = 0; it < this.maxIterations; it++) {
-      W = A.mmul(P);
+      W = A.mmul(P_ErrorView);
       WW = W.pow(2).sum('column');
-      alpha = Matrix.multiply(XError, Gradient)
+      alpha = Matrix.multiply(X_ErrorView, GradientView)
         .sum('column')
         .map((x, i) => x / WW[i]);
 
-      X.add(P.clone().mulRowVector(alpha)); //update x
-
-      for (let i = 0; i < X.columns; i++) {
+      for (let i = 0; i < X_View.columns; i++) {
         if (!Number.isFinite(alpha[i])) {
           cols2solve[i] = 0;
         }
       }
-      this.#updateMSEAndX(A, B, X, cols2solve); //updates: mse and counter and xBest
+
+      indices = cols2solveToColIndices(cols2solve);
+      if (indices.length < cols2solve.length) {
+        alpha = indices.map((x) => alpha[x]);
+        X_View = new MatrixColumnSelectionView(X, indices);
+        B_View = new MatrixColumnSelectionView(B, indices);
+        GradientView = new MatrixColumnSelectionView(Gradient, indices);
+        ResidualView = new MatrixColumnSelectionView(Residual, indices);
+      }
+      X_View.add(P_ErrorView.clone().mulRowVector(alpha)); //update x
+
+      this.#updateMSEAndX(A, B_View, X_View, cols2solve); //updates: mse and counter and xBest
 
       if (cols2solve.every((x) => x === 0)) break;
 
-      betaDenom = Matrix.multiply(XError, Gradient).sum('column'); // old CG (maybe)
-      Residual.sub(Residual.clone().mulRowVector(alpha)); // update residual
+      betaDenom = Matrix.multiply(X_ErrorView, GradientView).sum('column'); // old CG (maybe)
+      ResidualView.sub(ResidualView.clone().mulRowVector(alpha)); // update residual
 
       Gradient = At.mmul(Residual); // new g
       XError = AtA_inv.mmul(Gradient); // new x_error
@@ -182,4 +191,12 @@ function cols2solveToColIndices(arr: number[]) {
     }
   }
   return indices;
+}
+
+function ensureMatrix(output: Array1D | Array2D | AnyMatrix): AnyMatrix {
+  return Matrix.isMatrix(output)
+    ? output
+    : Array.isArray(output[0])
+      ? new Matrix(output as number[][])
+      : Matrix.columnVector(output as number[]);
 }
