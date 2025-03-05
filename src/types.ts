@@ -7,8 +7,9 @@ export interface EarlyStopping {
   /**
    * If it gets below this error, it stops
    * @default 10E-20
-   * Note: In many cases, it will still return a larger error,
-   * because afterNRounds was reached
+   * Note: sufficient but not necessary condition to stop.
+   * If the error is below this value, it stops.
+   * It does not apply otherwise.
    */
   minMSE: number;
 }

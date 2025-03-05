@@ -3,7 +3,7 @@ import { performance } from 'perf_hooks';
 
 import { TNT } from '../lib/index.js';
 
-const m = 100; // use 100 to see TNT using pseudo inverse by default
+const m = 10; // use 100 to see TNT using pseudo inverse by default
 const n = 150;
 
 /* first */
