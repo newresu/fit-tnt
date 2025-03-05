@@ -58,7 +58,7 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
 
-    this.metadata = B.pow(2)
+    this.metadata = Matrix.pow(B,2)
       .mean('column')
       .map((x) => {
         return {
