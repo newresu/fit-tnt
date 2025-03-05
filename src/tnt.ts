@@ -139,11 +139,11 @@ export class TNT {
     let B_View: Matrix | MatrixColumnSelectionView = B;
     const X_ErrorView: Matrix | MatrixColumnSelectionView = XError;
     let GradientView: Matrix | MatrixColumnSelectionView = Gradient;
-    const P_ErrorView = P;
+    let P_View: Matrix | MatrixColumnSelectionView = P;
     let ResidualView = Residual;
 
     for (let it = 0; it < this.maxIterations; it++) {
-      W = A.mmul(P_ErrorView);
+      W = A.mmul(P_View);
       WW = W.pow(2).sum('column');
       alpha = Matrix.multiply(X_ErrorView, GradientView)
         .sum('column')
@@ -162,8 +162,9 @@ export class TNT {
         B_View = new MatrixColumnSelectionView(B, indices);
         GradientView = new MatrixColumnSelectionView(Gradient, indices);
         ResidualView = new MatrixColumnSelectionView(Residual, indices);
+        P_View = new MatrixColumnSelectionView(P, indices);
       }
-      X_View.add(P_ErrorView.clone().mulRowVector(alpha)); //update x
+      X_View.add(P_View.clone().mulRowVector(alpha)); //update x
 
       this.#updateMSEAndX(A, B_View, X_View, cols2solve); //updates: mse and counter and xBest
 
@@ -174,11 +175,16 @@ export class TNT {
 
       Gradient = At.mmul(Residual); // new g
       XError = AtA_inv.mmul(Gradient); // new x_error
-      beta = Matrix.multiply(XError, Gradient)
+      beta = new MatrixColumnSelectionView(
+        Matrix.multiply(XError, Gradient),
+        indices,
+      )
         .sum('column')
         .map((x, i) => x / betaDenom[i]);
 
-      P.mulRowVector(beta).add(XError); // update p
+      P_View.mulRowVector(beta).add(
+        new MatrixColumnSelectionView(XError, indices),
+      ); // update p
     }
   }
 }

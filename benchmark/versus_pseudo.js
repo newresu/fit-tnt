@@ -3,7 +3,7 @@ import { performance } from 'perf_hooks';
 
 import { TNT } from '../lib/index.js';
 
-const m = 10; // use 100 to see TNT using pseudo inverse by default
+const m = 200; // use 100 to see TNT using pseudo inverse by default
 const n = 150;
 
 /* first */
@@ -26,7 +26,7 @@ for (let i = 0; i < cycles; i++) {
   e = performance.now();
   // push values TNT
   tntTime.push((e - s) / 1000);
-  tntErr.push(t.mseMin);
+  tntErr.push(t.metadata[0].mseMin);
 
   /*pseudo inverse*/
   s = performance.now();
