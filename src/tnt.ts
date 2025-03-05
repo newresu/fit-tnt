@@ -1,4 +1,4 @@
-import { Matrix } from 'ml-matrix';
+import { Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 
 import { choleskyPreconditionTrick } from './choPrecondition';
 import { initSafetyChecks } from './initSafetyChecks';
@@ -7,6 +7,12 @@ import { meanSquaredError } from './meanSquaredError';
 import { symmetricMul } from './symmetricMul';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
+interface ColumnInfo {
+  mse: number[];
+  mseMin: number;
+  mseLast: number;
+  iterations: number;
+}
 /**
  * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
  *
@@ -18,7 +24,7 @@ import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
  * @param opts {@link TNTOpts}
  */
 export class TNT {
-  xBest: AnyMatrix;
+  XBest: AnyMatrix;
   /**
    * {@link TNTOpts["maxIterations"]}
    */
@@ -28,18 +34,7 @@ export class TNT {
    */
   earlyStopping: EarlyStopping;
 
-  /**
-   * Mean Squared Error for each iteration plus the initial guess (`mse[0]`)
-   */
-  mse: number[];
-  /**
-   * Minimum Mean Squared Error in all the iterations.
-   */
-  mseMin: number;
-  /**
-   * Last MSE of all iterations.
-   */
-  mseLast: number;
+  metadata: ColumnInfo[];
 
   constructor(
     data: Array2D | AnyMatrix,
@@ -47,12 +42,12 @@ export class TNT {
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.checkMatrix(data);
-    const b = Matrix.isMatrix(output)
+    const B = Matrix.isMatrix(output)
       ? output
       : Array.isArray(output[0])
         ? new Matrix(output as number[][])
         : Matrix.columnVector(output as number[]);
-    this.xBest = new Matrix(A.columns, 1);
+    this.XBest = new Matrix(A.columns, B.columns);
 
     // unpack options
     const {
@@ -63,33 +58,52 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
 
-    this.mse = [b.dot(b) / b.columns];
-    this.mseLast = this.mseMin = this.mse[0];
+    this.metadata = B.pow(2)
+      .mean('column')
+      .map((x) => {
+        return {
+          mse: [x],
+          mseMin: x,
+          mseLast: x,
+          iterations: 0,
+        };
+      });
 
-    if (this.mseLast === 0) return;
-
-    this.#tnt(A, b);
-  }
-
-  get iterations() {
-    return this.mse.length - 1;
+    this.#tnt(A, B);
   }
 
   /**
    * 1. Calculate `mseLast`
    * 2. Updates `mse[]`
    * 3. Sets `mseMin` if improved, and `xBest` in that case.
+   * When some columns have been left out, both X and B are sub column views.
    * @param A input data matrix
-   * @param b known output vector
-   * @param x current coefficients
+   * @param B known output vector
+   * @param X current coefficients
+   * @param indices to set the results to.
    * @return void
    */
-  #updateMSEAndX(A: AnyMatrix, b: AnyMatrix, x: AnyMatrix, cloneX = true) {
-    this.mseLast = meanSquaredError(A, x, b);
-    this.mse.push(this.mseLast);
-    if (this.mseLast < this.mseMin) {
-      this.mseMin = this.mseLast;
-      this.xBest = cloneX ? x.clone() : x;
+  #updateMSEAndX(
+    A: AnyMatrix,
+    B: AnyMatrix,
+    X: AnyMatrix,
+    cols2solve: number[],
+  ) {
+    const indices = cols2solveToColIndices(cols2solve);
+    const X_sel = new MatrixColumnSelectionView(X, indices);
+    const B_sel = new MatrixColumnSelectionView(B, indices);
+    const mseLast = meanSquaredError(A, X_sel, B_sel);
+    for (let i = 0; i < indices.length; i++) {
+      const column = this.metadata[indices[i]];
+      column.mse.push(mseLast[i]);
+      column.mseLast = mseLast[i];
+      column.iterations++;
+      if (column.mseLast < column.mseMin) {
+        column.mseMin = column.mseLast;
+        this.XBest.setColumn(i, X.getColumn(i));
+      } else {
+        cols2solve[indices[i]] = 0;
+      }
     }
   }
 
@@ -101,42 +115,71 @@ export class TNT {
    * @param options
    * @returns best-found coefficients
    */
-  #tnt(A: AnyMatrix, b: AnyMatrix) {
-    const x = Matrix.zeros(A.columns, 1); // column of coefficients.
-    const At = A.transpose(); // copy is ok. it's used a few times.
+  #tnt(A: AnyMatrix, B: AnyMatrix) {
+    const X = Matrix.zeros(A.columns, B.columns);
+
+    initSafetyChecks(A, X, B);
+
+    // binary array to keep track of which columns to solve
+    const cols2solve = new Array(X.columns).fill(1);
+
+    const At = A.transpose(); // copy is ok
     const AtA = symmetricMul(At);
-    initSafetyChecks(A, b); //throws custom errors on issues.
+
     const choleskyDC = choleskyPreconditionTrick(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
     const AtA_inv = invertLLt(L);
 
-    const residual = b.clone(); // r = b - Ax_0 (but Ax_0 is 0)
-    let gradient = At.mmul(residual); // r_hat = At * r
+    const Residual = B.clone(); // r = b - Ax_0 (but Ax_0 is 0)
+    let Gradient = At.mmul(Residual); // r_hat = At * r
     // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
-    let xError = AtA_inv.mmul(gradient);
-    const p = xError.clone(); // z_0 clone
+    let XError = AtA_inv.mmul(Gradient);
+    const P = XError.clone(); // z_0 clone
 
-    let w, alpha, betaDenom, beta;
+    let W: Matrix;
+    let WW: number[];
+    let alpha: number[];
+    let betaDenom: number[];
+    let beta: number[];
+
     for (let it = 0; it < this.maxIterations; it++) {
-      w = A.mmul(p);
-      alpha = xError.dot(gradient) / w.dot(w);
-      x.add(Matrix.mul(p, alpha)); //update x
+      W = A.mmul(P);
+      WW = W.pow(2).sum('column');
+      alpha = Matrix.multiply(XError, Gradient)
+        .sum('column')
+        .map((x, i) => x / WW[i]);
 
-      if (!Number.isFinite(alpha)) break
+      X.add(P.clone().mulRowVector(alpha)); //update x
 
-      this.#updateMSEAndX(A, b, x); //updates: mse and counter and xBest
-
-      if (this.mseLast !== this.mseMin) {
-        break;
+      for (let i = 0; i < X.columns; i++) {
+        if (!Number.isFinite(alpha[i])) {
+          cols2solve[i] = 0;
+        }
       }
+      this.#updateMSEAndX(A, B, X, cols2solve); //updates: mse and counter and xBest
 
-      betaDenom = xError.dot(gradient); // old CG (maybe)
-      residual.sub(residual.clone().mul(alpha)); // update residual
+      if (cols2solve.every((x) => x === 0)) break;
 
-      gradient = At.mmul(residual); // new g
-      xError = AtA_inv.mmul(gradient); // new x_error
-      beta = xError.dot(gradient) / betaDenom; // new_CG/old_CG
-      p.multiply(beta).add(xError); // update p
+      betaDenom = Matrix.multiply(XError, Gradient).sum('column'); // old CG (maybe)
+      Residual.sub(Residual.clone().mulRowVector(alpha)); // update residual
+
+      Gradient = At.mmul(Residual); // new g
+      XError = AtA_inv.mmul(Gradient); // new x_error
+      beta = Matrix.multiply(XError, Gradient)
+        .sum('column')
+        .map((x, i) => x / betaDenom[i]);
+
+      P.mulRowVector(beta).add(XError); // update p
     }
   }
+}
+
+function cols2solveToColIndices(arr: number[]) {
+  const indices: number[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === 1) {
+      indices.push(i);
+    }
+  }
+  return indices;
 }
