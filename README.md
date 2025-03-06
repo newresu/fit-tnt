@@ -18,7 +18,7 @@ Supports multiple right-hand-sides.
 - Speed. Best when these apply:
 
   - $\large\frac{\mathrm{rows}}{\mathrm{cols}} \geq 1$.
-  - columns $\geq 10$. But it's good to try in any case.
+  - Data columns (or coefficients) $\geq 10$. But it's worth trying in any case.
 
 - Accuracy: with normalized data, it's frequently as accurate as QR or PseudoInverse. Otherwise, it struggles, probably due to large gradients.
 
