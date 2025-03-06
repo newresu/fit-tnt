@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { TNT } from '../tnt';
 import { makeData } from './makeData';
+import { pseudoInverse } from 'ml-matrix';
 
 describe('Multi RHS, random values', () => {
   it('Values between 0 and 1', () => {
@@ -22,7 +23,7 @@ describe('Multi RHS, random values', () => {
     for (let i = 0; i < 1e2; i++) {
       const m = Math.ceil(Math.random() * 12) + 2;
       const n = Math.ceil(Math.random() * 12) + 2;
-      const { inputs: bigA, outputs: b } = makeData(m, n, {
+      const { inputs: A, outputs: B } = makeData(m, n, {
         scaleA: 100,
         outputColumns: m,
       });
@@ -30,13 +31,15 @@ describe('Multi RHS, random values', () => {
         metadata,
         maxIterations,
         XBest: xBest,
-      } = new TNT(bigA, b, {
+      } = new TNT(A, B, {
         maxIterations: 8,
         earlyStopping: { minMSE: 1e-3 },
       });
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
       const { mse, mseMin, iterations } = metadata[0];
-
+      if (mseMin > 10) {
+        console.log(A, B, xBest, metadata);
+      }
       expect(mseMin).toBeLessThan(1e-3);
       expect(iterations).toBeLessThanOrEqual(maxIterations);
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
@@ -68,4 +71,5 @@ describe('Multi RHS, random values', () => {
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
     }
   });
+  
 });

@@ -16,13 +16,13 @@ describe('meanSquaredError', () => {
   it('Returns the mean squared error multi RHS', () => {
     const X = new Matrix([
       [1, 4],
-      [2, 5],
+      [2, 4],
     ]);
     const B = new Matrix([
       [5, 14],
       [11, 32],
     ]);
     expect(meanSquaredError(A, X, B)[0]).toBeCloseTo(0, 10);
-    expect(meanSquaredError(A, X, B)[1]).toBeCloseTo(0, 10);
+    expect(meanSquaredError(A, X, B)[1]).toBeCloseTo(10, 10);
   });
 });
