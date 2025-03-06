@@ -24,4 +24,4 @@ export interface TNTOpts {
   earlyStopping: EarlyStopping;
 }
 
-export type AnyMatrix = Matrix | AbstractMatrix | MatrixColumnSelectionView
+export type AnyMatrix = Matrix | AbstractMatrix | MatrixColumnSelectionView;
