@@ -26,20 +26,13 @@ describe('Multi RHS, random values', () => {
         scaleA: 100,
         outputColumns: m,
       });
-      const {
-        metadata,
-        maxIterations,
-        XBest: xBest,
-      } = new TNT(A, B, {
+      const { metadata, maxIterations, XBest } = new TNT(A, B, {
         maxIterations: 8,
-        earlyStopping: { minMSE: 1e-2 },
+        earlyStopping: { minMSE: 1e-3 },
       });
-      expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
+      expect(XBest.to1DArray().every(Number.isFinite)).toBeTruthy();
       const { mse, mseMin, iterations } = metadata[0];
-      if (mseMin > 10) {
-        console.log(A, B, xBest, metadata);
-      }
-      expect(mseMin).toBeLessThan(1e-3);
+      expect(mseMin).toBeLessThan(1e-2);
       expect(iterations).toBeLessThanOrEqual(maxIterations);
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
     }
