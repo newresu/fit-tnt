@@ -53,10 +53,7 @@ export class TNT {
     this.XBest = new Matrix(A.columns, B.columns);
 
     // unpack options
-    const {
-      maxIterations = 4,
-      earlyStopping: { minMSE = 1e-20 } = {},
-    } = opts;
+    const { maxIterations = 4, earlyStopping: { minMSE = 1e-20 } = {} } = opts;
 
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
