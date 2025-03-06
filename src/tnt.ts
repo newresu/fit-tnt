@@ -130,7 +130,7 @@ export class TNT {
 
     let W: Matrix;
     let WW: number[];
-    let [alpha, betaDenom, beta]: number[][] = []
+    let [alpha, betaDenom, beta]: number[][] = [[], [], []];
 
     // We will use views
     let [X_View, B_View, P_View]: AnyMatrix[] = [X, B, P];
@@ -147,6 +147,8 @@ export class TNT {
         .sum('column')
         .map((x, i) => x / WW[i]);
 
+      if (alpha.length === 0) break;
+      // get the indices of the columns to solve
       [indices, alpha, subsetIndices] = updateIndices(indices, alpha);
 
       // get the indices of the columns to solve
@@ -158,10 +160,10 @@ export class TNT {
       // With X updated, we need to narrow down again.
       this.#updateMSEAndX(A, B_View, X_View, indices);
 
-      [indices, alpha, subsetIndices] = secondUpdateIndices(
+      [indices, alpha, subsetIndices] = updateIndices(
         indices,
-        subsetIndices,
         alpha,
+        subsetIndices,
       );
 
       // get the indices of the columns to solve
@@ -202,40 +204,39 @@ function ensureMatrix(output: Array1D | Array2D | AnyMatrix): AnyMatrix {
   return Matrix.columnVector(output as number[]);
 }
 
-function updateIndices(indices: number[], alpha: number[]) {
+function updateIndices(
+  indices: number[],
+  alpha: number[],
+  subsetIndices?: number[],
+) {
+  if (subsetIndices) {
+    const tmpIndices = [];
+    const tmpSubsetIndices = [];
+    const tmpAlpha = [];
+    for (let i = 0; i < indices.length; i++) {
+      if (Number.isFinite(indices[i])) {
+        tmpIndices.push(indices[i]);
+        tmpSubsetIndices.push(subsetIndices[i]);
+        tmpAlpha.push(alpha[i]);
+      }
+    }
+    indices = tmpIndices;
+    subsetIndices = tmpSubsetIndices;
+    alpha = tmpAlpha;
+    return [indices, alpha, subsetIndices];
+  }
+
   // first filter through alpha
-  const tmpIndices = [];
-  const subsetIndices = [];
+  const [tmpIndices, sIx]: number[][] = [[], []];
   for (let i = 0; i < alpha.length; i++) {
     if (Number.isFinite(alpha[i])) {
       tmpIndices.push(indices[i]);
-      subsetIndices.push(i);
+      sIx.push(i);
     }
   }
   indices = tmpIndices;
   alpha = alpha.filter(Number.isFinite);
-  return [indices, alpha, subsetIndices];
-}
-
-function secondUpdateIndices(
-  indices: number[],
-  subsetIndices: number[],
-  alpha: number[],
-) {
-  const tmpIndices = [];
-  const tmpSubsetIndices = [];
-  const tmpAlpha = [];
-  for (let i = 0; i < indices.length; i++) {
-    if (Number.isFinite(indices[i])) {
-      tmpIndices.push(indices[i]);
-      tmpSubsetIndices.push(subsetIndices[i]);
-      tmpAlpha.push(alpha[i]);
-    }
-  }
-  indices = tmpIndices;
-  subsetIndices = tmpSubsetIndices;
-  alpha = tmpAlpha;
-  return [indices, alpha, subsetIndices];
+  return [indices, alpha, sIx];
 }
 
 function getColumnViews(indices: number[], ...matrices: AnyMatrix[]) {
