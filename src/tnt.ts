@@ -132,8 +132,9 @@ export class TNT {
     let WW: number[];
     let [alpha, betaDenom, beta]: number[][] = [[], [], []];
 
-    // We will use views
+    // These are updated with `indices`
     let [X_View, B_View, P_View]: AnyMatrix[] = [X, B, P];
+    // These are updated with `subsetIndices`
     let [GradientView, ResidualView, XErrorView]: AnyMatrix[] = [
       Gradient,
       Residual,
@@ -148,10 +149,10 @@ export class TNT {
         .map((x, i) => x / WW[i]);
 
       if (alpha.length === 0) break;
-      // get the indices of the columns to solve
+      // indices of the columns to solve
       [indices, alpha, subsetIndices] = updateIndices(indices, alpha);
 
-      // get the indices of the columns to solve
+      // view of columns to solve if needed
       if (indices.length < X_View.columns) {
         [X_View, B_View, P_View] = getColumnViews(indices, X, B, P);
       }
@@ -226,7 +227,6 @@ function updateIndices(
     return [indices, alpha, subsetIndices];
   }
 
-  // first filter through alpha
   const [tmpIndices, sIx]: number[][] = [[], []];
   for (let i = 0; i < alpha.length; i++) {
     if (Number.isFinite(alpha[i])) {
