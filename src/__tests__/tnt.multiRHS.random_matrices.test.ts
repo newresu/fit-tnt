@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { TNT } from '../tnt';
 import { makeData } from './makeData';
-import { pseudoInverse } from 'ml-matrix';
 
 describe('Multi RHS, random values', () => {
   it('Values between 0 and 1', () => {
@@ -71,5 +70,4 @@ describe('Multi RHS, random values', () => {
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
     }
   });
-  
 });

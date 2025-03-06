@@ -12,16 +12,21 @@ Least-squares solver for large, dense matrices. It is based off the [TNT](https:
 
 Supports multiple right-hand-sides.
 
-**Recommendations**
+<details>
+<summary>Recommendations</summary>
 
 - Speed. Best when these apply:
 
-  - $ \large\frac{\mathrm{rows}}{\mathrm{cols}} \gte 1$.
-  - columns $\gte 10$. [See comparison](#comparison-tnt-vs-pseudo-inverse).
+  - $ \large\frac{\mathrm{rows}}{\mathrm{cols}} \geq 1$.
+  - columns $\geq 10$. But it's good to try in any case.
 
-- Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.
+- Accuracy: in general, this method is not as accurate as QR or PseudoInverse. But for many practical uses the speed-up may be more relevant. [See comparison](#comparison-tnt-vs-pseudo-inverse).
 
 _For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in **XBest**.
+
+A more thorough comparison of speed accuracy will be included soon.
+
+</details>
 
 ## Install and Use
 
