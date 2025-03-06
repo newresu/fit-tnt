@@ -79,13 +79,7 @@ export class TNT {
    * @param indices to set the results to.
    * @return void
    */
-  #updateMSEAndX(
-    A: AnyMatrix,
-    B: AnyMatrix,
-    X: AnyMatrix,
-    cols2solve: number[],
-  ) {
-    const indices = cols2solveToColIndices(cols2solve);
+  #updateMSEAndX(A: AnyMatrix, B: AnyMatrix, X: AnyMatrix, indices: number[]) {
     const mseLast = meanSquaredError(A, X, B);
     for (let i = 0; i < indices.length; i++) {
       const column = this.metadata[indices[i]];
@@ -96,7 +90,7 @@ export class TNT {
         column.mseMin = column.mseLast;
         this.XBest.setColumn(i, X.getColumn(i));
       } else {
-        cols2solve[indices[i]] = 0;
+        indices[i] = NaN;
       }
     }
   }
@@ -110,11 +104,14 @@ export class TNT {
    * @returns best-found coefficients
    */
   #tnt(A: AnyMatrix, B: AnyMatrix) {
-    const X = Matrix.zeros(A.columns, B.columns);
+    const X: AnyMatrix = Matrix.zeros(A.columns, B.columns);
     initSafetyChecks(A, X, B);
 
     // binary array to keep track of which columns to solve
-    const cols2solve = new Array(X.columns).fill(1);
+    let indices = new Array(X.columns).fill(0).map((_, i) => i);
+    let newIndices: number[] = [];
+    let subsetIndices: number[] = [];
+    let subsetNewIndices: number[] = [];
 
     const At = A.transpose(); // copy is ok
     const AtA = symmetricMul(At);
@@ -124,7 +121,7 @@ export class TNT {
     const AtA_inv = invertLLt(L);
 
     const Residual = B.clone(); // r = b - Ax_0 (but Ax_0 is 0)
-    let Gradient = At.mmul(Residual); // r_hat = At * r
+    let Gradient: AnyMatrix = At.mmul(Residual); // r_hat = At * r
     // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
     let XError = AtA_inv.mmul(Gradient);
     const P = XError.clone(); // z_0 clone
@@ -134,69 +131,81 @@ export class TNT {
     let alpha: number[];
     let betaDenom: number[];
     let beta: number[];
-    let indices: number[];
-    let X_View: Matrix | MatrixColumnSelectionView = X;
-    let B_View: Matrix | MatrixColumnSelectionView = B;
-    const X_ErrorView: Matrix | MatrixColumnSelectionView = XError;
-    let GradientView: Matrix | MatrixColumnSelectionView = Gradient;
-    let P_View: Matrix | MatrixColumnSelectionView = P;
+    let X_View = X;
+    let B_View = B;
+    let GradientView = Gradient;
+    let P_View: AnyMatrix = P;
     let ResidualView = Residual;
+    let X_ErrorView: AnyMatrix = XError;
 
     for (let it = 0; it < this.maxIterations; it++) {
       W = A.mmul(P_View);
       WW = W.pow(2).sum('column');
-      alpha = Matrix.multiply(X_ErrorView, GradientView)
+      alpha = Matrix.multiply(XError, Gradient)
         .sum('column')
         .map((x, i) => x / WW[i]);
 
-      for (let i = 0; i < X_View.columns; i++) {
-        if (!Number.isFinite(alpha[i])) {
-          cols2solve[i] = 0;
+      // first filter through alpha
+      newIndices = [];
+      subsetIndices = [];
+      for (let i = 0; i < alpha.length; i++) {
+        if (Number.isFinite(alpha[i])) {
+          newIndices.push(indices[i]);
+          subsetIndices.push(i);
         }
       }
+      if (newIndices.length === 0) break;
+      alpha = alpha.filter(Number.isFinite);
 
-      indices = cols2solveToColIndices(cols2solve);
-      if (indices.length < cols2solve.length) {
-        alpha = indices.map((x) => alpha[x]);
-        X_View = new MatrixColumnSelectionView(X, indices);
-        B_View = new MatrixColumnSelectionView(B, indices);
-        GradientView = new MatrixColumnSelectionView(Gradient, indices);
-        ResidualView = new MatrixColumnSelectionView(Residual, indices);
-        P_View = new MatrixColumnSelectionView(P, indices);
+      // get the indices of the columns to solve
+      if (newIndices.length < X_View.columns) {
+        X_View = new MatrixColumnSelectionView(X, newIndices);
+        B_View = new MatrixColumnSelectionView(B, newIndices);
+        P_View = new MatrixColumnSelectionView(P, newIndices);
       }
       X_View.add(P_View.clone().mulRowVector(alpha)); //update x
 
-      this.#updateMSEAndX(A, B_View, X_View, cols2solve); //updates: mse and counter and xBest
+      // narrow down again, for the ones that didn't improve
+      this.#updateMSEAndX(A, B_View, X_View, newIndices);
 
-      if (cols2solve.every((x) => x === 0)) break;
+      indices = newIndices;
+      newIndices = [];
+      subsetNewIndices = [];
+      const new_alpha: number[] = [];
+      for (let i = 0; i < indices.length; i++) {
+        if (Number.isFinite(indices[i])) {
+          newIndices.push(indices[i]);
+          subsetNewIndices.push(subsetIndices[i]);
+          new_alpha.push(alpha[i]);
+        }
+      }
+      alpha = new_alpha;
+      // get the indices of the columns to solve
+      if (newIndices.length === 0) break;
+      if (newIndices.length < X_View.columns) {
+        X_View = new MatrixColumnSelectionView(X, newIndices);
+        B_View = new MatrixColumnSelectionView(B, newIndices);
+      }
+
+      GradientView = new MatrixColumnSelectionView(Gradient, subsetNewIndices);
+      X_ErrorView = new MatrixColumnSelectionView(XError, subsetNewIndices);
+      ResidualView = new MatrixColumnSelectionView(Residual, subsetNewIndices);
 
       betaDenom = Matrix.multiply(X_ErrorView, GradientView).sum('column'); // old CG (maybe)
+      // console.log(ResidualView)
       ResidualView.sub(ResidualView.clone().mulRowVector(alpha)); // update residual
 
-      Gradient = At.mmul(Residual); // new g
+      Gradient = At.mmul(ResidualView); // new g
       XError = AtA_inv.mmul(Gradient); // new x_error
-      beta = new MatrixColumnSelectionView(
-        Matrix.multiply(XError, Gradient),
-        indices,
-      )
+      beta = Matrix.multiply(XError, Gradient)
         .sum('column')
         .map((x, i) => x / betaDenom[i]);
 
-      P_View.mulRowVector(beta).add(
-        new MatrixColumnSelectionView(XError, indices),
-      ); // update p
+      P_View = new MatrixColumnSelectionView(P, newIndices);
+      P_View.mulRowVector(beta).add(XError); // update p
+      indices = newIndices;
     }
   }
-}
-
-function cols2solveToColIndices(arr: number[]) {
-  const indices: number[] = [];
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] === 1) {
-      indices.push(i);
-    }
-  }
-  return indices;
 }
 
 function ensureMatrix(output: Array1D | Array2D | AnyMatrix): AnyMatrix {

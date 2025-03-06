@@ -1,4 +1,4 @@
-import { AbstractMatrix, Matrix } from 'ml-matrix';
+import { AbstractMatrix, Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 
 export type Array2D = ArrayLike<ArrayLike<number>>;
 export type Array1D = ArrayLike<number>;
@@ -24,4 +24,4 @@ export interface TNTOpts {
   earlyStopping: EarlyStopping;
 }
 
-export type AnyMatrix = Matrix | AbstractMatrix;
+export type AnyMatrix = Matrix | AbstractMatrix | MatrixColumnSelectionView
