@@ -1,21 +1,39 @@
 import { Matrix } from 'ml-matrix';
-import { expect, test } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { initSafetyChecks } from '../initSafetyChecks';
 
-const A = Matrix.random(3, 4);
-const b = Matrix.random(3, 1);
+const m = 3;
+const n = 4;
+const p = 2;
 
-test('Correct Dimensions sends Undefined', () => {
-  expect(initSafetyChecks(A, b)).toBeUndefined();
-});
+describe('initSafetyChecks', () => {
+  it('should return undefined', () => {
+    const A = Matrix.random(m, n);
+    const B = Matrix.random(m, p);
+    const X = Matrix.zeros(n, p);
+    const metadata = initSafetyChecks(A, X, B);
 
-test('A and b: Row dimension must match', () => {
-  const b = Matrix.random(4, 1);
-  expect(() => initSafetyChecks(A, b)).toThrowError();
-});
+    expect(metadata).toBeUndefined();
+  });
 
-test('B Column Vector', () => {
-  const b = A;
-  expect(() => initSafetyChecks(A, b)).toThrowError();
+  it('should throw an error fot A, X', () => {
+    const A = Matrix.random(m, n);
+    const B = Matrix.random(m, p);
+    const X = Matrix.zeros(n - 1, p);
+    expect(() => initSafetyChecks(A, X, B)).toThrow();
+  });
+  it('should throw an error fot A, X', () => {
+    const A = Matrix.random(m, n);
+    const B = Matrix.random(m, p - 1);
+    const X = Matrix.zeros(n, p);
+    expect(() => initSafetyChecks(A, X, B)).toThrow();
+  });
+
+  it('should throw an error fot A, B', () => {
+    const A = Matrix.random(m, n);
+    const B = Matrix.random(m - 1, p);
+    const X = Matrix.zeros(n, p);
+    expect(() => initSafetyChecks(A, X, B)).toThrow();
+  });
 });

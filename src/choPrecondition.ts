@@ -19,8 +19,10 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
   let epsilon = min + Number.EPSILON * 100;
   let it = 10;
+  const AtAs = [];
   while (ratio < 1e-5 || !choleskyDC.isPositiveDefinite()) {
-    if (!Number.isFinite(epsilon) || !it) {
+    AtAs.push(AtA);
+    if (!Number.isFinite(epsilon) || it === 0) {
       //includes isNaN
       throw new PreconditionError();
     }

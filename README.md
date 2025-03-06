@@ -8,17 +8,27 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-A fast least-squares solver. It is based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
+Least-squares solver for large, dense matrices. It is based off the [TNT](https://ieeexplore.ieee.org/abstract/document/8425520) paper by J. M. Myre et al.
 
-**Recommendations**
+Supports multiple right-hand-sides.
 
-- Speed: best on tall matrices i.e $\large\frac{\mathrm{rows}}{\mathrm{cols}} \gt 10$. For wide matrices the PseudoInverse method is best. [See comparison](#comparison-tnt-vs-pseudo-inverse).
-- Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.
-- Capabilities: currently supports 1 right hand side (i.e a matrix and a vector as inputs.)
+<details>
+<summary>Recommendations</summary>
 
-For numerical issues, please include some example or link to a file.
+- Speed. Best when these apply:
 
-_For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in $xBest$.
+  - $ \large\frac{\mathrm{rows}}{\mathrm{cols}} \geq 1$.
+  - columns $\geq 10$. But it's good to try in any case.
+
+- Accuracy: with normalized data, it's frequently as accurate as QR or PseudoInverse. Otherwise, it struggles, probably due to large gradients.
+
+[For speed, see comparison here.](#comparison-tnt-vs-pseudo-inverse).
+
+_For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in **XBest**.
+
+A more thorough webpage to compare speed/accuracy will hopefully be included soon.
+
+</details>
 
 ## Install and Use
 
@@ -36,22 +46,22 @@ const A = [
 const b = [6, 12]; // or [[6],[12]]
 
 try {
-  // there are other properties as well.
-  const { xBest, mseMin } = new TNT(A, b);
+  const { XBest, metadata } = new TNT(A, b);
 } catch (e) {
   console.error(e);
 }
 ```
 
-The preconditioning was based off [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression), aiming to improve the condition number (and convergence.) This is a bit different to the paper.
+The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression). This is slightly different to the paper.
 
 ## Documentation
 
 - [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules.html)
 
-## Comparison: TNT vs Pseudo-Inverse
+## Comparison: TNT vs Pseudo-Inversemay be
 
 The larger the **rows/columns** ratio, the more convenient to use TNT.
+This is a benchmark on random matrices. (current speed up is closer to $6.9$)
 
 Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.
 

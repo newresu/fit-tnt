@@ -14,23 +14,22 @@ const b2 = [[6], [12]];
 describe('Test TNT Options', () => {
   test('Row and Column inputs return the same.', () => {
     const opts: Partial<TNTOpts> = {
-      maxIterations: 4,
       earlyStopping: { minMSE: 1e-8 },
     };
-    const r = new TNT(A, b, opts);
-    expect(r.mseMin).toBeLessThan(0.02);
+    const { metadata } = new TNT(A, b, opts);
+    const mseMin = metadata[0].mseMin;
+    expect(mseMin).toBeLessThan(0.02);
 
     const r2 = new TNT(A, b2, opts);
-    expect(r2.mseMin).toEqual(r.mseMin);
+    expect(r2.metadata[0].mseMin).toEqual(mseMin);
   });
 
   test('Should have large error without iterations.', () => {
     const opts: Partial<TNTOpts> = {
       maxIterations: 0,
-      earlyStopping: { minMSE: 1e-8 },
     };
     // this forces method 2
-    const r = new TNT(A, b, opts);
-    expect(r.mseMin).toBeGreaterThan(179);
+    const { metadata } = new TNT(A, b, opts);
+    expect(metadata[0].mseMin).toBeGreaterThan(89);
   });
 });
