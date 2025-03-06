@@ -16,7 +16,7 @@ interface ColumnInfo {
 /**
  * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
  *
- * Only one right-hand-side supported (i.e `b` can not be a matrix, but must be a column vector passed as array.)
+ * Multiple RHS are supported (i.e `b` can be a vector or matrix)
  *
  * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
  * @param data the input or data matrix (2D Array)

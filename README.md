@@ -10,6 +10,8 @@
 
 A fast least-squares solver for large, dense matrices. It is based off [the TNT paper](https://ieeexplore.ieee.org/abstract/document/8425520) by J. M. Myre et al.
 
+Supports multiple right-hand-sides.
+
 **Recommendations**
 
 - Speed. Best when these apply:
@@ -18,11 +20,8 @@ A fast least-squares solver for large, dense matrices. It is based off [the TNT 
   - columns $\gte 10$. [See comparison](#comparison-tnt-vs-pseudo-inverse).
 
 - Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.
-- Capabilities: currently supports 1 right hand side (i.e a matrix and a vector as inputs.)
 
-For numerical issues, please include some example or link to a file.
-
-_For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in $xBest$.
+_For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in **XBest**.
 
 ## Install and Use
 
@@ -47,7 +46,7 @@ try {
 }
 ```
 
-The preconditioning was based off [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression), aiming to improve the condition number (and convergence.) This is a bit different to the paper.
+The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression). This is slightly different to the paper.
 
 ## Documentation
 
