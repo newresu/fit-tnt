@@ -43,5 +43,4 @@ export interface ColumnInfo {
   iterations: number;
 }
 
-
 export type AnyMatrix = Matrix | AbstractMatrix | MatrixColumnSelectionView;
