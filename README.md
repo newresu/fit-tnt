@@ -58,7 +58,7 @@ The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_re
 
 - [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules.html)
 
-## Comparison: TNT vs Pseudo-Inversemay be
+## Comparison: TNT vs Pseudo-Inverse
 
 The larger the **rows/columns** ratio, the more convenient to use TNT.
 This is a benchmark on random matrices. (current speed up is closer to $6.9$)
