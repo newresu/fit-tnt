@@ -59,6 +59,7 @@ The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_re
 ## Comparison: TNT vs Pseudo-Inverse
 
 The larger the **rows/columns** ratio, the more convenient to use TNT.
+This is a benchmark on random matrices. (current speed up is closer to $6.9$)
 
 Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.
 

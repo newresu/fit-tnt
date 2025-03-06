@@ -3,9 +3,9 @@ import { performance } from 'perf_hooks';
 
 import { TNT } from '../lib/index.js';
 
-const m = 200; // use 100 to see TNT using pseudo inverse by default
-const n = 150;
-const p = 15;
+const m = 500; // use 100 to see TNT using pseudo inverse by default
+const n = 200;
+const p = 1;
 
 /* first */
 const tntTime = [];
@@ -27,7 +27,7 @@ for (let i = 0; i < cycles; i++) {
   e = performance.now();
   // push values TNT
   tntTime.push((e - s) / 1000);
-  tntErr.push(t.metadata[2].mseMin);
+  tntErr.push(t.metadata[0].mseMin);
 
   /*pseudo inverse*/
   s = performance.now();
@@ -37,7 +37,7 @@ for (let i = 0; i < cycles; i++) {
 
   // push values pseudo inverse
   piTime.push((e - s) / 1000);
-  piErr.push(r.pow(2).sum('column')[2] / A.rows);
+  piErr.push(r.pow(2).sum('column')[0] / A.rows);
 }
 
 const tntavgt = avg(tntTime);
