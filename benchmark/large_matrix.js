@@ -23,7 +23,7 @@ for (let i = 0; i < cycles; i++) {
   e = performance.now();
   // push values TNT
   tntTime.push((e - s) / 1000);
-  tntErr.push(t.mseMin);
+  tntErr.push(t.metadata[0].mseMin);
 }
 
 const tntavgt = avg(tntTime);

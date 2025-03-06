@@ -39,8 +39,7 @@ const A = [
 const b = [6, 12]; // or [[6],[12]]
 
 try {
-  // there are other properties as well.
-  const { xBest, mseMin } = new TNT(A, b);
+  const { XBest, metadata } = new TNT(A, b);
 } catch (e) {
   console.error(e);
 }

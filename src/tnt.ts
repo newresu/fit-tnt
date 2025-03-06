@@ -7,16 +7,31 @@ import { meanSquaredError } from './meanSquaredError';
 import { symmetricMul } from './symmetricMul';
 import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
 
+/**
+ * Each column of X has its own life and its metadata is stored separately.
+ */
 interface ColumnInfo {
+  /**
+   * Mean Squared Error.
+   */
   mse: number[];
+  /**
+   * Minimum Mean Squared Error in all iterations
+   * It is also the Mean Squared Error of the returned coefficients.
+   */
   mseMin: number;
+  /**
+   * Mean Squared Error in the last iteration.
+   */
   mseLast: number;
   iterations: number;
 }
+
 /**
- * Find the coefficients `x` for `A x = b`; `A` is the data, `b` the known output.
+ * Find the best $X$ in $A X = B$; where $A$ and $B$ are known.
+ * By 'best' it refers to the least-squares (least error) solution.
  *
- * Multiple RHS are supported (i.e `b` can be a vector or matrix)
+ * Multiple RHS are supported (i.e $B$ can be a vector or matrix)
  *
  * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
  * @param data the input or data matrix (2D Array)
@@ -75,23 +90,22 @@ export class TNT {
   /**
    * 1. Calculate `mseLast`
    * 2. Updates `mse[]`
-   * 3. Sets `mseMin` if improved, and `xBest` in that case.
+   * 3. Sets `mseMin` if improved, and `XBest` in that case.
    * When some columns have been left out, both X and B are sub column views.
    * @param A input data matrix
-   * @param B known output vector
-   * @param X current coefficients
-   * @param indices to set the results to.
+   * @param B known output. Note that this will be a View.
+   * @param X coefficients. Note that this will be a View.
+   * @param indices track which columns of initial X are optimized.
    */
-  #updateMSEAndX(A: AnyMatrix, B: AnyMatrix, X: AnyMatrix, indices: number[]) {
-    const mseLast = meanSquaredError(A, X, B);
+  #updateMSEAndX(mseLast: number[], XView: AnyMatrix, indices: number[]) {
     for (let i = 0; i < indices.length; i++) {
-      const column = this.metadata[indices[i]];
-      column.mse.push(mseLast[i]);
-      column.mseLast = mseLast[i];
-      column.iterations++;
-      if (column.mseLast < column.mseMin) {
-        column.mseMin = column.mseLast;
-        this.XBest.setColumn(i, X.getColumn(i));
+      const columnInfo = this.metadata[indices[i]];
+      columnInfo.mse.push(mseLast[i]);
+      columnInfo.mseLast = mseLast[i];
+      columnInfo.iterations++;
+      if (columnInfo.mseLast < columnInfo.mseMin) {
+        columnInfo.mseMin = columnInfo.mseLast;
+        this.XBest.setColumn(i, XView.getColumn(i));
       } else {
         indices[i] = NaN;
       }
@@ -159,7 +173,8 @@ export class TNT {
       X_View.add(P_View.clone().mulRowVector(alpha)); //update x
 
       // With X updated, we need to narrow down again.
-      this.#updateMSEAndX(A, B_View, X_View, indices);
+      const mseLast = meanSquaredError(A, X_View, B_View);
+      this.#updateMSEAndX(mseLast, X_View, indices);
 
       [indices, alpha, subsetIndices] = updateIndices(
         indices,
@@ -181,7 +196,6 @@ export class TNT {
       );
 
       betaDenom = Matrix.multiply(XErrorView, GradientView).sum('column'); // old CG (maybe)
-      // console.log(ResidualView)
       ResidualView.sub(ResidualView.clone().mulRowVector(alpha)); // update residual
 
       Gradient = At.mmul(ResidualView); // new g
@@ -196,13 +210,21 @@ export class TNT {
   }
 }
 
-function ensureMatrix(output: Array1D | Array2D | AnyMatrix): AnyMatrix {
-  if (Matrix.isMatrix(output)) {
-    return output;
-  } else if (Array.isArray(output[0])) {
-    return new Matrix(output as number[][]);
+/**
+ * The output $B$ can be passed as flat array, nested array or matrix.
+ * This function ensures that it is correctly converted to matrix in those
+ * cases.
+ *
+ * @param B as input
+ * @returns B as a matrix.
+ */
+function ensureMatrix(input: Array1D | Array2D | AnyMatrix): AnyMatrix {
+  if (Matrix.isMatrix(input)) {
+    return input;
+  } else if (Array.isArray(input[0])) {
+    return new Matrix(input as number[][]);
   }
-  return Matrix.columnVector(output as number[]);
+  return Matrix.columnVector(input as number[]);
 }
 
 function updateIndices(
@@ -210,10 +232,10 @@ function updateIndices(
   alpha: number[],
   subsetIndices?: number[],
 ) {
+  const tmpIndices = [];
+  const tmpAlpha = [];
+  const tmpSubsetIndices = [];
   if (subsetIndices) {
-    const tmpIndices = [];
-    const tmpSubsetIndices = [];
-    const tmpAlpha = [];
     for (let i = 0; i < indices.length; i++) {
       if (Number.isFinite(indices[i])) {
         tmpIndices.push(indices[i]);
@@ -221,24 +243,24 @@ function updateIndices(
         tmpAlpha.push(alpha[i]);
       }
     }
-    indices = tmpIndices;
-    subsetIndices = tmpSubsetIndices;
-    alpha = tmpAlpha;
-    return [indices, alpha, subsetIndices];
-  }
-
-  const [tmpIndices, sIx]: number[][] = [[], []];
-  for (let i = 0; i < alpha.length; i++) {
-    if (Number.isFinite(alpha[i])) {
-      tmpIndices.push(indices[i]);
-      sIx.push(i);
+  } else {
+    for (let i = 0; i < alpha.length; i++) {
+      if (Number.isFinite(alpha[i])) {
+        tmpIndices.push(indices[i]);
+        tmpAlpha.push(alpha[i]);
+        tmpSubsetIndices.push(i);
+      }
     }
   }
-  indices = tmpIndices;
-  alpha = alpha.filter(Number.isFinite);
-  return [indices, alpha, sIx];
+  return [tmpIndices, tmpAlpha, tmpSubsetIndices];
 }
 
+/**
+ * Generate a matrix column view for the matrices from the indices.
+ * @param indices
+ * @param matrices
+ * @returns views.
+ */
 function getColumnViews(indices: number[], ...matrices: AnyMatrix[]) {
   return matrices.map((m) => new MatrixColumnSelectionView(m, indices));
 }
