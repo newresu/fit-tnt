@@ -54,7 +54,7 @@ export class TNT {
 
     // unpack options
     const {
-      maxIterations = 3 * A.columns,
+      maxIterations = 4,
       earlyStopping: { minMSE = 1e-20 } = {},
     } = opts;
 

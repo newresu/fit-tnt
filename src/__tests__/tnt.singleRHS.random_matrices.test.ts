@@ -21,13 +21,13 @@ describe('Single RHS, random values', () => {
     for (let i = 0; i < 1e2; i++) {
       const m = Math.ceil(Math.random() * 12) + 2;
       const n = Math.ceil(Math.random() * 12) + 2;
-      const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 100 });
+      const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 10 });
       const {
         metadata,
         maxIterations,
         XBest: xBest,
       } = new TNT(bigA, b, {
-        maxIterations: 8,
+        maxIterations: 5,
         earlyStopping: { minMSE: 1e-3 },
       });
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();

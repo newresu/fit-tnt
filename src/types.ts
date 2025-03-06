@@ -15,7 +15,7 @@ export interface EarlyStopping {
 }
 export interface TNTOpts {
   /**
-   * @default `A.columns * 3`
+   * @default 4
    */
   maxIterations: number;
   /**

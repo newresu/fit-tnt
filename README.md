@@ -20,11 +20,13 @@ Supports multiple right-hand-sides.
   - $ \large\frac{\mathrm{rows}}{\mathrm{cols}} \geq 1$.
   - columns $\geq 10$. But it's good to try in any case.
 
-- Accuracy: not as accurate as QR or PseudoInverse. It fits better to normalized data. In many cases though, the speed-up is more relevant. [See comparison](#comparison-tnt-vs-pseudo-inverse).
+- Accuracy: with normalized data, it's frequently as accurate as QR or PseudoInverse. Otherwise, it struggles, probably due to large gradients.
+
+[For speed, see comparison here.](#comparison-tnt-vs-pseudo-inverse).
 
 _For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in **XBest**.
 
-A more thorough comparison of speed accuracy will be included soon.
+A more thorough webpage to compare speed/accuracy will hopefully be included soon.
 
 </details>
 

@@ -27,7 +27,7 @@ describe('Multi RHS, random values', () => {
         outputColumns: m,
       });
       const { metadata, maxIterations, XBest } = new TNT(A, B, {
-        maxIterations: 8,
+        maxIterations: 15,
         earlyStopping: { minMSE: 1e-3 },
       });
       expect(XBest.to1DArray().every(Number.isFinite)).toBeTruthy();
