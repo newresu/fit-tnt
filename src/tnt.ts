@@ -34,6 +34,10 @@ export class TNT {
    */
   earlyStopping: EarlyStopping;
 
+  /**
+   * Information regarding the solution coefficients, their error and iterations.
+   * {@link ColumnInfo}
+   */
   metadata: ColumnInfo[];
 
   constructor(
@@ -77,7 +81,6 @@ export class TNT {
    * @param B known output vector
    * @param X current coefficients
    * @param indices to set the results to.
-   * @return void
    */
   #updateMSEAndX(A: AnyMatrix, B: AnyMatrix, X: AnyMatrix, indices: number[]) {
     const mseLast = meanSquaredError(A, X, B);
@@ -109,6 +112,7 @@ export class TNT {
 
     // binary array to keep track of which columns to solve
     let indices = new Array(X.columns).fill(0).map((_, i) => i);
+    // same but for matrices that are recalculated as it runs.
     let subsetIndices;
 
     const At = A.transpose(); // copy is ok
@@ -119,16 +123,14 @@ export class TNT {
     const AtA_inv = invertLLt(L);
 
     const Residual = B.clone(); // r = b - Ax_0 (but Ax_0 is 0)
-    let Gradient: AnyMatrix = At.mmul(Residual); // r_hat = At * r
+    let Gradient = At.mmul(Residual); // r_hat = At * r
     // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
     let XError = AtA_inv.mmul(Gradient);
     const P = XError.clone(); // z_0 clone
 
     let W: Matrix;
     let WW: number[];
-    let alpha: number[];
-    let betaDenom: number[];
-    let beta: number[];
+    let [alpha, betaDenom, beta]: number[][] = []
 
     // We will use views
     let [X_View, B_View, P_View]: AnyMatrix[] = [X, B, P];
