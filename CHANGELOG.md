@@ -1,5 +1,21 @@
 # Changelog
 
+## [7.0.0](https://github.com/newresu/fit-tnt/compare/v6.0.0...v7.0.0) (2025-03-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* support for multiple right-hand-sides ([#20](https://github.com/newresu/fit-tnt/issues/20))
+
+### Features
+
+* support for multiple right-hand-sides ([#20](https://github.com/newresu/fit-tnt/issues/20)) ([0a9b78d](https://github.com/newresu/fit-tnt/commit/0a9b78d0b7a65401421e83251073273689fb1e35))
+
+
+### Bug Fixes
+
+* typo in readme/docs. ([bd87a80](https://github.com/newresu/fit-tnt/commit/bd87a8034471d288a8d163179cfd538057906cc5))
+
 ## [6.0.0](https://github.com/newresu/fit-tnt/compare/v5.1.1...v6.0.0) (2025-03-04)
 
 
