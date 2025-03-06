@@ -23,5 +23,25 @@ export interface TNTOpts {
    */
   earlyStopping: EarlyStopping;
 }
+/**
+ * Each column of X has its own life and its metadata is stored separately.
+ */
+export interface ColumnInfo {
+  /**
+   * Mean Squared Error.
+   */
+  mse: number[];
+  /**
+   * Minimum Mean Squared Error in all iterations
+   * It is also the Mean Squared Error of the returned coefficients.
+   */
+  mseMin: number;
+  /**
+   * Mean Squared Error in the last iteration.
+   */
+  mseLast: number;
+  iterations: number;
+}
+
 
 export type AnyMatrix = Matrix | AbstractMatrix | MatrixColumnSelectionView;

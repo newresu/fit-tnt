@@ -5,27 +5,15 @@ import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
 import { meanSquaredError } from './meanSquaredError';
 import { symmetricMul } from './symmetricMul';
-import { AnyMatrix, Array1D, Array2D, EarlyStopping, TNTOpts } from './types';
-
-/**
- * Each column of X has its own life and its metadata is stored separately.
- */
-interface ColumnInfo {
-  /**
-   * Mean Squared Error.
-   */
-  mse: number[];
-  /**
-   * Minimum Mean Squared Error in all iterations
-   * It is also the Mean Squared Error of the returned coefficients.
-   */
-  mseMin: number;
-  /**
-   * Mean Squared Error in the last iteration.
-   */
-  mseLast: number;
-  iterations: number;
-}
+import {
+  AnyMatrix,
+  Array1D,
+  Array2D,
+  ColumnInfo,
+  EarlyStopping,
+  TNTOpts,
+} from './types';
+import { ensureMatrix, filterIndices, getColumnViews } from './utils';
 
 /**
  * Find the best $X$ in $A X = B$; where $A$ and $B$ are known.
@@ -124,7 +112,7 @@ export class TNT {
     const X: AnyMatrix = Matrix.zeros(A.columns, B.columns);
     initSafetyChecks(A, X, B);
 
-    // binary array to keep track of which columns to solve
+    // indices of current "on" columns of X.
     let indices = new Array(X.columns).fill(0).map((_, i) => i);
     // same but for matrices that are recalculated as it runs.
     let subsetIndices;
@@ -162,9 +150,10 @@ export class TNT {
         .sum('column')
         .map((x, i) => x / WW[i]);
 
-      if (alpha.length === 0) break;
       // indices of the columns to solve
-      [indices, alpha, subsetIndices] = updateIndices(indices, alpha);
+      [indices, alpha, subsetIndices] = filterIndices(indices, alpha);
+      // after removing NaNs alpha may be empty.
+      if (alpha.length === 0) break;
 
       // view of columns to solve if needed
       if (indices.length < X_View.columns) {
@@ -176,14 +165,14 @@ export class TNT {
       const mseLast = meanSquaredError(A, X_View, B_View);
       this.#updateMSEAndX(mseLast, X_View, indices);
 
-      [indices, alpha, subsetIndices] = updateIndices(
+      [indices, alpha, subsetIndices] = filterIndices(
         indices,
         alpha,
         subsetIndices,
       );
-
-      // get the indices of the columns to solve
+      // after removing NaNs indices may be empty
       if (indices.length === 0) break;
+
       if (indices.length < X_View.columns) {
         [X_View, B_View] = getColumnViews(indices, X, B);
       }
@@ -195,7 +184,8 @@ export class TNT {
         ResidualView,
       );
 
-      betaDenom = Matrix.multiply(XErrorView, GradientView).sum('column'); // old CG (maybe)
+      // using old error and gradient
+      betaDenom = Matrix.multiply(XErrorView, GradientView).sum('column');
       ResidualView.sub(ResidualView.clone().mulRowVector(alpha)); // update residual
 
       Gradient = At.mmul(ResidualView); // new g
@@ -208,59 +198,4 @@ export class TNT {
       P_View.mulRowVector(beta).add(XError); // update p
     }
   }
-}
-
-/**
- * The output $B$ can be passed as flat array, nested array or matrix.
- * This function ensures that it is correctly converted to matrix in those
- * cases.
- *
- * @param B as input
- * @returns B as a matrix.
- */
-function ensureMatrix(input: Array1D | Array2D | AnyMatrix): AnyMatrix {
-  if (Matrix.isMatrix(input)) {
-    return input;
-  } else if (Array.isArray(input[0])) {
-    return new Matrix(input as number[][]);
-  }
-  return Matrix.columnVector(input as number[]);
-}
-
-function updateIndices(
-  indices: number[],
-  alpha: number[],
-  subsetIndices?: number[],
-) {
-  const tmpIndices = [];
-  const tmpAlpha = [];
-  const tmpSubsetIndices = [];
-  if (subsetIndices) {
-    for (let i = 0; i < indices.length; i++) {
-      if (Number.isFinite(indices[i])) {
-        tmpIndices.push(indices[i]);
-        tmpSubsetIndices.push(subsetIndices[i]);
-        tmpAlpha.push(alpha[i]);
-      }
-    }
-  } else {
-    for (let i = 0; i < alpha.length; i++) {
-      if (Number.isFinite(alpha[i])) {
-        tmpIndices.push(indices[i]);
-        tmpAlpha.push(alpha[i]);
-        tmpSubsetIndices.push(i);
-      }
-    }
-  }
-  return [tmpIndices, tmpAlpha, tmpSubsetIndices];
-}
-
-/**
- * Generate a matrix column view for the matrices from the indices.
- * @param indices
- * @param matrices
- * @returns views.
- */
-function getColumnViews(indices: number[], ...matrices: AnyMatrix[]) {
-  return matrices.map((m) => new MatrixColumnSelectionView(m, indices));
 }
