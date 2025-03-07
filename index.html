@@ -4,27 +4,39 @@
 <a href="https://www.npmjs.com/package/fit-tnt"><img src="https://img.shields.io/npm/dm/fit-tnt.svg" alt="npm download"></a></p>
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
-<p>A fast least-squares solver. It is based off <a href="https://ieeexplore.ieee.org/abstract/document/8425520">the TNT paper</a> by J. M. Myre et al.</p>
-<p><strong>Recommendations</strong></p>
+<p>Least-squares solver for large, dense matrices. It is based off the <a href="https://ieeexplore.ieee.org/abstract/document/8425520">TNT</a> paper by J. M. Myre et al.</p>
+<p>Supports multiple right-hand-sides.</p>
+<details>
+<summary>Recommendations</summary>
 <ul>
-<li>Speed: best on tall matrices i.e $\large\frac{\mathrm{rows}}{\mathrm{cols}} \gt 10$. For wide matrices the PseudoInverse method is best. <a href="#comparison-tnt-vs-pseudo-inverse">See comparison</a>.</li>
-<li>Accuracy: normalizing the data is likely to reduce error, but in many cases it's not needed.</li>
-<li>Capabilities: currently supports 1 right hand side (i.e a matrix and a vector as inputs.)</li>
+<li>
+<p>Speed. Best when these apply:</p>
+<ul>
+<li>$\large\frac{\mathrm{rows}}{\mathrm{cols}} \geq 1$.</li>
+<li>Data columns $\geq 10$. But it's worth trying in any case.</li>
 </ul>
-<p>For numerical issues, please include some example or link to a file.</p>
-<p><em>For calculations with non-zero intercept</em>, remember to push a $1$ to each row. The coefficient will be the last item in $xBest$.</p>
+</li>
+<li>
+<p>Accuracy: it's frequently as accurate as QR or PseudoInverse but it will have larger error (normally still acceptable) with tricky matrices.</p>
+</li>
+</ul>
+<p><a href="#comparison-tnt-vs-pseudo-inverse">For speed, see comparison here.</a>.</p>
+<p><em>For calculations with non-zero intercept</em>, remember to push a $1$ to each row. The coefficient will be the last item in <strong>XBest</strong>.</p>
+<p>A more thorough webpage to compare speed/accuracy will hopefully be included soon.</p>
+</details>
 <a id="install-and-use" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Install and Use<a href="#install-and-use" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">i</span><span class="hl-1"> </span><span class="hl-2">fit-tnt</span>
 </code><button type="button">Copy</button></pre>
 
-<pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> { </span><span class="hl-4">TNT</span><span class="hl-1"> } </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;fit-tnt&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">A</span><span class="hl-1"> = [</span><br/><span class="hl-1">  [</span><span class="hl-7">1</span><span class="hl-1">, </span><span class="hl-7">2</span><span class="hl-1">, </span><span class="hl-7">3</span><span class="hl-1">],</span><br/><span class="hl-1">  [</span><span class="hl-7">4</span><span class="hl-1">, </span><span class="hl-7">5</span><span class="hl-1">, </span><span class="hl-7">6</span><span class="hl-1">],</span><br/><span class="hl-1">]; </span><span class="hl-8">// 2x3</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">b</span><span class="hl-1"> = [</span><span class="hl-7">6</span><span class="hl-1">, </span><span class="hl-7">12</span><span class="hl-1">]; </span><span class="hl-8">// or [[6],[12]]</span><br/><br/><span class="hl-3">try</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-8">// there are other properties as well.</span><br/><span class="hl-1">  </span><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">xBest</span><span class="hl-1">, </span><span class="hl-6">mseMin</span><span class="hl-1"> } = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">TNT</span><span class="hl-1">(</span><span class="hl-6">A</span><span class="hl-1">, </span><span class="hl-4">b</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-3">catch</span><span class="hl-1"> (</span><span class="hl-4">e</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-0">error</span><span class="hl-1">(</span><span class="hl-4">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
+<pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> { </span><span class="hl-4">TNT</span><span class="hl-1"> } </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;fit-tnt&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">A</span><span class="hl-1"> = [</span><br/><span class="hl-1">  [</span><span class="hl-7">1</span><span class="hl-1">, </span><span class="hl-7">2</span><span class="hl-1">, </span><span class="hl-7">3</span><span class="hl-1">],</span><br/><span class="hl-1">  [</span><span class="hl-7">4</span><span class="hl-1">, </span><span class="hl-7">5</span><span class="hl-1">, </span><span class="hl-7">6</span><span class="hl-1">],</span><br/><span class="hl-1">]; </span><span class="hl-8">// 2x3</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">b</span><span class="hl-1"> = [</span><span class="hl-7">6</span><span class="hl-1">, </span><span class="hl-7">12</span><span class="hl-1">]; </span><span class="hl-8">// or [[6],[12]]</span><br/><br/><span class="hl-3">try</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">XBest</span><span class="hl-1">, </span><span class="hl-6">metadata</span><span class="hl-1"> } = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">TNT</span><span class="hl-1">(</span><span class="hl-6">A</span><span class="hl-1">, </span><span class="hl-4">b</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-3">catch</span><span class="hl-1"> (</span><span class="hl-4">e</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-0">error</span><span class="hl-1">(</span><span class="hl-4">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
 </code><button type="button">Copy</button></pre>
 
-<p>The preconditioning was based off <a href="https://en.wikipedia.org/wiki/Ridge_regression">Ridge Regression</a>, aiming to improve the condition number (and convergence.) This is a bit different to the paper.</p>
+<p>The preconditioning is <a href="https://en.wikipedia.org/wiki/Ridge_regression">Ridge Regression</a>. This is slightly different to the paper.</p>
 <a id="documentation" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Documentation<a href="#documentation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
 <li><a href="https://newresu.github.io/fit-tnt/modules.html">ReadTheDocs 😊</a></li>
 </ul>
-<a id="comparison-tnt-vs-pseudo-inverse" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Comparison: TNT vs Pseudo-Inverse<a href="#comparison-tnt-vs-pseudo-inverse" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The smaller the <strong>rows/columns</strong> ratio, the more one should use the
-pseudo inverse method (currently this <code>criticalRatio</code> is set to 1/10)</p>
+<a id="comparison-tnt-vs-pseudo-inverse" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Comparison: TNT vs Pseudo-Inverse<a href="#comparison-tnt-vs-pseudo-inverse" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The larger the <strong>rows/columns</strong> ratio, the more convenient to use TNT.
+This is a benchmark on random matrices.</p>
+<p>Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.</p>
 <ul>
 <li>Matrix Shape: 500 200</li>
 </ul>
