@@ -5,7 +5,7 @@ import { TNT } from '../lib/index.js';
 
 const m = 500; // use 100 to see TNT using pseudo inverse by default
 const n = 200;
-const p = 1;
+const p = 4;
 
 /* first */
 const tntTime = [];
@@ -18,16 +18,16 @@ let [s, e] = [0, 0];
 const cycles = 10;
 
 for (let i = 0; i < cycles; i++) {
-  const A = Matrix.random(m, n).mul(10);
+  const A = Matrix.random(m, n).mul(100000);
   const B = Matrix.random(m, p);
   s = performance.now();
   t = new TNT(A, B, {
-    maxIterations: 12,
+    maxIterations: 8,
   });
   e = performance.now();
   // push values TNT
   tntTime.push((e - s) / 1000);
-  tntErr.push(t.metadata[0].mseMin);
+  tntErr.push(avg(t.metadata.map((i) => i.mseMin)));
 
   /*pseudo inverse*/
   s = performance.now();
@@ -37,7 +37,14 @@ for (let i = 0; i < cycles; i++) {
 
   // push values pseudo inverse
   piTime.push((e - s) / 1000);
-  piErr.push(r.pow(2).sum('column')[0] / A.rows);
+  piErr.push(
+    avg(
+      r
+        .pow(2)
+        .sum('column')
+        .map((i) => i / A.rows),
+    ),
+  );
 }
 
 const tntavgt = avg(tntTime);

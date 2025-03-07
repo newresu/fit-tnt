@@ -18,9 +18,9 @@ Supports multiple right-hand-sides.
 - Speed. Best when these apply:
 
   - $\large\frac{\mathrm{rows}}{\mathrm{cols}} \geq 1$.
-  - Data columns (or coefficients) $\geq 10$. But it's worth trying in any case.
+  - Data columns $\geq 10$. But it's worth trying in any case.
 
-- Accuracy: with normalized data, it's frequently as accurate as QR or PseudoInverse. Otherwise, it struggles, probably due to large gradients.
+- Accuracy: it's frequently as accurate as QR or PseudoInverse but it will have larger error (normally still acceptable) with tricky matrices.
 
 [For speed, see comparison here.](#comparison-tnt-vs-pseudo-inverse).
 
@@ -61,7 +61,7 @@ The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_re
 ## Comparison: TNT vs Pseudo-Inverse
 
 The larger the **rows/columns** ratio, the more convenient to use TNT.
-This is a benchmark on random matrices. (current speed up is closer to $6.9$)
+This is a benchmark on random matrices.
 
 Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.
 

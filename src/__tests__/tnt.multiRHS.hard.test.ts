@@ -24,10 +24,11 @@ describe('Multi RHS, random values', () => {
       [114.676, 101.811, 82.1189, 177.616, 114.161, 8.06781],
     ]);
     const r = new TNT(A, B);
+    console.log(r);
     const X = pseudoInverse(A).mmul(B);
     const minErrorTNT = r.metadata[0].mseMin;
     const minErrorpseudoInverse = meanSquaredError(A, X, B);
-    expect(minErrorTNT).toBeGreaterThan(10);
+    expect(minErrorTNT).toBeLessThan(2e-7);
     expect(minErrorpseudoInverse[0]).toBeLessThan(1e-20);
   });
 });

@@ -7,7 +7,10 @@ import { PreconditionError } from './Errors';
  * Do `A^T A + d*I` until AtA is positive definite and `L` is "nice".
  * **Mutates** AtA
  * For info on [MDN:EPSILON](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON)
+ *
  * @param AtA - Symmetric matrix from the normal equation.
+ * @param maxIterations
+ * @param ratio target for ratio of diagonal values in L.
  * @returns Cholesky Decomposition of AtA
  */
 export function choleskyPreconditionTrick(AtA: Matrix) {
@@ -16,13 +19,15 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
   let [min, avg] = arrayMinAndAverage(diag);
 
-  let ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
-  let epsilon = min + Number.EPSILON * 100;
-  let it = 10;
-  const AtAs = [];
-  while (ratio < 1e-5 || !choleskyDC.isPositiveDefinite()) {
-    AtAs.push(AtA);
-    if (!Number.isFinite(epsilon) || it === 0) {
+  let ratio = min / avg + Number.EPSILON;
+  let epsilon = min + Number.EPSILON * 1000;
+  let it = 15;
+  let npdIt = 5;
+  while (ratio < 1e-3 || !choleskyDC.isPositiveDefinite()) {
+    if (!choleskyDC.isPositiveDefinite()) {
+      npdIt -= 1;
+    }
+    if (!Number.isFinite(epsilon) || it === 0 || npdIt === 0) {
       //includes isNaN
       throw new PreconditionError();
     }
@@ -33,7 +38,7 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
     [min, avg] = arrayMinAndAverage(diag);
-    ratio = (min + Number.EPSILON) / (avg + Number.EPSILON);
+    ratio = min / avg;
 
     it--;
   }
