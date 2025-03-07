@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.0.0](https://github.com/newresu/fit-tnt/compare/v7.0.0...v8.0.0) (2025-03-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* API is stable. Changes internal Cholesky Ratio. ([#22](https://github.com/newresu/fit-tnt/issues/22))
+
+### Code Refactoring
+
+* API is stable. Changes internal Cholesky Ratio. ([#22](https://github.com/newresu/fit-tnt/issues/22)) ([064dd06](https://github.com/newresu/fit-tnt/commit/064dd067167698d4a9a6b7c9c3bf22e7cc5a3bd9))
+
 ## [7.0.0](https://github.com/newresu/fit-tnt/compare/v6.0.0...v7.0.0) (2025-03-06)
 
 
