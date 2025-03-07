@@ -12,7 +12,7 @@ describe('Single RHS, random values', () => {
       const { XBest: xBest, metadata: e } = new TNT(A, b, {
         earlyStopping: { minMSE: 1e-6 },
       });
-      expect(e[0].mseMin).toBeLessThan(1e-3);
+      expect(e[0].mseMin).toBeLessThan(1e-4);
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
     }
   });
@@ -21,7 +21,7 @@ describe('Single RHS, random values', () => {
     for (let i = 0; i < 1e2; i++) {
       const m = Math.ceil(Math.random() * 12) + 2;
       const n = Math.ceil(Math.random() * 12) + 2;
-      const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 10 });
+      const { inputs: bigA, outputs: b } = makeData(m, n, { scaleA: 100 });
       const {
         metadata,
         maxIterations,
@@ -33,7 +33,7 @@ describe('Single RHS, random values', () => {
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
       const { mse, mseMin, iterations } = metadata[0];
 
-      expect(mseMin).toBeLessThan(1e-3);
+      expect(mseMin).toBeLessThan(1e-4);
       expect(iterations).toBeLessThanOrEqual(maxIterations);
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
     }
@@ -58,7 +58,7 @@ describe('Single RHS, random values', () => {
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
 
       const { mse, mseMin, iterations } = metadata[0];
-      expect(mseMin).toBeLessThan(1e-3);
+      expect(mseMin).toBeLessThan(1e-4);
       expect(iterations).toBeLessThanOrEqual(maxIterations);
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
     }

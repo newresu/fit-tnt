@@ -14,11 +14,11 @@ const m = 1e4;
 const n = 1e2;
 
 for (let i = 0; i < cycles; i++) {
-  const A = Matrix.random(m, n).mul(10);
+  const A = Matrix.random(m, n).mul(100);
   const b = Matrix.random(m, 1);
   s = performance.now();
   t = new TNT(A, b, {
-    maxIterations: 12,
+    maxIterations: 4,
   });
   e = performance.now();
   // push values TNT
