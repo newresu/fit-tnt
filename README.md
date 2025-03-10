@@ -52,7 +52,7 @@ try {
 }
 ```
 
-The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression). This is slightly different to the paper.
+A related method is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regression).
 
 ## Documentation
 
@@ -63,7 +63,7 @@ The preconditioning is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_re
 The larger the **rows/columns** ratio, the more convenient to use TNT.
 This is a benchmark on random matrices.
 
-Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.
+Inverting the shape below, TNT is slower.
 
 - Matrix Shape: 500 200
 
@@ -89,7 +89,7 @@ Concepts
 
 The linear problem appears in all science: $A\,x = b$. Methods to solve it fast abound. But $A^{-1}$ rarely exists in practice; the Least-Squares approach is used to minimize the squared error in the predictions:
 
-$E(x) = \mathrm{min}_x \left|\left| A\,x -b \right|\right|_2^2$
+$E(x) = \mathrm{min}_x \lVert A\,x -b \rVert_2^2$
 
 We then look for $\nabla_x E(x)=0$ that is $A^T\,A x = A^T b$
 
@@ -99,9 +99,9 @@ When computed directly (as done here), $A^T\,A$ has a condition number $\kappa (
 
 The Conjugate Gradient for Normal Residual (CGNR) is a popular method for solving Sparse Least-Squares problems, where the design matrix has many zeros.
 
-The reason for "Large" is that systems with $m \lt\lt n$ can be solved faster and more accurately using the Pseudo-Inverse. Even though the QR decomposition-method can be more accurate, TNT tends to be faster in overdetermined problems where $m \approx n$ or $m \gt n$.
+For wide-$A$, where $\frac{n}{m} \gt 1$ calculating and factoring $A^T A$ becomes computationally demanding, given its $n^2$ separate elements. Here pseudo-inverse will be faster. TNT tends to be faster when $m \geq n$.
 
-TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T\,A$ so that it has an inverse.
+TNT preconditions $A^T\,A$ so that it has an inverse and a smaller condition number, then iteratively solves using CGNR.
 
 Positive definite means that $x^T M x \gt 0$. In our case: $x^T \,(A^T A)\, x \gt 0$, and $(A\,x)^T (A x) \gt 0$
 
