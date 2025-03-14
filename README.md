@@ -22,7 +22,7 @@ Supports multiple right-hand-sides.
 
 - Accuracy: it's frequently as accurate as QR or PseudoInverse but it will have larger error (normally still acceptable) with tricky matrices.
 
-[For speed, see comparison here.](#comparison-tnt-vs-pseudo-inverse).
+[For speed, see comparison here](#comparison-tnt-vs-pseudo-inverse).
 
 _For calculations with non-zero intercept_, remember to push a $1$ to each row. The coefficient will be the last item in **XBest**.
 
@@ -56,16 +56,15 @@ A related method is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regre
 
 ## Documentation
 
-- [ReadTheDocs 😊](https://newresu.github.io/fit-tnt/modules.html)
+- [Docs here](https://newresu.github.io/fit-tnt/modules.html)
 
 ## Comparison: TNT vs Pseudo-Inverse
 
 The larger the **rows/columns** ratio, the more convenient to use TNT.
-This is a benchmark on random matrices.
 
-Inverting the shape below, TNT is slower.
-
-- Matrix Shape: 500 200
+- Inverting the shape below, TNT is slower.
+- Matrix Shape: rows 500, columns 200
+- Speed Up: **5.20**
 
 ```
 ┌───────────────┬─────────────────────┬─────────────────────┐
@@ -76,8 +75,6 @@ Inverting the shape below, TNT is slower.
 └───────────────┴─────────────────────┴─────────────────────┘
 ```
 
-- Speed Up: 5.202455747083906
-
 ## Misc.
 
 - In some cases it won't get to a low error, but [normalizing improves performance.](https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr)
@@ -87,15 +84,15 @@ Inverting the shape below, TNT is slower.
 Theoretical Background
 </summary>
 
-Linear systems appears in all science: $A\,x = b$. Unique solutions rarely exist. Least-Squares is one way to select the best:
+Linear systems appear everywhere: $A\,x = b$. Unique solutions ($x$) rarely exist. Least-Squares is one way to select the best:
 
 $G(x) = \mathrm{min}_x \lVert A\,x -b \rVert_2^2$
 
-Searching the gradient-vector $G(x)=\vec{0}$ we get $A^T\,A x = A^T b$
+Searching the gradient-vector $G(x)=\vec{0}$ we get the normal equation $A^T\,A x = A^T b$
 
 This is also a linear system! $S x = y$. If the symmetric matrix $S$ is positive definite (hence $A$ has l.i. cols.) then it is invertible and can be solved using $\mathrm{Cho(S)} = L L^T$ and solving two triangular systems, which is fast and simple.
 
-When computed directly (as done here), $A^T\,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. We try to reduce this problem with preconditioning. Larger condition number also tends to slow the convergence.
+When computed directly (as done here), $S=A^T\,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. So it will fail for near-singular $S$. _Preconditioning tries to reduce this problem_. Larger condition number also tends to slow the convergence of iterative methods.
 
 **TNT**
 
