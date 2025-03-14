@@ -2,16 +2,30 @@ import { Matrix } from 'ml-matrix';
 
 import { symmetricMulUpperLower } from './symmetricMul';
 
+interface Opts {
+  /**
+   * @default true
+   * this mutates the lower triangular matrix L
+   * resulting from the final cholesky decomposition
+   * i.e the conditioned normal matrix.
+   */
+  inPlace: boolean;
+}
 /**
  * Performs the lower triangular substitution (starts from the top-left.)
  * @param lowerTriangular
  * @param rhs supports multiple right hand sides.
  * @returns solution to the system of equations
  */
-export function lowerTriangularInverse(lowerTriangular: Matrix) {
+export function lowerTriangularInverse(
+  lowerTriangular: Matrix,
+  opts: Partial<Opts> = {},
+) {
   let terms;
   const { rows } = lowerTriangular;
-  const V = new Matrix(rows, rows);
+  const { inPlace = true } = opts;
+  const V = inPlace ? lowerTriangular : new Matrix(rows, rows);
+
   for (let i = 0; i < rows; i++) {
     for (let k = 0; k < rows; k++) {
       terms = i === k ? 1 : 0;
@@ -31,8 +45,9 @@ export function lowerTriangularInverse(lowerTriangular: Matrix) {
  * So it's really just one system and one matmul.
  
  * @param L lower triangular.
+ * @param opts - {@link Opts}
  * @returns inverse
  */
-export function invertLLt(L: Matrix) {
-  return symmetricMulUpperLower(lowerTriangularInverse(L).transpose());
+export function invertLLt(L: Matrix, opts: Partial<Opts> = {}) {
+  return symmetricMulUpperLower(lowerTriangularInverse(L, opts).transpose());
 }
