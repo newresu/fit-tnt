@@ -84,14 +84,16 @@ Inverting the shape below, TNT is slower.
 
 <details>
 <summary>
-Concepts
+Theoretical Background
 </summary>
 
-The linear problem appears in all science: $A\,x = b$. Methods to solve it fast abound. But $A^{-1}$ rarely exists in practice; the Least-Squares approach is used to minimize the squared error in the predictions:
+Linear systems appears in all science: $A\,x = b$. Unique solutions rarely exist. Least-Squares is one way to select the best:
 
-$E(x) = \mathrm{min}_x \lVert A\,x -b \rVert_2^2$
+$G(x) = \mathrm{min}_x \lVert A\,x -b \rVert_2^2$
 
-We then look for $\nabla_x E(x)=0$ that is $A^T\,A x = A^T b$
+Searching the gradient-vector $G(x)=\vec{0}$ we get $A^T\,A x = A^T b$
+
+This is also a linear system! $S x = y$. If the symmetric matrix $S$ is positive definite (hence $A$ has l.i. cols.) then it is invertible and can be solved using $\mathrm{Cho(S)} = L L^T$ and solving two triangular systems, which is fast and simple.
 
 When computed directly (as done here), $A^T\,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. We try to reduce this problem with preconditioning. Larger condition number also tends to slow the convergence.
 

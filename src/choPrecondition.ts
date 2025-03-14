@@ -21,8 +21,8 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
 
   let ratio = min / avg + Number.EPSILON;
   let epsilon = min + Number.EPSILON * 1000;
-  let it = 15;
-  let npdIt = 5;
+  let it = 15; // increase epsilon
+  let npdIt = 5; //non positive definite iterations
   while (ratio < 1e-3 || !choleskyDC.isPositiveDefinite()) {
     if (!choleskyDC.isPositiveDefinite()) {
       npdIt -= 1;
@@ -47,10 +47,11 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
 
 /**
  * Calculate min and average of an array.
+ * values all positive | 0 -> don't take `abs(item)`
  * @param arr array of numbers
- * @returns
+ * @returns min and average values.
  */
-function arrayMinAndAverage(arr: number[]) {
+function arrayMinAndAverage(arr: number[]): [number, number] {
   let min = arr[0];
   let avg = 0;
   for (const item of arr) {
