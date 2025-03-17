@@ -17,12 +17,14 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
-  let [min, avg] = arrayMinAndAverage(diag);
+  const criteria = getCriteria(diag);
 
-  let ratio = min / avg + Number.EPSILON;
-  let epsilon = min + Number.EPSILON * 1000;
+  const minValue = criteria.min;
+  let ratio = criteria.ratio;
+  let epsilon = minValue + Number.EPSILON * 1000;
+
   let it = 15; // increase epsilon
-  let npdIt = 5; //non positive definite iterations
+  let npdIt = 5; //non-positive-definite iterations
   while (ratio < 1e-3 || !choleskyDC.isPositiveDefinite()) {
     if (!choleskyDC.isPositiveDefinite()) {
       npdIt -= 1;
@@ -34,31 +36,40 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
     for (let i = 0; i < AtA.rows; i++) {
       AtA.set(i, i, AtA.get(i, i) + epsilon);
     }
-    epsilon *= 10;
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    [min, avg] = arrayMinAndAverage(diag);
-    ratio = min / avg;
+    ratio = getCriteria(diag).ratio;
+    epsilon *= 10;
 
     it--;
   }
   return choleskyDC;
 }
 
+interface Criteria {
+  /**
+   * min value in array.
+   */
+  min: number;
+  /**
+   * min / avg
+   */
+  ratio: number;
+}
 /**
- * Calculate min and average of an array.
+ * Calculate min, ratio (min/avg)
  * values all positive | 0 -> don't take `abs(item)`
  * @param arr array of numbers
- * @returns min and average values.
+ * @returns {@link Criteria}
  */
-function arrayMinAndAverage(arr: number[]): [number, number] {
+function getCriteria(arr: number[]): Criteria {
   let min = arr[0];
-  let avg = 0;
+  let sum = 0;
   for (const item of arr) {
-    avg += item;
+    sum += item;
     if (item < min) {
       min = item;
     }
   }
-  return [min, avg / arr.length];
+  return { min, ratio: min / (sum / arr.length) };
 }
