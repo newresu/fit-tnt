@@ -1,6 +1,6 @@
 {
   "name": "fit-tnt",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "description": "TNT - A Least Squares iterative solver.",
   "main": "./lib/index.js",
   "module": "./lib-esm/index.js",
