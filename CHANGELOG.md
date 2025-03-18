@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.0.1](https://github.com/newresu/fit-tnt/compare/v8.0.0...v8.0.1) (2025-03-18)
+
+
+### Bug Fixes
+
+* getCriteria to re-run using new min (not old one) and average. ([#24](https://github.com/newresu/fit-tnt/issues/24)) ([c0acd17](https://github.com/newresu/fit-tnt/commit/c0acd17fa5be787272db15443af92d6fcdd1060a))
+
 ## [8.0.0](https://github.com/newresu/fit-tnt/compare/v7.0.0...v8.0.0) (2025-03-07)
 
 
