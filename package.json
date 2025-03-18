@@ -24,7 +24,8 @@
     "test-watch": "vitest",
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
-    "tsc-esm": "tsc --project tsconfig.esm.json"
+    "tsc-esm": "tsc --project tsconfig.esm.json",
+    "bench": "node ./benchmark/versus_pseudo.js"
   },
   "repository": {
     "type": "git",

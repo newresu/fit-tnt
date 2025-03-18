@@ -17,48 +17,61 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
-  let [min, avg] = arrayMinAndAverage(diag);
+  let criteria = getCriteria(diag);
 
-  let ratio = min / avg + Number.EPSILON;
-  let epsilon = min + Number.EPSILON * 1000;
   let it = 15; // increase epsilon
-  let npdIt = 5; //non positive definite iterations
-  while (ratio < 1e-3 || !choleskyDC.isPositiveDefinite()) {
+  let npdIt = 5; //non-positive-definite iterations
+
+  while (criteria.ratio < 1e-4 || !choleskyDC.isPositiveDefinite()) {
     if (!choleskyDC.isPositiveDefinite()) {
-      npdIt -= 1;
+      npdIt--;
     }
-    if (!Number.isFinite(epsilon) || it === 0 || npdIt === 0) {
+    if (!Number.isFinite(criteria.eps) || !it || !npdIt) {
       //includes isNaN
       throw new PreconditionError();
     }
     for (let i = 0; i < AtA.rows; i++) {
-      AtA.set(i, i, AtA.get(i, i) + epsilon);
+      AtA.set(i, i, AtA.get(i, i) + criteria.eps);
     }
-    epsilon *= 10;
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    [min, avg] = arrayMinAndAverage(diag);
-    ratio = min / avg;
-
+    criteria = getCriteria(diag, 15 - (it - 1));
     it--;
   }
+
   return choleskyDC;
 }
 
+interface Criteria {
+  /**
+   * epsilon
+   */
+  eps: number;
+  /**
+   * min / avg
+   */
+  ratio: number;
+}
 /**
- * Calculate min and average of an array.
+ * Calculate min, ratio (min/avg)
  * values all positive | 0 -> don't take `abs(item)`
  * @param arr array of numbers
- * @returns min and average values.
+ * @returns {@link Criteria}
  */
-function arrayMinAndAverage(arr: number[]): [number, number] {
-  let min = arr[0];
-  let avg = 0;
+function getCriteria(arr: number[], power = 0): Criteria {
+  let min = Infinity;
+  let sum = 0;
   for (const item of arr) {
-    avg += item;
-    if (item < min) {
-      min = item;
+    if (Number.isFinite(item)) {
+      sum += item;
+      if (item < min) {
+        min = item;
+      }
     }
   }
-  return [min, avg / arr.length];
+  min = min + Number.EPSILON * 1000;
+  return {
+    eps: min * 10 ** power,
+    ratio: min / ((sum + min) / arr.length),
+  };
 }
