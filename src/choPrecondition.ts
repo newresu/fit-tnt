@@ -17,40 +17,36 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
-  const criteria = getCriteria(diag);
-
-  const minValue = criteria.min;
-  let ratio = criteria.ratio;
-  let epsilon = minValue + Number.EPSILON * 1000;
+  let criteria = getCriteria(diag);
 
   let it = 15; // increase epsilon
   let npdIt = 5; //non-positive-definite iterations
-  while (ratio < 1e-3 || !choleskyDC.isPositiveDefinite()) {
+
+  while (criteria.ratio < 1e-4 || !choleskyDC.isPositiveDefinite()) {
     if (!choleskyDC.isPositiveDefinite()) {
-      npdIt -= 1;
+      npdIt--;
     }
-    if (!Number.isFinite(epsilon) || it === 0 || npdIt === 0) {
+    if (!Number.isFinite(criteria.eps) || !it || !npdIt) {
       //includes isNaN
       throw new PreconditionError();
     }
     for (let i = 0; i < AtA.rows; i++) {
-      AtA.set(i, i, AtA.get(i, i) + epsilon);
+      AtA.set(i, i, AtA.get(i, i) + criteria.eps);
     }
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    ratio = getCriteria(diag).ratio;
-    epsilon *= 10;
-
+    criteria = getCriteria(diag, 15 - (it - 1));
     it--;
   }
+
   return choleskyDC;
 }
 
 interface Criteria {
   /**
-   * min value in array.
+   * epsilon
    */
-  min: number;
+  eps: number;
   /**
    * min / avg
    */
@@ -62,14 +58,20 @@ interface Criteria {
  * @param arr array of numbers
  * @returns {@link Criteria}
  */
-function getCriteria(arr: number[]): Criteria {
-  let min = arr[0];
+function getCriteria(arr: number[], power = 0): Criteria {
+  let min = Infinity;
   let sum = 0;
   for (const item of arr) {
-    sum += item;
-    if (item < min) {
-      min = item;
+    if (Number.isFinite(item)) {
+      sum += item;
+      if (item < min) {
+        min = item;
+      }
     }
   }
-  return { min, ratio: min / (sum / arr.length) };
+  min = min + Number.EPSILON * 1000;
+  return {
+    eps: min * 10 ** power,
+    ratio: min / ((sum + min) / arr.length),
+  };
 }
