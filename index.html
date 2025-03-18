@@ -20,7 +20,7 @@
 <p>Accuracy: it's frequently as accurate as QR or PseudoInverse but it will have larger error (normally still acceptable) with tricky matrices.</p>
 </li>
 </ul>
-<p><a href="#comparison-tnt-vs-pseudo-inverse">For speed, see comparison here.</a>.</p>
+<p><a href="#comparison-tnt-vs-pseudo-inverse">For speed, see comparison here</a>.</p>
 <p><em>For calculations with non-zero intercept</em>, remember to push a $1$ to each row. The coefficient will be the last item in <strong>XBest</strong>.</p>
 <p>A more thorough webpage to compare speed/accuracy will hopefully be included soon.</p>
 </details>
@@ -30,37 +30,35 @@
 <pre><code class="ts"><span class="hl-3">import</span><span class="hl-1"> { </span><span class="hl-4">TNT</span><span class="hl-1"> } </span><span class="hl-3">from</span><span class="hl-1"> </span><span class="hl-2">&#39;fit-tnt&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">A</span><span class="hl-1"> = [</span><br/><span class="hl-1">  [</span><span class="hl-7">1</span><span class="hl-1">, </span><span class="hl-7">2</span><span class="hl-1">, </span><span class="hl-7">3</span><span class="hl-1">],</span><br/><span class="hl-1">  [</span><span class="hl-7">4</span><span class="hl-1">, </span><span class="hl-7">5</span><span class="hl-1">, </span><span class="hl-7">6</span><span class="hl-1">],</span><br/><span class="hl-1">]; </span><span class="hl-8">// 2x3</span><br/><span class="hl-5">const</span><span class="hl-1"> </span><span class="hl-6">b</span><span class="hl-1"> = [</span><span class="hl-7">6</span><span class="hl-1">, </span><span class="hl-7">12</span><span class="hl-1">]; </span><span class="hl-8">// or [[6],[12]]</span><br/><br/><span class="hl-3">try</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-5">const</span><span class="hl-1"> { </span><span class="hl-6">XBest</span><span class="hl-1">, </span><span class="hl-6">metadata</span><span class="hl-1"> } = </span><span class="hl-5">new</span><span class="hl-1"> </span><span class="hl-0">TNT</span><span class="hl-1">(</span><span class="hl-6">A</span><span class="hl-1">, </span><span class="hl-4">b</span><span class="hl-1">);</span><br/><span class="hl-1">} </span><span class="hl-3">catch</span><span class="hl-1"> (</span><span class="hl-4">e</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">console</span><span class="hl-1">.</span><span class="hl-0">error</span><span class="hl-1">(</span><span class="hl-4">e</span><span class="hl-1">);</span><br/><span class="hl-1">}</span>
 </code><button type="button">Copy</button></pre>
 
-<p>The preconditioning is <a href="https://en.wikipedia.org/wiki/Ridge_regression">Ridge Regression</a>. This is slightly different to the paper.</p>
+<p>A related method is <a href="https://en.wikipedia.org/wiki/Ridge_regression">Ridge Regression</a>.</p>
 <a id="documentation" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Documentation<a href="#documentation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
-<li><a href="https://newresu.github.io/fit-tnt/modules.html">ReadTheDocs 😊</a></li>
+<li><a href="https://newresu.github.io/fit-tnt/modules.html">Docs here</a></li>
 </ul>
-<a id="comparison-tnt-vs-pseudo-inverse" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Comparison: TNT vs Pseudo-Inverse<a href="#comparison-tnt-vs-pseudo-inverse" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The larger the <strong>rows/columns</strong> ratio, the more convenient to use TNT.
-This is a benchmark on random matrices.</p>
-<p>Inverting the shape below, the TNT speed is about $\approx 0.9$ slower.</p>
+<a id="comparison-tnt-vs-pseudo-inverse" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Comparison: TNT vs Pseudo-Inverse<a href="#comparison-tnt-vs-pseudo-inverse" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The larger the <strong>rows/columns</strong> ratio, the more convenient to use TNT.</p>
 <ul>
-<li>Matrix Shape: 500 200</li>
+<li>Inverting the shape below, TNT is slower.</li>
+<li>Matrix Shape: rows 500, columns 200</li>
+<li>Speed Up: <strong>5.20</strong></li>
 </ul>
 <pre><code><span class="hl-1">┌───────────────┬─────────────────────┬─────────────────────┐</span><br/><span class="hl-1">│ (</span><span class="hl-4">index</span><span class="hl-1">)       │       </span><span class="hl-4">Avg</span><span class="hl-1"> </span><span class="hl-4">Exec</span><span class="hl-1"> </span><span class="hl-4">Time</span><span class="hl-1"> │           </span><span class="hl-4">Avg</span><span class="hl-1"> </span><span class="hl-4">Error</span><span class="hl-1"> │</span><br/><span class="hl-1">├───────────────┼─────────────────────┼─────────────────────┤</span><br/><span class="hl-1">│ </span><span class="hl-6">TNT</span><span class="hl-1">           │ </span><span class="hl-7">0.09470919929999999</span><span class="hl-1"> │ </span><span class="hl-7">0.04945702797110891</span><span class="hl-1"> │</span><br/><span class="hl-1">│ </span><span class="hl-4">PseudoInverse</span><span class="hl-1"> │ </span><span class="hl-7">0.49272041820000007</span><span class="hl-1"> │ </span><span class="hl-7">0.04945702797110894</span><span class="hl-1"> │</span><br/><span class="hl-1">└───────────────┴─────────────────────┴─────────────────────┘</span>
 </code><button>Copy</button></pre>
 
-<ul>
-<li>Speed Up: 5.202455747083906</li>
-</ul>
 <a id="misc" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Misc.<a href="#misc" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><ul>
 <li>In some cases it won't get to a low error, but <a href="https://stats.stackexchange.com/questions/306019/in-linear-regression-why-do-we-often-have-to-normalize-independent-variables-pr">normalizing improves performance.</a></li>
 </ul>
 <details>
 <summary>
-Concepts
+Theoretical Background
 </summary>
-<p>The linear problem appears in all science: $A,x = b$. Methods to solve it fast abound. But $A^{-1}$ rarely exists in practice; the Least-Squares approach is used to minimize the squared error in the predictions:</p>
-<p>$E(x) = \mathrm{min}_x \left|\left| A,x -b \right|\right|_2^2$</p>
-<p>We then look for $\nabla_x E(x)=0$ that is $A^T,A x = A^T b$</p>
-<p>When computed directly (as done here), $A^T,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. We try to reduce this problem with preconditioning. Larger condition number also tends to slow the convergence.</p>
+<p>Linear systems appear everywhere: $A,x = b$. Unique solutions ($x$) rarely exist. Least-Squares is one way to select the best:</p>
+<p>$G(x) = \mathrm{min}_x \lVert A,x -b \rVert_2^2$</p>
+<p>Searching the gradient-vector $G(x)=\vec{0}$ we get the normal equation $A^T,A x = A^T b$</p>
+<p>This is also a linear system! $S x = y$. If the symmetric matrix $S$ is positive definite (hence $A$ has l.i. cols.) then it is invertible and can be solved using $\mathrm{Cho(S)} = L L^T$ and solving two triangular systems, which is fast and simple.</p>
+<p>When computed directly (as done here), $S=A^T,A$ has a condition number $\kappa (A^T A) = \kappa (A)^2$. So it will fail for near-singular $S$. <em>Preconditioning tries to reduce this problem</em>. Larger condition number also tends to slow the convergence of iterative methods.</p>
 <p><strong>TNT</strong></p>
 <p>The Conjugate Gradient for Normal Residual (CGNR) is a popular method for solving Sparse Least-Squares problems, where the design matrix has many zeros.</p>
-<p>The reason for &quot;Large&quot; is that systems with $m \lt\lt n$ can be solved faster and more accurately using the Pseudo-Inverse. Even though the QR decomposition-method can be more accurate, TNT tends to be faster in overdetermined problems where $m \approx n$ or $m \gt n$.</p>
-<p>TNT revives CGNR for Dense Large matrices. It uses a modified version Preconditioned-CGNR to update $A^T,A$ so that it has an inverse.</p>
+<p>For wide-$A$, where $\frac{n}{m} \gt 1$ calculating and factoring $A^T A$ becomes computationally demanding, given its $n^2$ separate elements. Here pseudo-inverse will be faster. TNT tends to be faster when $m \geq n$.</p>
+<p>TNT preconditions $A^T,A$ so that it has an inverse and a smaller condition number, then iteratively solves using CGNR.</p>
 <p>Positive definite means that $x^T M x \gt 0$. In our case: $x^T ,(A^T A), x \gt 0$, and $(A,x)^T (A x) \gt 0$</p>
 <p>The $(\ldots)$ are non-zero when the columns are linearly independent. If the columns of $A$ are linearly independent then it's invertible/non-singular, and $A^T A$ is invertible.</p>
 <p>So we want to pre-condition $A^T A$ so that it is invertible, we also want to avoid tiny numbers in the diagonal of the decomposition.</p>
