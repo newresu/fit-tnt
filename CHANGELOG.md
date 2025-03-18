@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.0.2](https://github.com/newresu/fit-tnt/compare/v8.0.1...v8.0.2) (2025-03-18)
+
+
+### Bug Fixes
+
+* dont add minimum value (min) to average (avg) ([eaecfb2](https://github.com/newresu/fit-tnt/commit/eaecfb2de13740a03b53c3a28276538e6c039b12))
+
 ## [8.0.1](https://github.com/newresu/fit-tnt/compare/v8.0.0...v8.0.1) (2025-03-18)
 
 
