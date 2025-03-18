@@ -53,25 +53,26 @@ interface Criteria {
   ratio: number;
 }
 /**
- * Calculate min, ratio (min/avg)
+ * Calculate epsilon and ratio (min/avg)
  * values all positive | 0 -> don't take `abs(item)`
  * @param arr array of numbers
  * @returns {@link Criteria}
  */
 function getCriteria(arr: number[], power = 0): Criteria {
   let min = Infinity;
-  let sum = 0;
+  let avg = 0;
   for (const item of arr) {
     if (Number.isFinite(item)) {
-      sum += item;
+      avg += item;
       if (item < min) {
         min = item;
       }
     }
   }
-  min = min + Number.EPSILON * 1000;
+  min += Number.EPSILON * 1000;
+  avg = avg / arr.length + Number.EPSILON * 1000;
   return {
     eps: min * 10 ** power,
-    ratio: min / ((sum + min) / arr.length),
+    ratio: min / avg,
   };
 }
