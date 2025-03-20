@@ -1,5 +1,12 @@
 # Changelog
 
+## [8.0.3](https://github.com/newresu/fit-tnt/compare/v8.0.2...v8.0.3) (2025-03-20)
+
+
+### Performance Improvements
+
+* Remove extra loop SymMul ([e42e937](https://github.com/newresu/fit-tnt/commit/e42e937a0c73b7f0a361b449014ad63afd75f3fa))
+
 ## [8.0.2](https://github.com/newresu/fit-tnt/compare/v8.0.1...v8.0.2) (2025-03-18)
 
 
