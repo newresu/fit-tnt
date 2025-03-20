@@ -1,11 +1,37 @@
 import { Matrix } from 'ml-matrix';
 
+/**
+ * Options for generating data.
+ */
 interface MakeDataOpts {
-  useBias: boolean; // false
-  outputColumns: number; //default 1
-  addNoise: boolean; // true. Add noise to `b` using 1/100 of scaling of X
-  scaleX: number; // Scale the X by this number.
-  scaleA: number; // Scale the A by this number.
+  /**
+   * Indicates whether to include a bias term in the generated data.
+   * @default false
+   */
+  useBias: boolean;
+
+  /**
+   * Specifies the number of output columns to generate.
+   * @default 1
+   */
+  outputColumns: number;
+
+  /**
+   * Indicates whether to add noise to the output data (`b`).
+   * If true, noise is added using 1/100 of the scaling factor of `X`.
+   * @default true
+   */
+  addNoise: boolean;
+
+  /**
+   * Scale the input data (`X`) by this number.
+   */
+  scaleX: number;
+
+  /**
+   * Scale the coefficients (`A`) by this number.
+   */
+  scaleA: number;
 }
 export function makeData(
   samples: number,

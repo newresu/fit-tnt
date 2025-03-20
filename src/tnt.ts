@@ -58,16 +58,14 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
 
-    this.metadata = Matrix.pow(B, 2)
-      .mean('column')
-      .map((x) => {
-        return {
-          mse: [x],
-          mseMin: x,
-          mseLast: x,
-          iterations: 0,
-        };
-      });
+    this.metadata = meanSquaredError(B).map((x) => {
+      return {
+        mse: [x],
+        mseMin: x,
+        mseLast: x,
+        iterations: 0,
+      };
+    });
 
     this.#tnt(A, B);
   }
@@ -129,7 +127,7 @@ export class TNT {
 
     let W: Matrix;
     let WW: number[];
-    let [alpha, betaDenom, beta]: number[][] = [[], [], []];
+    let [alpha, betaDenom, beta, mseLast]: number[][] = [[], [], []];
 
     // These are updated with `indices`
     let [X_View, B_View, P_View]: AnyMatrix[] = [X, B, P];
@@ -159,7 +157,7 @@ export class TNT {
       X_View.add(P_View.clone().mulRowVector(alpha)); //update x
 
       // With X updated, we need to narrow down again.
-      const mseLast = meanSquaredError(A, X_View, B_View);
+      mseLast = meanSquaredError(A, B_View, X_View);
       this.#updateMSEAndX(mseLast, X_View, indices);
 
       [indices, alpha, subsetIndices] = filterIndices(

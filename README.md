@@ -60,11 +60,9 @@ A related method is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regre
 
 ## Comparison: TNT vs Pseudo-Inverse
 
-The larger the **rows/columns** ratio, the more convenient to use TNT.
-
-- Inverting the shape below, TNT is slower.
 - Matrix Shape: rows 500, columns 200
 - Speed Up: **5.20**
+- Inverting the shape below, TNT is slower.
 
 ```
 ┌───────────────┬─────────────────────┬─────────────────────┐

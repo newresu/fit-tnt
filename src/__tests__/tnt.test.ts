@@ -67,7 +67,7 @@ describe('Test some ill conditioned matrices', () => {
 
     // pseudoInverse
     const X = pseudoInverse(A).mmul(B);
-    const minErrorPseudoInverse = meanSquaredError(A, X, B);
+    const minErrorPseudoInverse = meanSquaredError(A, B, X);
     expect(minErrorPseudoInverse[0]).toBeLessThan(1e-20);
   });
 });

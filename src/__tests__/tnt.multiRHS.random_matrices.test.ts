@@ -28,7 +28,7 @@ describe('Multi RHS, random values', () => {
       });
       const { metadata, maxIterations, XBest } = new TNT(A, B, {
         maxIterations: 15,
-        earlyStopping: { minMSE: 1e-3 },
+        earlyStopping: { minMSE: 1e-4 },
       });
       expect(XBest.to1DArray().every(Number.isFinite)).toBeTruthy();
       const { mse, mseMin, iterations } = metadata[0];
@@ -52,7 +52,7 @@ describe('Multi RHS, random values', () => {
         XBest: xBest,
       } = new TNT(A, bigB, {
         maxIterations: 4,
-        earlyStopping: { minMSE: 1e-3 },
+        earlyStopping: { minMSE: 1e-4 },
       });
 
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
