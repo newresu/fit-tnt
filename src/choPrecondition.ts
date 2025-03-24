@@ -15,10 +15,10 @@ export function choleskyPrecondition(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
-  let criteria = getCriteria(diag);
 
   let it = 5; // increase epsilon
   let npdIt = 5; //non-positive-definite iterations
+  let criteria = getCriteria(diag, -it);
 
   while (criteria.ratio < 1e-4 || !choleskyDC.isPositiveDefinite()) {
     if (!choleskyDC.isPositiveDefinite()) {
@@ -33,7 +33,7 @@ export function choleskyPrecondition(AtA: Matrix) {
     }
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    criteria = getCriteria(diag, 5 - (it - 1));
+    criteria = getCriteria(diag, 1 - it);
     it--;
   }
 
@@ -57,7 +57,9 @@ interface Criteria {
  * @param power multiplies the min value by 10**power
  * @returns {@link Criteria}
  */
-function getCriteria(arr: number[], power = 0): Criteria {
+function getCriteria(arr: number[], power: number): Criteria {
+  // below this it's inaccurate.
+  const delta = Number.EPSILON * 1000;
   let min = Infinity;
   let avg = 0;
   for (const item of arr) {
@@ -68,10 +70,10 @@ function getCriteria(arr: number[], power = 0): Criteria {
       }
     }
   }
-  min += Number.EPSILON * 1000;
-  avg = avg / arr.length + Number.EPSILON * 1000;
+  min += delta;
+  avg = avg / arr.length;
   return {
-    eps: avg * 10 ** (power - 4),
+    eps: avg * Math.pow(10, power),
     ratio: min / avg,
   };
 }
