@@ -3,17 +3,14 @@ import { performance } from 'perf_hooks';
 
 import { TNT } from '../lib/index.js';
 
-const m = 500; // use 100 to see TNT using pseudo inverse by default
-const n = 200;
-const p = 4;
+// rows, columns, projects
+const [m, n, p] = [500, 200, 4];
 
-/* first */
-const tntTime = [];
-const tntErr = [];
-const piTime = [];
-const piErr = [];
-let t;
-let r;
+const [tntTime, tntErr]: [number[], number[]] = [[], []];
+const [piTime, piErr]: [number[], number[]] = [[], []];
+
+let temp;
+
 let [s, e] = [0, 0];
 const cycles = 10;
 
@@ -21,25 +18,25 @@ for (let i = 0; i < cycles; i++) {
   const A = Matrix.random(m, n).mul(100000);
   const B = Matrix.random(m, p);
   s = performance.now();
-  t = new TNT(A, B, {
+  temp = new TNT(A, B, {
     maxIterations: 8,
   });
   e = performance.now();
   // push values TNT
-  tntTime.push((e - s) / 1000);
-  tntErr.push(avg(t.metadata.map((i) => i.mseMin)));
+  tntTime.push(e - s);
+  tntErr.push(avg(temp.metadata.map((i) => i.mseMin)));
 
   /*pseudo inverse*/
   s = performance.now();
-  r = pseudoInverse(A).mmul(B);
+  temp = pseudoInverse(A).mmul(B);
   e = performance.now();
-  r = A.mmul(r).sub(B);
+  temp = A.mmul(temp).sub(B);
 
   // push values pseudo inverse
-  piTime.push((e - s) / 1000);
+  piTime.push(e - s);
   piErr.push(
     avg(
-      r
+      temp
         .pow(2)
         .sum('column')
         .map((i) => i / A.rows),
@@ -47,8 +44,9 @@ for (let i = 0; i < cycles; i++) {
   );
 }
 
-const tntavgt = avg(tntTime);
-const piavgt = avg(piTime);
+// milliseconds to seconds
+const tntavgt = avg(tntTime) / 1000;
+const piavgt = avg(piTime) / 1000;
 
 console.log('\n Matrix Shape: ', m, n, '\n');
 console.table({
@@ -63,10 +61,10 @@ console.table({
 });
 console.log('\n ----> Speed Up: ', piavgt / tntavgt, '\n');
 
-function avg(a) {
+function avg(arr: number[]) {
   let total = 0;
-  for (let i = 0; i < a.length; i++) {
-    total += a[i];
+  for (const item of arr) {
+    total += item;
   }
-  return total / a.length;
+  return total / arr.length;
 }

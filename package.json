@@ -25,7 +25,8 @@
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
     "tsc-esm": "tsc --project tsconfig.esm.json",
-    "bench": "node ./benchmark/versus_pseudo.js"
+    "bench": "tsx ./benchmark/versus_pseudo.ts",
+    "profile":"tsx --cpu-prof ./benchmark/versus_pseudo.ts "
   },
   "repository": {
     "type": "git",
@@ -53,6 +54,7 @@
     "globals": "^16.0.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1",
     "vitest": "^3.0.8"
