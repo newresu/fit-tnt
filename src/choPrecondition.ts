@@ -4,22 +4,20 @@ import { CholeskyDecomposition } from 'ml-matrix';
 import { PreconditionError } from './Errors';
 
 /**
- * Do `A^T A + d*I` until AtA is positive definite and `L` is "nice".
+ * Do `A^T A += d*I` until AtA is positive definite and `L` is "nice".
  * **Mutates** AtA
- * For info on [MDN:EPSILON](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON)
  *
  * @param AtA - Symmetric matrix from the normal equation.
- * @param maxIterations
- * @param ratio target for ratio of diagonal values in L.
  * @returns Cholesky Decomposition of AtA
+ *
  */
-export function choleskyPreconditionTrick(AtA: Matrix) {
+export function choleskyPrecondition(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
 
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
   let criteria = getCriteria(diag);
 
-  let it = 15; // increase epsilon
+  let it = 5; // increase epsilon
   let npdIt = 5; //non-positive-definite iterations
 
   while (criteria.ratio < 1e-4 || !choleskyDC.isPositiveDefinite()) {
@@ -35,7 +33,7 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
     }
     choleskyDC = new CholeskyDecomposition(AtA); //again
     diag = choleskyDC.lowerTriangularMatrix.diagonal();
-    criteria = getCriteria(diag, 15 - (it - 1));
+    criteria = getCriteria(diag, 5 - (it - 1));
     it--;
   }
 
@@ -44,11 +42,11 @@ export function choleskyPreconditionTrick(AtA: Matrix) {
 
 interface Criteria {
   /**
-   * epsilon
+   * epsilon added to the diagonal of L
    */
   eps: number;
   /**
-   * min / avg
+   * min / avg used as stop condition.
    */
   ratio: number;
 }
@@ -56,6 +54,7 @@ interface Criteria {
  * Calculate epsilon and ratio (min/avg)
  * values all positive | 0 -> don't take `abs(item)`
  * @param arr array of numbers
+ * @param power multiplies the min value by 10**power
  * @returns {@link Criteria}
  */
 function getCriteria(arr: number[], power = 0): Criteria {
@@ -72,7 +71,7 @@ function getCriteria(arr: number[], power = 0): Criteria {
   min += Number.EPSILON * 1000;
   avg = avg / arr.length + Number.EPSILON * 1000;
   return {
-    eps: min * 10 ** power,
+    eps: avg * 10 ** (power - 4),
     ratio: min / avg,
   };
 }
