@@ -8,9 +8,9 @@
 <!--
 [![DOI](https://zenodo.org/badge/DOI/[DOINUMBER]/zenodo.8189402.svg)](https://doi.org/[DOINUMBER]/zenodo.8189402) -->
 
-Least-squares solver for large, dense matrices. It is based off the [TNT](https://ieeexplore.ieee.org/abstract/document/8425520) paper by J. M. Myre et al.
+Finds $x$ in $A x = b$ by least-squares. Supports multiple right-hand-sides.
 
-Supports multiple right-hand-sides.
+The method is based off the [TNT](https://ieeexplore.ieee.org/abstract/document/8425520) paper by J. M. Myre et al.
 
 <details>
 <summary>Recommendations</summary>
