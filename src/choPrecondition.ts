@@ -9,7 +9,6 @@ import { PreconditionError } from './Errors';
  *
  * @param AtA - Symmetric matrix from the normal equation.
  * @returns Cholesky Decomposition of AtA
- *
  */
 export function choleskyPrecondition(AtA: Matrix) {
   let choleskyDC = new CholeskyDecomposition(AtA);
@@ -17,14 +16,10 @@ export function choleskyPrecondition(AtA: Matrix) {
   let diag = choleskyDC.lowerTriangularMatrix.diagonal();
 
   let it = 5; // increase epsilon
-  let npdIt = 5; //non-positive-definite iterations
   let criteria = getCriteria(diag, -it);
 
   while (criteria.ratio < 1e-4 || !choleskyDC.isPositiveDefinite()) {
-    if (!choleskyDC.isPositiveDefinite()) {
-      npdIt--;
-    }
-    if (!Number.isFinite(criteria.eps) || !it || !npdIt) {
+    if (!Number.isFinite(criteria.eps) || !it) {
       //includes isNaN
       throw new PreconditionError();
     }
