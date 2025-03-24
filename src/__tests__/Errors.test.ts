@@ -10,7 +10,7 @@ describe('Custom Errors', () => {
       expect(error).toBeInstanceOf(PreconditionError);
       expect(error).toHaveProperty('message');
       expect(error.message).toBe(
-        'Preconditioning AtA failed. This may be due to ill-conditioning. Please, raise an issue with the matrix that errors.',
+        'Preconditioning AtA failed. This may be due to ill-conditioning.',
       );
     });
   });

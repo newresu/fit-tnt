@@ -1,6 +1,6 @@
 import { Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 
-import { choleskyPreconditionTrick } from './choPrecondition';
+import { choleskyPrecondition } from './choPrecondition';
 import { initSafetyChecks } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
 import { meanSquaredError } from './meanSquaredError';
@@ -110,28 +110,28 @@ export class TNT {
     // indices of current "on" columns of X.
     let indices = new Array(X.columns).fill(0).map((_, i) => i);
     // same but for matrices that are recalculated as it runs.
-    let subsetIndices;
+    let shiftedIndices;
 
     const At = A.transpose(); // copy is ok
     const AtA = symmetricMul(At);
 
-    const choleskyDC = choleskyPreconditionTrick(AtA);
+    const choleskyDC = choleskyPrecondition(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
     const AtA_inv = invertLLt(L);
 
-    const Residual = B.clone(); // r = b - Ax_0 (but Ax_0 is 0)
+    const Residual = B.clone(); // r = b - Ax_0 (Ax_0 = 0)
     let Gradient = At.mmul(Residual); // r_hat = At * r
-    // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
+    // z_0 = AtA_inv * r_hat = AtA_inv * At b - x_0
     let XError = AtA_inv.mmul(Gradient);
     const P = XError.clone(); // z_0 clone
 
     let W: Matrix;
-    let WW: number[];
+    let ww: number[];
     let [alpha, betaDenom, beta, mseLast]: number[][] = [[], [], []];
 
     // These are updated with `indices`
     let [X_View, B_View, P_View]: AnyMatrix[] = [X, B, P];
-    // These are updated with `subsetIndices`
+    // These are updated with `shiftedIndices`
     let [GradientView, ResidualView, XErrorView]: AnyMatrix[] = [
       Gradient,
       Residual,
@@ -140,13 +140,12 @@ export class TNT {
 
     for (let it = 0; it < this.maxIterations; it++) {
       W = A.mmul(P_View);
-      WW = W.pow(2).sum('column');
+      ww = W.pow(2).sum('column');
       alpha = Matrix.multiply(XError, Gradient)
         .sum('column')
-        .map((x, i) => x / WW[i]);
-
+        .map((x, i) => x / ww[i]);
       // indices of the columns to solve
-      [indices, alpha, subsetIndices] = filterIndices(indices, alpha);
+      [indices, alpha, shiftedIndices] = filterIndices(indices, alpha);
       // after removing NaNs alpha may be empty.
       if (alpha.length === 0) break;
 
@@ -160,10 +159,10 @@ export class TNT {
       mseLast = meanSquaredError(A, B_View, X_View);
       this.#updateMSEAndX(mseLast, X_View, indices);
 
-      [indices, alpha, subsetIndices] = filterIndices(
+      [indices, alpha, shiftedIndices] = filterIndices(
         indices,
         alpha,
-        subsetIndices,
+        shiftedIndices,
       );
       // after removing NaNs indices may be empty
       if (indices.length === 0) break;
@@ -173,7 +172,7 @@ export class TNT {
       }
 
       [GradientView, XErrorView, ResidualView] = getColumnViews(
-        subsetIndices,
+        shiftedIndices,
         Gradient,
         XErrorView,
         ResidualView,
