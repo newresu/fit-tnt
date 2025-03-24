@@ -38,7 +38,7 @@ describe('Test some ill conditioned matrices', () => {
   it('Another Test', () => {
     const result = new TNT(Matrix.ones(5, 500), Matrix.ones(5, 1));
     expect(result).toBeDefined();
-    expect(result.metadata[0].mseMin).toBeLessThanOrEqual(1e-2);
+    expect(result.metadata[0].mseMin).toBeLessThanOrEqual(5e-31);
   });
 
   it('hard matrix multi-RHS', () => {
@@ -63,7 +63,8 @@ describe('Test some ill conditioned matrices', () => {
     // tnt
     const r = new TNT(A, B);
     const { mseMin } = r.metadata[0];
-    expect(mseMin).toBeLessThan(2e-7);
+    console.log(mseMin);
+    expect(mseMin).toBeLessThan(5e-11);
 
     // pseudoInverse
     const X = pseudoInverse(A).mmul(B);
