@@ -1,7 +1,7 @@
 import { Matrix, pseudoInverse } from 'ml-matrix';
 import { describe, expect, it } from 'vitest';
 
-import { meanSquaredError } from '../squaredSum';
+import { meanSquaredError } from '../meanSquaredError';
 import { TNT } from '../tnt';
 
 describe('Test some ill conditioned matrices', () => {
@@ -63,7 +63,6 @@ describe('Test some ill conditioned matrices', () => {
     // tnt
     const r = new TNT(A, B);
     const { mseMin } = r.metadata[0];
-    console.log(mseMin);
     expect(mseMin).toBeLessThan(5e-11);
 
     // pseudoInverse

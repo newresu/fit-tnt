@@ -3,7 +3,8 @@ import { Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 import { choleskyPrecondition } from './choPrecondition';
 import { checkMatchingDimensions } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
-import { meanSquaredError, squaredSum } from './squaredSum';
+import { meanSquaredError } from './meanSquaredError';
+import { squaredSum } from './squaredSum';
 import { symmetricMul } from './symmetricMul';
 import {
   AnyMatrix,
