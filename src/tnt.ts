@@ -1,9 +1,10 @@
 import { Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 
-import { choleskyPreconditionTrick } from './choPrecondition';
-import { initSafetyChecks } from './initSafetyChecks';
+import { choleskyPrecondition } from './choPrecondition';
+import { checkMatchingDimensions } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
 import { meanSquaredError } from './meanSquaredError';
+import { squaredSum } from './squaredSum';
 import { symmetricMul } from './symmetricMul';
 import {
   AnyMatrix,
@@ -13,17 +14,15 @@ import {
   EarlyStopping,
   TNTOpts,
 } from './types';
-import { ensureMatrix, filterIndices, getColumnViews } from './utils';
+import { ensureMatrixB, filterIndices, getColumnViews } from './utils';
 
 /**
- * Find the best $X$ in $A X = B$; where $A$ and $B$ are known.
+ * Find the best `X` in `A X = B`; where `A` and `B` are known.
  * By 'best' it refers to the least-squares (least error) solution.
  *
- * Multiple RHS are supported (i.e $B$ can be a vector or matrix)
- *
- * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
+ * Multiple RHS are supported (`B` can be a vector or matrix)
  * @param data the input or data matrix (2D Array)
- * @param output the known-output vector (1D Array)
+ * @param output the known-output
  * @param opts {@link TNTOpts}
  */
 export class TNT {
@@ -49,7 +48,7 @@ export class TNT {
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.checkMatrix(data);
-    const B = ensureMatrix(output);
+    const B = ensureMatrixB(output);
     this.XBest = new Matrix(A.columns, B.columns);
 
     // unpack options
@@ -58,7 +57,8 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
 
-    this.metadata = meanSquaredError(B).map((x) => {
+    this.metadata = squaredSum(B).map((x) => {
+      x = x / B.rows;
       return {
         mse: [x],
         mseMin: x,
@@ -71,13 +71,11 @@ export class TNT {
   }
 
   /**
-   * 1. Calculate `mseLast`
-   * 2. Updates `mse[]`
-   * 3. Sets `mseMin` if improved, and `XBest` in that case.
-   * When some columns have been left out, both X and B are sub column views.
-   * @param A input data matrix
-   * @param B known output. Note that this will be a View.
-   * @param X coefficients. Note that this will be a View.
+   * 1. Append last mse for each column
+   * 2. Set `XBest` and `mseMin` **iff** it improved
+   * 3. Sets `indices[i]=NaN` if it didn't improve.
+   * @param mseLast list of mean squared errors for each column
+   * @param XView columns of X currently available.
    * @param indices track which columns of initial X are optimized.
    */
   #updateMSEAndX(mseLast: number[], XView: AnyMatrix, indices: number[]) {
@@ -88,7 +86,7 @@ export class TNT {
       columnInfo.iterations++;
       if (columnInfo.mseLast < columnInfo.mseMin) {
         columnInfo.mseMin = columnInfo.mseLast;
-        this.XBest.setColumn(i, XView.getColumn(i));
+        this.XBest.setColumn(indices[i], XView.getColumn(i));
       } else {
         indices[i] = NaN;
       }
@@ -96,42 +94,39 @@ export class TNT {
   }
 
   /**
-   * Private function (main method)
-   * @param A
-   * @param b
-   * @param mse this will be mutated; this allows user to get all MSEs.
-   * @param options
-   * @returns best-found coefficients
+   * Find the XBest and set it in the class.
+   * @param A data matrix
+   * @param B solution matrix
    */
   #tnt(A: AnyMatrix, B: AnyMatrix) {
     const X: AnyMatrix = Matrix.zeros(A.columns, B.columns);
-    initSafetyChecks(A, X, B);
+    checkMatchingDimensions(A, X, B);
 
     // indices of current "on" columns of X.
     let indices = new Array(X.columns).fill(0).map((_, i) => i);
     // same but for matrices that are recalculated as it runs.
-    let subsetIndices;
+    let shiftedIndices;
 
     const At = A.transpose(); // copy is ok
     const AtA = symmetricMul(At);
 
-    const choleskyDC = choleskyPreconditionTrick(AtA);
+    const choleskyDC = choleskyPrecondition(AtA);
     const L = choleskyDC.lowerTriangularMatrix;
     const AtA_inv = invertLLt(L);
 
-    const Residual = B.clone(); // r = b - Ax_0 (but Ax_0 is 0)
+    const Residual = B.clone(); // r = b - Ax_0 (Ax_0 = 0)
     let Gradient = At.mmul(Residual); // r_hat = At * r
-    // `z_0 = AtA_inv * r_hat = x_0 - A_inv * b`
+    // z_0 = AtA_inv * r_hat = AtA_inv * At b - x_0
     let XError = AtA_inv.mmul(Gradient);
     const P = XError.clone(); // z_0 clone
 
     let W: Matrix;
-    let WW: number[];
+    let ww: number[];
     let [alpha, betaDenom, beta, mseLast]: number[][] = [[], [], []];
 
     // These are updated with `indices`
     let [X_View, B_View, P_View]: AnyMatrix[] = [X, B, P];
-    // These are updated with `subsetIndices`
+    // These are updated with `shiftedIndices`
     let [GradientView, ResidualView, XErrorView]: AnyMatrix[] = [
       Gradient,
       Residual,
@@ -140,13 +135,12 @@ export class TNT {
 
     for (let it = 0; it < this.maxIterations; it++) {
       W = A.mmul(P_View);
-      WW = W.pow(2).sum('column');
+      ww = squaredSum(W);
       alpha = Matrix.multiply(XError, Gradient)
         .sum('column')
-        .map((x, i) => x / WW[i]);
-
+        .map((x, i) => x / ww[i]);
       // indices of the columns to solve
-      [indices, alpha, subsetIndices] = filterIndices(indices, alpha);
+      [indices, alpha, shiftedIndices] = filterIndices(indices, alpha);
       // after removing NaNs alpha may be empty.
       if (alpha.length === 0) break;
 
@@ -160,10 +154,10 @@ export class TNT {
       mseLast = meanSquaredError(A, B_View, X_View);
       this.#updateMSEAndX(mseLast, X_View, indices);
 
-      [indices, alpha, subsetIndices] = filterIndices(
+      [indices, alpha, shiftedIndices] = filterIndices(
         indices,
         alpha,
-        subsetIndices,
+        shiftedIndices,
       );
       // after removing NaNs indices may be empty
       if (indices.length === 0) break;
@@ -173,7 +167,7 @@ export class TNT {
       }
 
       [GradientView, XErrorView, ResidualView] = getColumnViews(
-        subsetIndices,
+        shiftedIndices,
         Gradient,
         XErrorView,
         ResidualView,

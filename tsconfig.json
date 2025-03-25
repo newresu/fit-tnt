@@ -9,6 +9,5 @@
     "target": "es2020",
     "skipLibCheck": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/**/__tests__"]
+  "include": ["./src/**/*"]
 }

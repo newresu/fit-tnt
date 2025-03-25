@@ -5,7 +5,6 @@ import { Matrix } from 'ml-matrix';
  * To calculate `AtA` pass `At`, to calculate `AAt` pass `A`.
  *
  * Uses symmetry and contiguity to increase speed.
- *
  * @param B - The matrix to multiply by its transpose.
  * @returns Square matrix, result of `B * B^t`.
  */
@@ -42,9 +41,8 @@ export function symmetricMul(B: Matrix) {
  * Compute `U * L`.
  *
  * Take advantage of symmetry.
- * @param {Matrix} U - The upper triangular matrix to multiply by its transpose.
- * @returns {Matrix} `U * L`
- *
+ * @param U - The upper triangular matrix to multiply by its transpose.
+ * @returns `U * L`
  */
 export function symmetricMulUpperLower(U: Matrix) {
   const R = new Matrix(U.rows, U.rows);
