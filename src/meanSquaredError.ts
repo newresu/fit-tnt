@@ -2,15 +2,13 @@ import { AnyMatrix } from './types';
 
 /**
  * Calculate the mean squared error.
-
+ *
  * It works for matrices or vectors.
  *
  * It operates like this:
  * If you pass A only, it squares all and the mean **by column**.
  * If you pass A and B, it does A-B and then same as above.
  * If you pass A, X and B it does `AX` and then same as above.
- *
- *
  * @param A input data
  * @param B output data
  * @param X current coefficients
@@ -20,7 +18,7 @@ export function meanSquaredError(A: AnyMatrix, B?: AnyMatrix, X?: AnyMatrix) {
   const e: AnyMatrix = X && B ? A.mmul(X).sub(B) : B ? A.sub(B) : A;
   const { rows: samples, columns: coeffs } = e;
 
-  const result: number[] = new Array(e.columns).fill(0);
+  const result: number[] = new Array(e.columns).fill(0) as number[];
   if (e.isColumnVector()) {
     return [e.dot(e) / samples];
   } else {

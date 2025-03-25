@@ -26,7 +26,7 @@
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
     "tsc-esm": "tsc --project tsconfig.esm.json",
     "bench": "tsx ./benchmark/versus_pseudo.ts",
-    "profile":"tsx --cpu-prof ./benchmark/versus_pseudo.ts "
+    "profile": "tsx --cpu-prof ./benchmark/versus_pseudo.ts "
   },
   "repository": {
     "type": "git",
@@ -51,6 +51,7 @@
     "@types/node": "^22.13.10",
     "@vitest/coverage-v8": "^3.0.8",
     "eslint": "^9.22.0",
+    "eslint-plugin-jsdoc": "^50.6.9",
     "globals": "^16.0.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",

@@ -1,23 +1,21 @@
 import { Matrix } from 'ml-matrix';
 
-/**
- * Options for generating data.
- */
+/** Options for generating data.  */
 interface MakeDataOpts {
   /**
-   * Indicates whether to include a bias term in the generated data.
+   * Whether to include a bias term in the generated data.
    * @default false
    */
   useBias: boolean;
 
   /**
-   * Specifies the number of output columns to generate.
+   * Number of output/coefficient columns to generate.
    * @default 1
    */
   outputColumns: number;
 
   /**
-   * Indicates whether to add noise to the output data (`b`).
+   * Whether to add noise to the output data `B`.
    * If true, noise is added using 1/100 of the scaling factor of `X`.
    * @default true
    */
@@ -25,29 +23,36 @@ interface MakeDataOpts {
 
   /**
    * Scale the input data (`X`) by this number.
+   * @default 1 (no scaling)
    */
   scaleX: number;
 
   /**
    * Scale the coefficients (`A`) by this number.
+   * @default 1 (no scaling)
    */
   scaleA: number;
 }
+/**
+ * Make `A`, `B` and `X` matrices to use for testing purposes.
+ * @param samples how many samples to use
+ * @param coefficients how many `X` or `B` columns to use.
+ * @param opts {@link MakeDataOpts}
+ * @returns `A`, `B`, and `X`
+ */
 export function makeData(
   samples: number,
   coefficients: number, // do not include bias here.
   opts: Partial<MakeDataOpts> = {},
 ) {
-  /**
-   * Make some random samples with a number of "coefficients".
-   */
   const {
-    useBias = false,
     scaleX = 1,
     scaleA = 1,
     outputColumns = 1,
+    useBias = false,
     addNoise = true,
   } = opts;
+
   // design matrix / input data
   const A = Matrix.random(samples, coefficients, {
     random: myRandom,
@@ -81,6 +86,10 @@ export function makeData(
   return { inputs: A, outputs: B, coefficients: X };
 }
 
+/**
+ * Random value with random sign.
+ * @returns random value with random sign.
+ */
 function myRandom() {
   const randomSign = Math.random() > 0.5 ? -1 : 1;
   return Math.random() * randomSign;

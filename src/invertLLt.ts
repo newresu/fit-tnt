@@ -5,16 +5,16 @@ import { symmetricMulUpperLower } from './symmetricMul';
 interface Opts {
   /**
    * @default true
-   * this mutates the lower triangular matrix L
+   * mutate the lower triangular matrix L
    * resulting from the final cholesky decomposition
-   * i.e the conditioned normal matrix.
+   * of the conditioned normal matrix AtA
    */
   inPlace: boolean;
 }
 /**
  * Performs the lower triangular substitution (starts from the top-left.)
- * @param lowerTriangular
- * @param rhs supports multiple right hand sides.
+ * @param lowerTriangular matrix
+ * @param opts check {@link Opts} (currently a single "inPlace" option)
  * @returns solution to the system of equations
  */
 export function lowerTriangularInverse(
@@ -43,7 +43,6 @@ export function lowerTriangularInverse(
  *
  * However, calculating $L^{-1}$, we can find the other one.
  * So it's really just one system and one matmul.
- 
  * @param L lower triangular.
  * @param opts - {@link Opts}
  * @returns inverse
