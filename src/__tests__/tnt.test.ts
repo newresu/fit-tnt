@@ -1,7 +1,7 @@
 import { Matrix, pseudoInverse } from 'ml-matrix';
 import { describe, expect, it } from 'vitest';
 
-import { meanSquaredError } from '../meanSquaredError';
+import { meanSquaredError } from '../squaredSum';
 import { TNT } from '../tnt';
 
 describe('Test some ill conditioned matrices', () => {

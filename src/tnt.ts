@@ -3,7 +3,7 @@ import { Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 import { choleskyPrecondition } from './choPrecondition';
 import { checkMatchingDimensions } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
-import { meanSquaredError } from './meanSquaredError';
+import { meanSquaredError, squaredSum } from './squaredSum';
 import { symmetricMul } from './symmetricMul';
 import {
   AnyMatrix,
@@ -16,14 +16,12 @@ import {
 import { ensureMatrixB, filterIndices, getColumnViews } from './utils';
 
 /**
- * Find the best $X$ in $A X = B$; where $A$ and $B$ are known.
+ * Find the best `X` in `A X = B`; where `A` and `B` are known.
  * By 'best' it refers to the least-squares (least error) solution.
  *
- * Multiple RHS are supported (i.e $B$ can be a vector or matrix)
- *
- * tnt is [based off the paper](https://ieeexplore.ieee.org/abstract/document/8425520).
+ * Multiple RHS are supported (`B` can be a vector or matrix)
  * @param data the input or data matrix (2D Array)
- * @param output the known-output vector (1D Array)
+ * @param output the known-output
  * @param opts {@link TNTOpts}
  */
 export class TNT {
@@ -58,7 +56,8 @@ export class TNT {
     this.maxIterations = maxIterations;
     this.earlyStopping = { minMSE };
 
-    this.metadata = meanSquaredError(B).map((x) => {
+    this.metadata = squaredSum(B).map((x) => {
+      x = x / B.rows;
       return {
         mse: [x],
         mseMin: x,
@@ -71,9 +70,9 @@ export class TNT {
   }
 
   /**
-   * 1. Updates `mse[]` for each column
-   * 2. Sets `mseMin` if improved, and `XBest` in that case.
-   * When some columns have been left out, both X and B are sub column views.
+   * 1. Append last mse for each column
+   * 2. Set `XBest` and `mseMin` **iff** it improved
+   * 3. Sets `indices[i]=NaN` if it didn't improve.
    * @param mseLast list of mean squared errors for each column
    * @param XView columns of X currently available.
    * @param indices track which columns of initial X are optimized.
@@ -135,7 +134,7 @@ export class TNT {
 
     for (let it = 0; it < this.maxIterations; it++) {
       W = A.mmul(P_View);
-      ww = W.pow(2).sum('column');
+      ww = squaredSum(W);
       alpha = Matrix.multiply(XError, Gradient)
         .sum('column')
         .map((x, i) => x / ww[i]);

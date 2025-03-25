@@ -1,7 +1,7 @@
 import { Matrix } from 'ml-matrix';
 import { describe, expect, it } from 'vitest';
 
-import { meanSquaredError } from '../meanSquaredError';
+import { meanSquaredError } from '../squaredSum';
 
 describe('meanSquaredError', () => {
   const A = new Matrix([

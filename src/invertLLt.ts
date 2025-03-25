@@ -2,29 +2,16 @@ import { Matrix } from 'ml-matrix';
 
 import { symmetricMulUpperLower } from './symmetricMul';
 
-interface Opts {
-  /**
-   * @default true
-   * mutate the lower triangular matrix L
-   * resulting from the final cholesky decomposition
-   * of the conditioned normal matrix AtA
-   */
-  inPlace: boolean;
-}
 /**
  * Performs the lower triangular substitution (starts from the top-left.)
+ * It is done in-place.
  * @param lowerTriangular matrix
- * @param opts check {@link Opts} (currently a single "inPlace" option)
  * @returns solution to the system of equations
  */
-export function lowerTriangularInverse(
-  lowerTriangular: Matrix,
-  opts: Partial<Opts> = {},
-) {
+export function lowerTriangularInverse(lowerTriangular: Matrix) {
   let terms;
   const { rows } = lowerTriangular;
-  const { inPlace = true } = opts;
-  const V = inPlace ? lowerTriangular : new Matrix(rows, rows);
+  const V = lowerTriangular;
 
   for (let i = 0; i < rows; i++) {
     for (let k = 0; k < rows; k++) {
@@ -44,9 +31,8 @@ export function lowerTriangularInverse(
  * However, calculating $L^{-1}$, we can find the other one.
  * So it's really just one system and one matmul.
  * @param L lower triangular.
- * @param opts - {@link Opts}
  * @returns inverse
  */
-export function invertLLt(L: Matrix, opts: Partial<Opts> = {}) {
-  return symmetricMulUpperLower(lowerTriangularInverse(L, opts).transpose());
+export function invertLLt(L: Matrix) {
+  return symmetricMulUpperLower(lowerTriangularInverse(L).transpose());
 }

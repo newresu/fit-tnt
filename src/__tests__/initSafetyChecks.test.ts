@@ -13,9 +13,9 @@ describe('checkMatchingDimensions', () => {
     const B = Matrix.random(m, p);
     const X = Matrix.zeros(n, p);
 
-    const fn = vi.fn(checkMatchingDimensions);
-    fn(A, X, B);
-    expect(fn.mockReturnValue());
+    const fn = vi.fn().mockImplementation(checkMatchingDimensions);
+
+    expect(fn(A, X, B)).toBeUndefined();
   });
 
   it('should throw an error fot A, X', () => {

@@ -6,7 +6,11 @@ import { AnyMatrix } from './types';
  * @param X solution matrix
  * @param B results matrix
  */
-export function checkMatchingDimensions(A: AnyMatrix, X: AnyMatrix, B: AnyMatrix) {
+export function checkMatchingDimensions(
+  A: AnyMatrix,
+  X: AnyMatrix,
+  B: AnyMatrix,
+) {
   if (A.rows !== B.rows) {
     throw new RangeError(
       `Rows of A and y must match. Found dim(A)=(${A.rows}, ${A.columns}) and dim(y)=(${B.rows}, ${B.columns})`,
