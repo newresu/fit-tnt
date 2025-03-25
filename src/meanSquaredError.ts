@@ -1,14 +1,7 @@
 import { AnyMatrix } from './types';
 
 /**
- * Calculate the mean squared error.
- *
- * It works for matrices or vectors.
- *
- * It operates like this:
- * If you pass A only, it squares all and the mean **by column**.
- * If you pass A and B, it does A-B and then same as above.
- * If you pass A, X and B it does `AX` and then same as above.
+ * Calculate the mean squared error `||AX - B||^2`
  * @param A input data
  * @param B output data
  * @param X current coefficients
