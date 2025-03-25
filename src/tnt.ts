@@ -1,7 +1,7 @@
 import { Matrix, MatrixColumnSelectionView } from 'ml-matrix';
 
 import { choleskyPrecondition } from './choPrecondition';
-import { initSafetyChecks } from './initSafetyChecks';
+import { checkMatchingDimensions } from './initSafetyChecks';
 import { invertLLt } from './invertLLt';
 import { meanSquaredError } from './meanSquaredError';
 import { symmetricMul } from './symmetricMul';
@@ -13,7 +13,7 @@ import {
   EarlyStopping,
   TNTOpts,
 } from './types';
-import { ensureMatrix, filterIndices, getColumnViews } from './utils';
+import { ensureMatrixB, filterIndices, getColumnViews } from './utils';
 
 /**
  * Find the best $X$ in $A X = B$; where $A$ and $B$ are known.
@@ -49,7 +49,7 @@ export class TNT {
     opts: Partial<TNTOpts> = {},
   ) {
     const A = Matrix.checkMatrix(data);
-    const B = ensureMatrix(output);
+    const B = ensureMatrixB(output);
     this.XBest = new Matrix(A.columns, B.columns);
 
     // unpack options
@@ -71,13 +71,11 @@ export class TNT {
   }
 
   /**
-   * 1. Calculate `mseLast`
-   * 2. Updates `mse[]`
-   * 3. Sets `mseMin` if improved, and `XBest` in that case.
+   * 1. Updates `mse[]` for each column
+   * 2. Sets `mseMin` if improved, and `XBest` in that case.
    * When some columns have been left out, both X and B are sub column views.
-   * @param A input data matrix
-   * @param B known output. Note that this will be a View.
-   * @param X coefficients. Note that this will be a View.
+   * @param mseLast list of mean squared errors for each column
+   * @param XView columns of X currently available.
    * @param indices track which columns of initial X are optimized.
    */
   #updateMSEAndX(mseLast: number[], XView: AnyMatrix, indices: number[]) {
@@ -88,7 +86,7 @@ export class TNT {
       columnInfo.iterations++;
       if (columnInfo.mseLast < columnInfo.mseMin) {
         columnInfo.mseMin = columnInfo.mseLast;
-        this.XBest.setColumn(i, XView.getColumn(i));
+        this.XBest.setColumn(indices[i], XView.getColumn(i));
       } else {
         indices[i] = NaN;
       }
@@ -96,16 +94,13 @@ export class TNT {
   }
 
   /**
-   * Private function (main method)
-   * @param A
-   * @param b
-   * @param mse this will be mutated; this allows user to get all MSEs.
-   * @param options
-   * @returns best-found coefficients
+   * Find the XBest and set it in the class.
+   * @param A data matrix
+   * @param B solution matrix
    */
   #tnt(A: AnyMatrix, B: AnyMatrix) {
     const X: AnyMatrix = Matrix.zeros(A.columns, B.columns);
-    initSafetyChecks(A, X, B);
+    checkMatchingDimensions(A, X, B);
 
     // indices of current "on" columns of X.
     let indices = new Array(X.columns).fill(0).map((_, i) => i);
