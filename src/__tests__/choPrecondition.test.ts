@@ -17,7 +17,7 @@ describe('choleskyPrecondition', () => {
     expect(cholesky.isPositiveDefinite()).toBe(true);
   });
 
-  it('Can not improve this 3x3 matrix ', () => {
+  it('Can not improve this 3x3 matrix', () => {
     const matrix = new Matrix([
       [1, 4, 5],
       [4, 2, 6],
@@ -38,7 +38,6 @@ describe('choleskyPrecondition', () => {
   it('Can not improve this 2x2 matrix.', () => {
     const matrix = new Matrix([
       [1, 2],
-
       [2, 1],
     ]);
     expect(() => choleskyPrecondition(matrix)).toThrow(PreconditionError);

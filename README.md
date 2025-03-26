@@ -64,7 +64,7 @@ A related method is [Ridge Regression](https://en.wikipedia.org/wiki/Ridge_regre
 - Speed Up: **5.20**
 - Inverting the shape below, TNT is slower.
 
-```
+```txt
 ┌───────────────┬─────────────────────┬─────────────────────┐
 │ (index)       │       Avg Exec Time │           Avg Error │
 ├───────────────┼─────────────────────┼─────────────────────┤

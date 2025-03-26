@@ -14,7 +14,7 @@
   "scripts": {
     "check-types": "tsc --noEmit",
     "clean": "rimraf lib lib-esm",
-    "eslint": "eslint src",
+    "eslint": "eslint",
     "eslint-fix": "npm run eslint -- --fix",
     "prepack": "npm run tsc",
     "prettier": "prettier --check .",
@@ -46,11 +46,13 @@
   "homepage": "https://github.com/newseru/fit-tnt#readme",
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@eslint/markdown": "^6.3.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/node": "^22.13.10",
     "@vitest/coverage-v8": "^3.0.8",
-    "eslint": "^9.22.0",
+    "@vitest/eslint-plugin": "^1.1.38",
+    "eslint": "^9.23.0",
     "eslint-plugin-jsdoc": "^50.6.9",
     "globals": "^16.0.0",
     "prettier": "^3.5.3",

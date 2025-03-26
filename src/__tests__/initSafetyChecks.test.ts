@@ -18,7 +18,7 @@ describe('checkMatchingDimensions', () => {
     expect(fn(A, X, B)).toBeUndefined();
   });
 
-  it('should throw an error fot A, X', () => {
+  it('Should throw an error for A, X mismatch', () => {
     const A = Matrix.random(m, n);
     const B = Matrix.random(m, p);
     const X = Matrix.zeros(n - 1, p);
@@ -26,7 +26,7 @@ describe('checkMatchingDimensions', () => {
       checkMatchingDimensions(A, X, B);
     }).toThrow();
   });
-  it('should throw an error fot A, X', () => {
+  it('Should throw an error for B,X p mismatch.', () => {
     const A = Matrix.random(m, n);
     const B = Matrix.random(m, p - 1);
     const X = Matrix.zeros(n, p);
@@ -35,7 +35,7 @@ describe('checkMatchingDimensions', () => {
     }).toThrow();
   });
 
-  it('should throw an error fot A, B', () => {
+  it('Should throw an error for A,B n mismatch.', () => {
     const A = Matrix.random(m, n);
     const B = Matrix.random(m - 1, p);
     const X = Matrix.zeros(n, p);
