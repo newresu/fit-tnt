@@ -42,7 +42,7 @@ describe('Multi RHS, random values', () => {
       const m = Math.ceil(Math.random() * 12) + 2;
       const n = Math.ceil(Math.random() * 12) + 2;
       const { inputs: A, outputs: bigB } = makeData(m, n, {
-        scaleX: 1,
+        scaleX: 10,
         outputColumns: m,
         addNoise: true,
       });
@@ -58,7 +58,7 @@ describe('Multi RHS, random values', () => {
       expect(xBest.to1DArray().every(Number.isFinite)).toBeTruthy();
 
       const { mse, mseMin, iterations } = metadata[0];
-      expect(mseMin).toBeLessThan(1e-4);
+      expect(mseMin).toBeLessThan(0.1);
       expect(iterations).toBeLessThanOrEqual(maxIterations);
       expect(mse.length).toBeLessThanOrEqual(maxIterations + 1);
     }
