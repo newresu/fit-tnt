@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.0.0](https://github.com/newresu/fit-tnt/compare/v8.0.3...v9.0.0) (2025-03-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* new heuristics for cholesky, bug-fixes, new error msg. ([#28](https://github.com/newresu/fit-tnt/issues/28))
+
+### Code Refactoring
+
+* new heuristics for cholesky, bug-fixes, new error msg. ([#28](https://github.com/newresu/fit-tnt/issues/28)) ([980bfd1](https://github.com/newresu/fit-tnt/commit/980bfd192f1f4b67aafd3f2d9af1e21c209b7717))
+
 ## [8.0.3](https://github.com/newresu/fit-tnt/compare/v8.0.2...v8.0.3) (2025-03-20)
 
 
