@@ -1,7 +1,7 @@
 {
   "name": "fit-tnt",
   "version": "9.0.0",
-  "description": "TNT - A Least Squares iterative solver.",
+  "description": "TNT - A Least Squares Iterative Solver.",
   "main": "./lib/index.js",
   "module": "./lib-esm/index.js",
   "types": "./lib/index.d.ts",
@@ -33,10 +33,10 @@
     "url": "git+https://github.com/newseru/fit-tnt.git"
   },
   "keywords": [
-    "least-squares",
-    "unconstrained least squares",
+    "least squares",
+    "unconstrained optimization",
     "linear regression",
-    "multiple linear regression"
+    "iterative methods"
   ],
   "author": "Santiago Miranda",
   "license": "MIT",
